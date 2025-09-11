@@ -14,7 +14,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Cell, RadialBar, RadialBarChart, ResponsiveContainer } from "recharts";
+import { Pie, PieChart } from "recharts";
 import { Calendar, TrendingUp } from "lucide-react";
 
 const chartConfig = {

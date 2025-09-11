@@ -39,8 +39,6 @@ import {
   BellIcon,
   UserIcon,
   CalendarIcon,
-  CheckIcon,
-  AlertTriangleIcon,
 } from "lucide-react";
 
 interface EmailTemplate {

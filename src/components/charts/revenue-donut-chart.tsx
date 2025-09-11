@@ -1,6 +1,6 @@
 "use client";
 
-import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
+import { Pie, PieChart } from "recharts";
 
 import {
   Card,

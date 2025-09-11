@@ -37,3 +37,5 @@ export function supabaseBrowser() {
     throw err;
   }
 }
+
+export const createClient = supabaseBrowser;

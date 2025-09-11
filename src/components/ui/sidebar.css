@@ -1,0 +1,97 @@
+/* sidebar.css - CSS to enhance sidebar and content layout with proper rounded corners */
+
+.sidebar-wrapper {
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.sidebar {
+  border-radius: var(--radius) 0 0 var(--radius);
+  transition: width 0.2s ease;
+}
+
+.sidebar-inset {
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+/* Collapsed state */
+.sidebar[data-collapsed="true"] {
+  border-radius: var(--radius) 0 0 var(--radius);
+}
+
+/* Smooth transitions for hover/focus states */
+.sidebar-menu-button {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Enhanced rounded corners and borders */
+.sidebar-rail {
+  border-radius: 0 var(--radius) var(--radius) 0;
+  border-left: 1px solid hsl(var(--border) / 0.5);
+  background-color: hsl(var(--background) / 0.5);
+}
+
+/* Styles for better spacing and layout */
+.sidebar-content {
+  border-radius: 0 var(--radius) var(--radius) 0;
+  overflow: hidden;
+  transition: border-radius 0.2s ease;
+}
+
+/* Inner content container */
+.sidebar-inset-container {
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 0 0 1px hsl(var(--border) / 0.3);
+}
+
+/* Menu items in collapsed state */
+.sidebar[data-collapsed="true"] .sidebar-menu-button > span {
+  opacity: 0;
+}
+
+.sidebar[data-collapsed="true"] .sidebar-menu-button svg {
+  margin-right: 0;
+}
+
+/* Menu divider/separator */
+.sidebar-separator {
+  margin: 0.5rem 0;
+  height: 1px;
+  background-color: hsl(var(--border) / 0.6);
+}
+
+/* Mobile sidebar enhancements */
+@media (max-width: 768px) {
+  .sidebar-rail,
+  .sidebar {
+    border-radius: 0;
+  }
+
+  .sidebar-inset {
+    border-radius: 0;
+  }
+}
+
+/* Fixes for focus states in sidebar */
+.sidebar-menu-button:focus-visible {
+  box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring)) !important;
+  background-color: transparent !important;
+}
+
+/* Subtle hover effects */
+.sidebar-menu-button:hover {
+  background-color: hsl(var(--accent) / 0.3);
+}
+
+/* Better spacing for sidebar menu items */
+.sidebar-menu-item {
+  margin-bottom: 2px;
+}
+
+/* Custom background for active items */
+.sidebar-menu-button[data-active="true"] {
+  background-color: hsl(var(--primary) / 0.15);
+  color: hsl(var(--primary));
+  font-weight: 500;
+}

@@ -2,23 +2,9 @@
 
 import { useState } from "react";
 import { useEventTypes } from "@/hooks/use-dashboard-data";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { supabaseBrowser } from "@/lib/supabase-browser";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
 import {
   Dialog,
   DialogContent,
@@ -26,95 +12,122 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+
+import { toast } from "sonner";
+import {
+  ChevronRightIcon,
+  EditIcon,
+  Trash2Icon,
+  Copy,
+  Settings,
+  Camera,
+  ClockIcon,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  BookOpenIcon,
-  PlusIcon,
-  MoreHorizontalIcon,
-  EditIcon,
-  TrashIcon,
-  ClockIcon,
-  DollarSignIcon,
-  Calendar,
-} from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { Badge } from "@/components/ui/badge";
+
+interface EventType {
+  id: string;
+  name: string;
+  duration_minutes: number;
+  description: string | null;
+  price_cents: number | null;
+  created_at: string;
+}
 
 export function EventTypes() {
-  const { data: eventTypes, loading, error } = useEventTypes();
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const { data: eventTypes, loading, error, refetch } = useEventTypes();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [selectedEventType, setSelectedEventType] = useState<{
-    id: string;
-    name: string;
-    duration_minutes: number;
-    description: string | null;
-    price_cents: number | null;
-  } | null>(null);
-  const [formData, setFormData] = useState({
+  const [selectedEventType, setSelectedEventType] = useState<EventType | null>(
+    null
+  );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Form state for editing
+  const [editForm, setEditForm] = useState({
     name: "",
-    duration_minutes: "",
+    duration_minutes: 30,
     description: "",
-    price_cents: "",
+    price_cents: 0,
   });
 
-  const handleCreateEventType = () => {
-    // TODO: Implement create functionality with Supabase
-    console.log("Creating event type:", formData);
-    setIsCreateDialogOpen(false);
-    resetForm();
-  };
+  const supabase = supabaseBrowser();
 
-  const handleEditEventType = (eventType: {
-    id: string;
-    name: string;
-    duration_minutes: number;
-    description: string | null;
-    price_cents: number | null;
-  }) => {
+  const handleEditEventType = (eventType: EventType) => {
     setSelectedEventType(eventType);
-    setFormData({
+    setEditForm({
       name: eventType.name,
-      duration_minutes: eventType.duration_minutes.toString(),
+      duration_minutes: eventType.duration_minutes,
       description: eventType.description || "",
-      price_cents: eventType.price_cents
-        ? (eventType.price_cents / 100).toString()
-        : "",
+      price_cents: eventType.price_cents ? eventType.price_cents / 100 : 0,
     });
     setIsEditDialogOpen(true);
   };
 
-  const handleUpdateEventType = () => {
-    // TODO: Implement update functionality with Supabase
-    console.log("Updating event type:", selectedEventType.id, formData);
-    setIsEditDialogOpen(false);
-    resetForm();
+  const handleUpdateEventType = async () => {
+    if (!selectedEventType) return;
+
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from("event_types")
+        .update({
+          name: editForm.name,
+          duration_minutes: editForm.duration_minutes,
+          description: editForm.description || null,
+          price_cents: editForm.price_cents
+            ? Math.round(editForm.price_cents * 100)
+            : null,
+        })
+        .eq("id", selectedEventType.id);
+
+      if (error) throw error;
+
+      toast.success("Event type updated successfully");
+      setIsEditDialogOpen(false);
+      setSelectedEventType(null);
+      refetch();
+    } catch (error) {
+      console.error("Error updating event type:", error);
+      toast.error("Failed to update event type");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleDeleteEventType = (eventType: { id: string }) => {
-    // TODO: Implement delete functionality with Supabase
-    console.log("Deleting event type:", eventType.id);
-  };
+  const handleDeleteEventType = async (eventType: EventType) => {
+    if (
+      !confirm(
+        `Are you sure you want to delete "${eventType.name}"? This action cannot be undone.`
+      )
+    ) {
+      return;
+    }
 
-  const resetForm = () => {
-    setFormData({
-      name: "",
-      duration_minutes: "",
-      description: "",
-      price_cents: "",
-    });
-    setSelectedEventType(null);
+    try {
+      const { error } = await supabase
+        .from("event_types")
+        .delete()
+        .eq("id", eventType.id);
+
+      if (error) throw error;
+
+      toast.success("Event type deleted successfully");
+      refetch();
+    } catch (error) {
+      console.error("Error deleting event type:", error);
+      toast.error("Failed to delete event type");
+    }
   };
 
   const formatCurrency = (cents: number | null) => {
@@ -137,329 +150,238 @@ export function EventTypes() {
     }
   };
 
+  const copyEventTypeUrl = (eventType: EventType) => {
+    const url = `modfram.com/${eventType.name
+      .toLowerCase()
+      .replace(/\s+/g, "-")}`;
+    navigator.clipboard.writeText(url);
+    toast.success("URL copied to clipboard");
+  };
+
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">Event Types</h2>
-            <p className="text-muted-foreground">
-              Manage your booking event types
-            </p>
-          </div>
-        </div>
-        <Card>
-          <CardContent className="flex items-center justify-center h-48">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
-          </CardContent>
-        </Card>
+      <div className="flex items-center justify-center h-72">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">Event Types</h2>
-            <p className="text-muted-foreground">
-              Manage your booking event types
-            </p>
-          </div>
-        </div>
-        <Card>
-          <CardContent className="flex items-center justify-center h-48 text-muted-foreground">
-            {error}
-          </CardContent>
-        </Card>
+      <div className="text-center py-12">
+        <p className="text-muted-foreground">
+          Error loading event types: {error}
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div>
+      <div className="mb-6">
         <div>
-          <h2 className="flex items-center gap-2 text-2xl font-bold tracking-tight">
-            <BookOpenIcon className="h-6 w-6" />
+          <h1 className="text-2xl font-semibold text-foreground mb-1">
             Event Types
-          </h2>
+          </h1>
           <p className="text-muted-foreground">
-            Manage your booking event types and their settings
+            Create events to share for people to book on your calendar.
           </p>
         </div>
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <PlusIcon className="h-4 w-4 mr-2" />
-              Add Event Type
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create Event Type</DialogTitle>
-              <DialogDescription>
-                Create a new event type for your booking system.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">
-                  Name
-                </Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  className="col-span-3"
-                  placeholder="e.g., Strategy Session"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="duration" className="text-right">
-                  Duration (min)
-                </Label>
-                <Input
-                  id="duration"
-                  type="number"
-                  value={formData.duration_minutes}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      duration_minutes: e.target.value,
-                    })
-                  }
-                  className="col-span-3"
-                  placeholder="60"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="price" className="text-right">
-                  Price ($)
-                </Label>
-                <Input
-                  id="price"
-                  type="number"
-                  step="0.01"
-                  value={formData.price_cents}
-                  onChange={(e) =>
-                    setFormData({ ...formData, price_cents: e.target.value })
-                  }
-                  className="col-span-3"
-                  placeholder="0 for free"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-start gap-4">
-                <Label htmlFor="description" className="text-right">
-                  Description
-                </Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                  className="col-span-3"
-                  placeholder="Describe this event type..."
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setIsCreateDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button onClick={handleCreateEventType}>Create Event Type</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </div>
 
-      {/* Event Types List */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Your Event Types</CardTitle>
-          <CardDescription>
-            {eventTypes.length} event type{eventTypes.length !== 1 ? "s" : ""}{" "}
-            configured
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {eventTypes.length === 0 ? (
-            <div className="text-center py-8">
-              <BookOpenIcon className="mx-auto h-12 w-12 text-muted-foreground" />
-              <h3 className="mt-2 text-sm font-semibold text-gray-900">
-                No event types
-              </h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Get started by creating your first event type.
-              </p>
-              <div className="mt-6">
-                <Button onClick={() => setIsCreateDialogOpen(true)}>
-                  <PlusIcon className="h-4 w-4 mr-2" />
-                  Add Event Type
-                </Button>
+      <div className="relative">
+        <div className="mb-4">
+          <Input placeholder="Search..." className="max-w-sm" />
+        </div>
+
+        {eventTypes.length === 0 ? (
+          <Card className="shadow-sm border">
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <div className="rounded-full bg-primary/10 p-3 mb-4">
+                <ClockIcon className="h-10 w-10 text-primary" />
               </div>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Event Type</TableHead>
-                  <TableHead>Duration</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="w-[100px]">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {eventTypes.map((eventType) => (
-                  <TableRow key={eventType.id}>
-                    <TableCell>
-                      <div>
-                        <div className="font-semibold">{eventType.name}</div>
-                        {eventType.description && (
-                          <div className="text-sm text-muted-foreground max-w-md truncate">
-                            {eventType.description}
+              <h3 className="text-xl font-semibold mb-2">No event types</h3>
+              <p className="text-muted-foreground text-center max-w-md">
+                You don&apos;t have any event types yet. Contact your
+                administrator to create event types.
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-4">
+            {eventTypes.map((eventType) => (
+              <Card
+                key={eventType.id}
+                className="shadow-sm border hover:shadow-md transition-shadow"
+              >
+                <CardContent className="p-0">
+                  <div className="flex items-center p-6 hover:bg-muted/30 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center">
+                        <div className="mr-4 rounded-lg bg-gradient-to-br from-purple-500 to-blue-600 p-3">
+                          <Camera className="h-5 w-5 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-lg text-foreground mb-1">
+                            {eventType.name}
+                          </h3>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <div className="flex items-center">
+                              <ClockIcon className="h-4 w-4 mr-1" />
+                              {formatDuration(eventType.duration_minutes)}
+                            </div>
+                            {eventType.price_cents &&
+                              eventType.price_cents > 0 && (
+                                <Badge variant="secondary">
+                                  {formatCurrency(eventType.price_cents)}
+                                </Badge>
+                              )}
                           </div>
-                        )}
+                        </div>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <ClockIcon className="h-4 w-4 text-muted-foreground" />
-                        {formatDuration(eventType.duration_minutes)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
-                        {formatCurrency(eventType.price_cents)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        {formatDistanceToNow(new Date(eventType.created_at), {
-                          addSuffix: true,
-                        })}
-                      </div>
-                    </TableCell>
-                    <TableCell>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => copyEventTypeUrl(eventType)}
+                      >
+                        <Copy className="h-4 w-4 mr-2" />
+                        Copy link
+                      </Button>
+
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontalIcon className="h-4 w-4" />
+                          <Button variant="outline" size="sm">
+                            <Settings className="h-4 w-4 mr-2" />
+                            Edit
+                            <ChevronRightIcon className="h-4 w-4 ml-1" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
                           <DropdownMenuItem
                             onClick={() => handleEditEventType(eventType)}
                           >
-                            <EditIcon className="mr-2 h-4 w-4" />
+                            <EditIcon className="h-4 w-4 mr-2" />
                             Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => copyEventTypeUrl(eventType)}
+                          >
+                            <Copy className="h-4 w-4 mr-2" />
+                            Copy link
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
+                            className="text-destructive focus:text-destructive"
                             onClick={() => handleDeleteEventType(eventType)}
-                            className="text-destructive"
                           >
-                            <TrashIcon className="mr-2 h-4 w-4" />
+                            <Trash2Icon className="h-4 w-4 mr-2" />
                             Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
 
-      {/* Edit Dialog */}
+      {/* Edit Event Type Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[550px]">
           <DialogHeader>
             <DialogTitle>Edit Event Type</DialogTitle>
             <DialogDescription>
-              Update the details of your event type.
+              Update the details of your event type
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-name" className="text-right">
-                Name
-              </Label>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="name">Event Name</Label>
               <Input
-                id="edit-name"
-                value={formData.name}
+                id="name"
+                value={editForm.name}
                 onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
+                  setEditForm({ ...editForm, name: e.target.value })
                 }
-                className="col-span-3"
+                placeholder="Meeting"
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-duration" className="text-right">
-                Duration (min)
-              </Label>
+
+            <div>
+              <Label>URL</Label>
+              <div className="flex items-center border rounded-md px-3 py-2">
+                <span className="text-muted-foreground">
+                  modfram.com/{editForm.name.toLowerCase().replace(/\s+/g, "-")}
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="duration">Duration (minutes)</Label>
               <Input
-                id="edit-duration"
+                id="duration"
                 type="number"
-                value={formData.duration_minutes}
+                value={editForm.duration_minutes}
                 onChange={(e) =>
-                  setFormData({ ...formData, duration_minutes: e.target.value })
+                  setEditForm({
+                    ...editForm,
+                    duration_minutes: parseInt(e.target.value) || 0,
+                  })
                 }
-                className="col-span-3"
+                placeholder="30"
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-price" className="text-right">
-                Price ($)
-              </Label>
+
+            <div>
+              <Label htmlFor="description">Description (Optional)</Label>
+              <Textarea
+                id="description"
+                value={editForm.description}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, description: e.target.value })
+                }
+                placeholder="A brief description of your event type"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="price">Price ($)</Label>
               <Input
-                id="edit-price"
+                id="price"
                 type="number"
                 step="0.01"
-                value={formData.price_cents}
+                value={editForm.price_cents}
                 onChange={(e) =>
-                  setFormData({ ...formData, price_cents: e.target.value })
+                  setEditForm({
+                    ...editForm,
+                    price_cents: parseFloat(e.target.value) || 0,
+                  })
                 }
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="edit-description" className="text-right">
-                Description
-              </Label>
-              <Textarea
-                id="edit-description"
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-                className="col-span-3"
+                placeholder="0.00"
               />
             </div>
           </div>
+
           <DialogFooter>
             <Button
+              type="button"
               variant="outline"
-              onClick={() => setIsEditDialogOpen(false)}
+              onClick={() => {
+                setIsEditDialogOpen(false);
+                setSelectedEventType(null);
+              }}
             >
               Cancel
             </Button>
-            <Button onClick={handleUpdateEventType}>Update Event Type</Button>
+            <Button onClick={handleUpdateEventType} disabled={isSubmitting}>
+              {isSubmitting ? "Updating..." : "Update"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

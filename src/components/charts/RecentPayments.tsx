@@ -61,7 +61,7 @@ export function RecentPayments() {
         </CardHeader>
         <CardContent>
           <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-            {error}
+            {error || "Failed to load recent payments"}
           </div>
         </CardContent>
       </Card>
@@ -119,8 +119,15 @@ export function RecentPayments() {
           </TableHeader>
           <TableBody>
             {data.map((payment) => {
-              const client = payment.bookings.clients;
-              const booking = payment.bookings;
+              // Handle potentially different data structures
+              const client = payment.bookings?.clients || {
+                name: "Unknown",
+                email: "unknown@example.com",
+              };
+              const booking = payment.bookings || {
+                session_type: "Unknown",
+                category: null,
+              };
 
               return (
                 <TableRow key={payment.id}>

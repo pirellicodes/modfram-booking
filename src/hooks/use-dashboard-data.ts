@@ -2,15 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase-browser";
-import type {
-  Booking,
-  Client,
-  Payment,
-  EventType,
-  Availability,
-  BookingWithClient,
-  BookingWithClientAndPayment,
-} from "@/lib/types/database";
+import { Payment } from "@/lib/types";
 
 // Dashboard stats hook
 export function useDashboardStats() {
@@ -161,14 +153,26 @@ export function useRevenueBySession() {
         // Group revenue by session type
         const groupedRevenue: Record<string, number> = {};
 
-        revenueData?.forEach(
-          (payment: {
-            bookings: { session_type: string };
-            amount_cents: number;
-          }) => {
-            const sessionType = payment.bookings.session_type;
-            groupedRevenue[sessionType] =
-              (groupedRevenue[sessionType] || 0) + payment.amount_cents;
+        // Handle different possible data structures
+        revenueData?.forEach((payment) => {
+            let sessionType = "";
+
+            // Handle different possible structures from Supabase
+            if (payment.bookings && typeof payment.bookings === "object") {
+              if (Array.isArray(payment.bookings)) {
+                // If it's an array, take the first item's session_type
+                sessionType = payment.bookings[0]?.session_type || "Unknown";
+              } else {
+                // If it's an object with session_type
+                sessionType =
+                  payment.bookings.session_type || "Unknown";
+              }
+            }
+
+            if (sessionType && payment.amount_cents) {
+              groupedRevenue[sessionType] =
+                (groupedRevenue[sessionType] || 0) + payment.amount_cents;
+            }
           }
         );
 
@@ -246,9 +250,7 @@ export function usePopularCategories() {
 
 // Recent payments
 export function useRecentPayments(limit: number = 10) {
-  const [data, setData] = useState<
-    Array<Payment & { bookings: Booking & { clients: Client } }>
-  >([]);
+  const [data, setData] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -274,10 +276,7 @@ export function useRecentPayments(limit: number = 10) {
           .order("created_at", { ascending: false })
           .limit(limit);
 
-        setData(
-          (payments as Payment[] &
-            { bookings: Booking & { clients: Client } }[]) || []
-        );
+        setData(payments || []);
       } catch (err) {
         console.error("Error fetching recent payments:", err);
         setError("Failed to fetch recent payments");
@@ -298,29 +297,31 @@ export function useEventTypes() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchEventTypes() {
-      try {
-        const supabase = supabaseBrowser();
+  const fetchEventTypes = async () => {
+    try {
+      setLoading(true);
+      const supabase = supabaseBrowser();
 
-        const { data: eventTypes } = await supabase
-          .from("event_types")
-          .select("*")
-          .order("created_at", { ascending: false });
+      const { data: eventTypes } = await supabase
+        .from("event_types")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-        setData(eventTypes || []);
-      } catch (err) {
-        console.error("Error fetching event types:", err);
-        setError("Failed to fetch event types");
-      } finally {
-        setLoading(false);
-      }
+      setData(eventTypes || []);
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching event types:", err);
+      setError("Failed to fetch event types");
+    } finally {
+      setLoading(false);
     }
+  };
 
+  useEffect(() => {
     fetchEventTypes();
   }, []);
 
-  return { data, loading, error };
+  return { data, loading, error, refetch: fetchEventTypes };
 }
 
 // Bookings with clients
@@ -435,33 +436,28 @@ export function useClientAcquisition() {
           { newClients: Set<string>; returningClients: Set<string> }
         > = {};
 
-        bookings?.forEach(
-          (booking: {
-            created_at: string;
-            clients: { created_at: string; id: string };
-          }) => {
-            const bookingDate = new Date(booking.created_at)
-              .toISOString()
-              .split("T")[0];
-            const clientCreatedDate = new Date(booking.clients.created_at)
-              .toISOString()
-              .split("T")[0];
+        bookings?.forEach((booking) => {
+          const bookingDate = new Date(booking.created_at)
+            .toISOString()
+            .split("T")[0];
+          const clientCreatedDate = new Date(booking.clients.created_at)
+            .toISOString()
+            .split("T")[0];
 
-            if (!dailyData[bookingDate]) {
-              dailyData[bookingDate] = {
-                newClients: new Set(),
-                returningClients: new Set(),
-              };
-            }
-
-            // If client was created on the same date as booking, they're new
-            if (clientCreatedDate === bookingDate) {
-              dailyData[bookingDate].newClients.add(booking.clients.id);
-            } else {
-              dailyData[bookingDate].returningClients.add(booking.clients.id);
-            }
+          if (!dailyData[bookingDate]) {
+            dailyData[bookingDate] = {
+              newClients: new Set(),
+              returningClients: new Set(),
+            };
           }
-        );
+
+          // If client was created on the same date as booking, they're new
+          if (clientCreatedDate === bookingDate) {
+            dailyData[bookingDate].newClients.add(booking.clients.id);
+          } else {
+            dailyData[bookingDate].returningClients.add(booking.clients.id);
+          }
+        });
 
         const chartData = Object.entries(dailyData).map(([date, clients]) => ({
           date,

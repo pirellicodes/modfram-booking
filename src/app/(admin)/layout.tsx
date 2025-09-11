@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase-browser";
-import { User } from "@supabase/supabase-js";
 
 export default function AdminLayout({
   children,
@@ -35,7 +34,7 @@ export default function AdminLayout({
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_OUT") {
         router.replace("/login");
       }
@@ -46,7 +45,7 @@ export default function AdminLayout({
     return () => {
       subscription.unsubscribe();
     };
-  }, [router]);
+  }, [router, supabase.auth]);
 
   if (loading) {
     return (
@@ -57,8 +56,8 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <main>{children}</main>
+    <div className="min-h-screen bg-background overflow-hidden">
+      <main className="h-screen overflow-hidden rounded-lg">{children}</main>
     </div>
   );
 }

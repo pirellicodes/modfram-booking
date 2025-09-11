@@ -1,8 +1,5 @@
 "use client";
 
-import { AppSidebar } from "@/components/app-sidebar";
-import { SiteHeader } from "@/components/site-header";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { BookingsOverTimeChart } from "@/components/charts/BookingsOverTimeChart";
 import { RevenueBySessionChart } from "@/components/charts/RevenueBySessionChart";
 import { PopularSessionCategoriesChart } from "@/components/charts/PopularSessionCategoriesChart";
@@ -10,101 +7,221 @@ import { UpcomingBookingsChart } from "@/components/charts/UpcomingBookingsChart
 import { ClientAcquisitionChart } from "@/components/charts/ClientAcquisitionChart";
 import { RecentPayments } from "@/components/charts/RecentPayments";
 import { Button } from "@/components/ui/button";
-import { BarChart3, Download, RefreshCw } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Download, RefreshCw } from "lucide-react";
+import Link from "next/link";
 
 export default function InsightsPage() {
   return (
-    <SidebarProvider>
-      <AppSidebar variant="inset" />
-      <SidebarInset>
-        <SiteHeader />
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <div className="min-h-screen flex flex-col">
-            {/* Header */}
-            <div className="flex items-center justify-between py-6">
-              <div>
-                <h1 className="flex items-center gap-2 text-3xl font-bold tracking-tight">
-                  <BarChart3 className="h-8 w-8" />
-                  Insights
-                </h1>
-                <p className="text-muted-foreground">
-                  Comprehensive analytics and reporting for your booking business.
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm">
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Refresh
-                </Button>
-                <Button variant="outline" size="sm">
-                  <Download className="h-4 w-4 mr-2" />
-                  Export
-                </Button>
-              </div>
-            </div>
-
-            {/* Charts Grid */}
-            <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
-              {/* Bookings Over Time - Full width on larger screens */}
-              <div className="xl:col-span-2">
-                <BookingsOverTimeChart />
-              </div>
-
-              {/* Upcoming Bookings */}
-              <div>
-                <UpcomingBookingsChart />
-              </div>
-
-              {/* Revenue by Session */}
-              <div>
-                <RevenueBySessionChart />
-              </div>
-
-              {/* Popular Categories */}
-              <div>
-                <PopularSessionCategoriesChart />
-              </div>
-
-              {/* Client Acquisition */}
-              <div>
-                <ClientAcquisitionChart />
-              </div>
-
-              {/* Recent Payments - Full width */}
-              <div className="xl:col-span-3">
-                <RecentPayments />
-              </div>
-            </div>
-
-            {/* Additional Analytics Section */}
-            <div className="mt-8 pt-8 border-t">
-              <h2 className="text-xl font-semibold mb-4">Key Performance Indicators</h2>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <div className="bg-card p-4 rounded-lg border">
-                  <div className="text-sm font-medium text-muted-foreground">Conversion Rate</div>
-                  <div className="text-2xl font-bold">4.2%</div>
-                  <div className="text-sm text-green-600">+0.5% from last month</div>
-                </div>
-                <div className="bg-card p-4 rounded-lg border">
-                  <div className="text-sm font-medium text-muted-foreground">Avg. Session Value</div>
-                  <div className="text-2xl font-bold">$125</div>
-                  <div className="text-sm text-green-600">+$12 from last month</div>
-                </div>
-                <div className="bg-card p-4 rounded-lg border">
-                  <div className="text-sm font-medium text-muted-foreground">Client Retention</div>
-                  <div className="text-2xl font-bold">68%</div>
-                  <div className="text-sm text-red-600">-2% from last month</div>
-                </div>
-                <div className="bg-card p-4 rounded-lg border">
-                  <div className="text-sm font-medium text-muted-foreground">Booking Rate</div>
-                  <div className="text-2xl font-bold">89%</div>
-                  <div className="text-sm text-green-600">+3% from last month</div>
-                </div>
-              </div>
-            </div>
-          </div>
+    <>
+      {/* Header */}
+      <div className="flex items-center justify-between py-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Insights</h1>
+          <p className="text-muted-foreground">
+            Comprehensive analytics and reporting for your booking
+            business.
+          </p>
         </div>
-      </SidebarInset>
-    </SidebarProvider>
+        <div className="flex items-center space-x-2">
+          <Button variant="outline" size="sm">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
+          <Button variant="outline" size="sm">
+            <Download className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+        </div>
+      </div>
+
+      {/* Charts Grid */}
+      <div className="space-y-6">
+        {/* Top Row - Main Charts */}
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div>
+                <CardTitle>Bookings Over Time</CardTitle>
+                <CardDescription>
+                  Track your booking trends and seasonal patterns
+                </CardDescription>
+              </div>
+              <Link href="/admin/insights/bookings-over-time">
+                <Button variant="ghost" size="sm">
+                  View Details
+                </Button>
+              </Link>
+            </CardHeader>
+            <CardContent>
+              <BookingsOverTimeChart />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div>
+                <CardTitle>Revenue by Session Type</CardTitle>
+                <CardDescription>
+                  Which sessions generate the most revenue
+                </CardDescription>
+              </div>
+              <Link href="/admin/insights/revenue-by-session">
+                <Button variant="ghost" size="sm">
+                  View Details
+                </Button>
+              </Link>
+            </CardHeader>
+            <CardContent>
+              <RevenueBySessionChart />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Second Row - Category and Booking Analysis */}
+        <div className="grid gap-6 md:grid-cols-3">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div>
+                <CardTitle>Popular Categories</CardTitle>
+                <CardDescription>
+                  Most booked session categories
+                </CardDescription>
+              </div>
+              <Link href="/admin/insights/popular-categories">
+                <Button variant="ghost" size="sm">
+                  View Details
+                </Button>
+              </Link>
+            </CardHeader>
+            <CardContent>
+              <PopularSessionCategoriesChart />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div>
+                <CardTitle>Upcoming Bookings</CardTitle>
+                <CardDescription>
+                  Next 30 days breakdown
+                </CardDescription>
+              </div>
+              <Link href="/admin/insights/upcoming-bookings">
+                <Button variant="ghost" size="sm">
+                  View Details
+                </Button>
+              </Link>
+            </CardHeader>
+            <CardContent>
+              <UpcomingBookingsChart />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div>
+                <CardTitle>Client Acquisition</CardTitle>
+                <CardDescription>
+                  New vs returning clients
+                </CardDescription>
+              </div>
+              <Link href="/admin/insights/client-acquisition">
+                <Button variant="ghost" size="sm">
+                  View Details
+                </Button>
+              </Link>
+            </CardHeader>
+            <CardContent>
+              <ClientAcquisitionChart />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Third Row - Recent Activity */}
+        <div className="grid gap-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div>
+                <CardTitle>Recent Payments</CardTitle>
+                <CardDescription>
+                  Latest payment transactions and revenue
+                </CardDescription>
+              </div>
+              <Link href="/admin/insights/recent-payments">
+                <Button variant="ghost" size="sm">
+                  View All
+                </Button>
+              </Link>
+            </CardHeader>
+            <CardContent>
+              <RecentPayments />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Stats Row */}
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Bookings
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">347</div>
+              <p className="text-xs text-muted-foreground">
+                +12% from last month
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Revenue
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">$45,231</div>
+              <p className="text-xs text-muted-foreground">
+                +8% from last month
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Active Clients
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">123</div>
+              <p className="text-xs text-muted-foreground">
+                +23% from last month
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Avg Session Value
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">$130</div>
+              <p className="text-xs text-muted-foreground">
+                +5% from last month
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </>
   );
 }

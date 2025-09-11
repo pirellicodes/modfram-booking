@@ -11,8 +11,8 @@ export default function EmailSettingsPage() {
       <AppSidebar variant="inset" />
       <SidebarInset>
         <SiteHeader />
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <div className="min-h-screen flex flex-col">
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-0 overflow-auto">
+          <div className="flex flex-col">
             <div className="py-6">
               <EmailSettings />
             </div>

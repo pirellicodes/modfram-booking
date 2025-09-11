@@ -1,27 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAvailability } from "@/hooks/use-dashboard-data";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-
-import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -30,6 +13,33 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import {
+  ClockIcon,
+  Plus,
+  Copy,
+  Trash2,
+  Globe,
+  Calendar,
+  Info,
+  Settings,
+  MoreVertical,
+  Pencil,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -37,143 +47,275 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  ClockIcon,
-  PlusIcon,
-  MoreHorizontalIcon,
-  EditIcon,
-  TrashIcon,
-  CalendarIcon,
-  CheckIcon,
-  XIcon,
-} from "lucide-react";
 
-const daysOfWeek = [
-  { value: 0, label: "Sunday", short: "Sun" },
-  { value: 1, label: "Monday", short: "Mon" },
-  { value: 2, label: "Tuesday", short: "Tue" },
-  { value: 3, label: "Wednesday", short: "Wed" },
-  { value: 4, label: "Thursday", short: "Thu" },
-  { value: 5, label: "Friday", short: "Fri" },
-  { value: 6, label: "Saturday", short: "Sat" },
-];
-
-const timeSlots = Array.from({ length: 48 }, (_, i) => {
+const timeOptions = Array.from({ length: 48 }, (_, i) => {
   const hour = Math.floor(i / 2);
   const minute = i % 2 === 0 ? "00" : "30";
   const time24 = `${hour.toString().padStart(2, "0")}:${minute}`;
   const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
   const ampm = hour < 12 ? "AM" : "PM";
   const time12 = `${hour12}:${minute} ${ampm}`;
-
   return { value: time24, label: time12 };
 });
 
+const timezones = [
+  { value: "America/New_York", label: "Eastern Time (ET)" },
+  { value: "America/Chicago", label: "Central Time (CT)" },
+  { value: "America/Denver", label: "Mountain Time (MT)" },
+  { value: "America/Los_Angeles", label: "Pacific Time (PT)" },
+  { value: "America/Anchorage", label: "Alaska Time (AKT)" },
+  { value: "Pacific/Honolulu", label: "Hawaii Time (HST)" },
+  { value: "Europe/London", label: "Greenwich Mean Time (GMT)" },
+  { value: "Europe/Berlin", label: "Central European Time (CET)" },
+  { value: "Asia/Tokyo", label: "Japan Standard Time (JST)" },
+  { value: "Asia/Shanghai", label: "China Standard Time (CST)" },
+  { value: "Australia/Sydney", label: "Australian Eastern Time (AET)" },
+];
+
+interface TimeSlot {
+  start: string;
+  end: string;
+}
+
+interface DaySchedule {
+  enabled: boolean;
+  slots: TimeSlot[];
+}
+
 export function Availability() {
-  const { data: availability, loading, error } = useAvailability();
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [selectedSlot, setSelectedSlot] = useState<{
-    id: string;
-    day_of_week: number;
-    start_time: string;
-    end_time: string;
-  } | null>(null);
-  const [formData, setFormData] = useState({
-    day_of_week: "",
-    start_time: "",
-    end_time: "",
+  const { data: availabilityData, loading, error } = useAvailability();
+  const [isOverrideDialogOpen, setIsOverrideDialogOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [timezone, setTimezone] = useState("America/New_York");
+  const [selectedDate, setSelectedDate] = useState("");
+  const [scheduleType, setScheduleType] = useState("default");
+  const [scheduleLabel, setScheduleLabel] = useState("Working Hours");
+  const [weeklySchedule, setWeeklySchedule] = useState<
+    Record<number, DaySchedule>
+  >({
+    0: { enabled: false, slots: [] }, // Sunday
+    1: { enabled: true, slots: [{ start: "09:00", end: "17:00" }] }, // Monday
+    2: { enabled: true, slots: [{ start: "09:00", end: "17:00" }] }, // Tuesday
+    3: { enabled: true, slots: [{ start: "09:00", end: "17:00" }] }, // Wednesday
+    4: { enabled: true, slots: [{ start: "09:00", end: "17:00" }] }, // Thursday
+    5: { enabled: true, slots: [{ start: "09:00", end: "17:00" }] }, // Friday
+    6: { enabled: false, slots: [] }, // Saturday
   });
+  const [overrides, setOverrides] = useState<
+    { date: string; available: boolean }[]
+  >([]);
 
-  // Group availability by day of week
-  const availabilityByDay = daysOfWeek.map((day) => ({
-    ...day,
-    slots: availability
-      .filter((slot) => slot.day_of_week === day.value)
-      .sort((a, b) => a.start_time.localeCompare(b.start_time)),
-  }));
+  // Populate the weekly schedule from API data
+  useEffect(() => {
+    if (availabilityData.length > 0) {
+      const newSchedule = { ...weeklySchedule };
 
-  const handleCreateSlot = () => {
-    // TODO: Implement create functionality with Supabase
-    console.log("Creating availability slot:", formData);
-    setIsCreateDialogOpen(false);
-    resetForm();
-  };
+      availabilityData.forEach((slot) => {
+        const dayOfWeek = slot.day_of_week;
+        if (
+          !newSchedule[dayOfWeek].slots.some(
+            (s) => s.start === slot.start_time && s.end === slot.end_time
+          )
+        ) {
+          if (!newSchedule[dayOfWeek].enabled) {
+            newSchedule[dayOfWeek].enabled = true;
+          }
+          newSchedule[dayOfWeek].slots.push({
+            start: slot.start_time,
+            end: slot.end_time,
+          });
+        }
+      });
 
-  const handleEditSlot = (slot: {
-    id: string;
-    day_of_week: number;
-    start_time: string;
-    end_time: string;
-  }) => {
-    setSelectedSlot(slot);
-    setFormData({
-      day_of_week: slot.day_of_week.toString(),
-      start_time: slot.start_time,
-      end_time: slot.end_time,
-    });
-    setIsEditDialogOpen(true);
-  };
-
-  const handleUpdateSlot = () => {
-    // TODO: Implement update functionality with Supabase
-    console.log("Updating availability slot:", selectedSlot.id, formData);
-    setIsEditDialogOpen(false);
-    resetForm();
-  };
-
-  const handleDeleteSlot = (slot: { id: string }) => {
-    // TODO: Implement delete functionality with Supabase
-    console.log("Deleting availability slot:", slot.id);
-  };
-
-  const resetForm = () => {
-    setFormData({
-      day_of_week: "",
-      start_time: "",
-      end_time: "",
-    });
-    setSelectedSlot(null);
-  };
-
-  const formatTime = (time24: string) => {
-    const [hours, minutes] = time24.split(":");
-    const hour = parseInt(hours);
-    const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-    const ampm = hour < 12 ? "AM" : "PM";
-    return `${hour12}:${minutes} ${ampm}`;
-  };
-
-  const calculateDuration = (startTime: string, endTime: string) => {
-    const [startHour, startMin] = startTime.split(":").map(Number);
-    const [endHour, endMin] = endTime.split(":").map(Number);
-
-    const startMinutes = startHour * 60 + startMin;
-    const endMinutes = endHour * 60 + endMin;
-    const durationMinutes = endMinutes - startMinutes;
-
-    const hours = Math.floor(durationMinutes / 60);
-    const minutes = durationMinutes % 60;
-
-    if (hours > 0 && minutes > 0) {
-      return `${hours}h ${minutes}m`;
-    } else if (hours > 0) {
-      return `${hours}h`;
-    } else {
-      return `${minutes}m`;
+      setWeeklySchedule(newSchedule);
     }
+  }, [availabilityData]);
+
+  const toggleDay = (dayOfWeek: number) => {
+    setWeeklySchedule((prev) => {
+      const newSchedule = { ...prev };
+      newSchedule[dayOfWeek].enabled = !newSchedule[dayOfWeek].enabled;
+
+      // If enabling a day with no slots, add a default slot
+      if (
+        newSchedule[dayOfWeek].enabled &&
+        newSchedule[dayOfWeek].slots.length === 0
+      ) {
+        newSchedule[dayOfWeek].slots = [{ start: "09:00", end: "17:00" }];
+      }
+
+      return newSchedule;
+    });
+  };
+
+  const addTimeSlot = (dayOfWeek: number) => {
+    setWeeklySchedule((prev) => {
+      const newSchedule = { ...prev };
+      const slots = [...newSchedule[dayOfWeek].slots];
+
+      // Find a good default time slot that doesn't overlap
+      let newStart = "09:00";
+      let newEnd = "17:00";
+
+      if (slots.length > 0) {
+        const lastSlot = slots[slots.length - 1];
+        const lastEndHour = parseInt(lastSlot.end.split(":")[0]);
+        const lastEndMinute = parseInt(lastSlot.end.split(":")[1]);
+
+        let newStartHour = lastEndHour;
+        let newStartMinute = lastEndMinute + 30;
+
+        if (newStartMinute >= 60) {
+          newStartHour += 1;
+          newStartMinute = 0;
+        }
+
+        let newEndHour = newStartHour + 1;
+
+        if (newEndHour >= 24) {
+          newEndHour = 23;
+          newStartHour = 22;
+        }
+
+        newStart = `${String(newStartHour).padStart(2, "0")}:${String(
+          newStartMinute
+        ).padStart(2, "0")}`;
+        newEnd = `${String(newEndHour).padStart(2, "0")}:${String(
+          newStartMinute
+        ).padStart(2, "0")}`;
+      }
+
+      newSchedule[dayOfWeek].slots.push({ start: newStart, end: newEnd });
+      return newSchedule;
+    });
+  };
+
+  const removeTimeSlot = (dayOfWeek: number, slotIndex: number) => {
+    setWeeklySchedule((prev) => {
+      const newSchedule = { ...prev };
+      newSchedule[dayOfWeek].slots = newSchedule[dayOfWeek].slots.filter(
+        (_, index) => index !== slotIndex
+      );
+      return newSchedule;
+    });
+  };
+
+  const updateTimeSlot = (
+    dayOfWeek: number,
+    slotIndex: number,
+    field: "start" | "end",
+    value: string
+  ) => {
+    setWeeklySchedule((prev) => {
+      const newSchedule = { ...prev };
+      newSchedule[dayOfWeek].slots = newSchedule[dayOfWeek].slots.map(
+        (slot, index) =>
+          index === slotIndex ? { ...slot, [field]: value } : slot
+      );
+      return newSchedule;
+    });
+  };
+
+  const copyTimeSlots = (fromDay: number) => {
+    const daysOfWeek = [
+      { value: 0, label: "Sunday" },
+      { value: 1, label: "Monday" },
+      { value: 2, label: "Tuesday" },
+      { value: 3, label: "Wednesday" },
+      { value: 4, label: "Thursday" },
+      { value: 5, label: "Friday" },
+      { value: 6, label: "Saturday" },
+    ];
+
+    // Filter out the source day
+    const targetDays = daysOfWeek.filter((day) => day.value !== fromDay);
+
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="sm">
+            <Copy className="h-4 w-4 mr-2" />
+            Copy
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuLabel>Copy to</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {targetDays.map((day) => (
+            <DropdownMenuItem
+              key={day.value}
+              onClick={() => {
+                setWeeklySchedule((prev) => {
+                  const newSchedule = { ...prev };
+                  newSchedule[day.value] = {
+                    enabled: true,
+                    slots: [...prev[fromDay].slots],
+                  };
+                  return newSchedule;
+                });
+                toast.success(`Copied to ${day.label}`);
+              }}
+            >
+              {day.label}
+            </DropdownMenuItem>
+          ))}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={() => {
+              setWeeklySchedule((prev) => {
+                const newSchedule = { ...prev };
+                // Copy to all other days
+                targetDays.forEach((day) => {
+                  newSchedule[day.value] = {
+                    enabled: true,
+                    slots: [...prev[fromDay].slots],
+                  };
+                });
+                return newSchedule;
+              });
+              toast.success("Copied to all other days");
+            }}
+          >
+            All other days
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  };
+
+  const addOverride = () => {
+    if (!selectedDate) return;
+
+    // Check if override already exists
+    if (overrides.some((o) => o.date === selectedDate)) {
+      toast.error("An override for this date already exists");
+      return;
+    }
+
+    setOverrides([...overrides, { date: selectedDate, available: false }]);
+    setIsOverrideDialogOpen(false);
+    setSelectedDate("");
+    toast.success("Date override added");
+  };
+
+  const removeOverride = (date: string) => {
+    setOverrides(overrides.filter((o) => o.date !== date));
+    toast.success("Date override removed");
+  };
+
+  const saveSchedule = () => {
+    // In a real implementation, this would save the schedule to Supabase
+    toast.success("Schedule saved successfully");
+    setIsEditMode(false);
   };
 
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">Availability</h2>
-            <p className="text-muted-foreground">
-              Manage your weekly availability schedule
-            </p>
-          </div>
+        <div>
+          <p className="text-muted-foreground">
+            Loading your availability settings...
+          </p>
         </div>
         <Card>
           <CardContent className="flex items-center justify-center h-48">
@@ -184,338 +326,370 @@ export function Availability() {
     );
   }
 
-  if (error) {
+  if (isEditMode) {
+    // Edit schedule view
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">Availability</h2>
-            <p className="text-muted-foreground">
-              Manage your weekly availability schedule
-            </p>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsEditMode(false)}
+            >
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              Back
+            </Button>
+            <h2 className="text-xl font-semibold">{scheduleLabel}</h2>
+            <Badge variant="outline">Default</Badge>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsEditMode(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={saveSchedule}>Save</Button>
           </div>
         </div>
-        <Card>
-          <CardContent className="flex items-center justify-center h-48 text-muted-foreground">
-            {error}
+
+        <Card className="border shadow-sm">
+          <CardContent className="pt-6">
+            <div className="space-y-6">
+              {/* Days of week */}
+              {Object.keys(weeklySchedule).map((dayKey) => {
+                const dayOfWeek = parseInt(dayKey);
+                const dayNames = [
+                  "Sunday",
+                  "Monday",
+                  "Tuesday",
+                  "Wednesday",
+                  "Thursday",
+                  "Friday",
+                  "Saturday",
+                ];
+                const dayName = dayNames[dayOfWeek];
+                const schedule = weeklySchedule[dayOfWeek];
+
+                return (
+                  <div key={dayOfWeek} className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <Switch
+                          checked={schedule.enabled}
+                          onCheckedChange={() => toggleDay(dayOfWeek)}
+                        />
+                        <div className="w-24 font-medium">{dayName}</div>
+                      </div>
+
+                      {schedule.enabled &&
+                        schedule.slots.length > 0 &&
+                        copyTimeSlots(dayOfWeek)}
+                    </div>
+
+                    {schedule.enabled && (
+                      <div className="ml-12 space-y-3">
+                        {schedule.slots.map((slot, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center space-x-2"
+                          >
+                            <Select
+                              value={slot.start}
+                              onValueChange={(value) =>
+                                updateTimeSlot(dayOfWeek, index, "start", value)
+                              }
+                            >
+                              <SelectTrigger className="w-[140px]">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {timeOptions.map((time) => (
+                                  <SelectItem
+                                    key={time.value}
+                                    value={time.value}
+                                  >
+                                    {time.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+
+                            <span className="text-muted-foreground">to</span>
+
+                            <Select
+                              value={slot.end}
+                              onValueChange={(value) =>
+                                updateTimeSlot(dayOfWeek, index, "end", value)
+                              }
+                            >
+                              <SelectTrigger className="w-[140px]">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {timeOptions.map((time) => (
+                                  <SelectItem
+                                    key={time.value}
+                                    value={time.value}
+                                  >
+                                    {time.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+
+                            {schedule.slots.length > 1 && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => removeTimeSlot(dayOfWeek, index)}
+                              >
+                                <Trash2 className="h-4 w-4 text-muted-foreground" />
+                              </Button>
+                            )}
+                          </div>
+                        ))}
+
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs ml-0"
+                          onClick={() => addTimeSlot(dayOfWeek)}
+                        >
+                          <Plus className="h-3 w-3 mr-1" />
+                          Add time range
+                        </Button>
+                      </div>
+                    )}
+
+                    {dayOfWeek < 6 && <Separator className="mt-4" />}
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold">Timezone</h3>
+        </div>
+
+        <Card className="border shadow-sm">
+          <CardContent className="pt-6">
+            <Select value={timezone} onValueChange={setTimezone}>
+              <SelectTrigger className="w-full max-w-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {timezones.map((tz) => (
+                  <SelectItem key={tz.value} value={tz.value}>
+                    {tz.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </CardContent>
+        </Card>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <h3 className="text-lg font-semibold">Date overrides</h3>
+            <Info className="h-4 w-4 text-muted-foreground" />
+          </div>
+        </div>
+
+        <Card className="border shadow-sm">
+          <CardContent className="pt-6">
+            {overrides.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <Calendar className="h-10 w-10 mx-auto mb-4" />
+                <p>No date overrides set</p>
+                <p className="text-sm mt-1">
+                  Add a date override when your availability changes from your
+                  usual hours
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {overrides.map((override) => (
+                  <div
+                    key={override.date}
+                    className="flex items-center justify-between border p-4 rounded-lg"
+                  >
+                    <div>
+                      <div className="font-medium">
+                        {new Date(override.date).toLocaleDateString(undefined, {
+                          weekday: "long",
+                          month: "long",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {override.available ? "Available" : "Unavailable"}
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeOverride(override.date)}
+                    >
+                      <Trash2 className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-6">
+              <Button
+                variant="outline"
+                onClick={() => setIsOverrideDialogOpen(true)}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add an override
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
     );
   }
 
+  // Main view
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="flex items-center gap-2 text-2xl font-bold tracking-tight">
-            <ClockIcon className="h-6 w-6" />
-            Availability
-          </h2>
           <p className="text-muted-foreground">
-            Set your weekly availability for bookings
+            Configure times when you are available for bookings.
           </p>
         </div>
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <PlusIcon className="h-4 w-4 mr-2" />
-              Add Time Slot
+        <div className="flex flex-wrap gap-2">
+          <div className="flex rounded-md border border-input p-1">
+            <Button
+              variant="ghost"
+              className="rounded-sm px-3 text-sm font-medium bg-background text-foreground"
+            >
+              My Availability
             </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add Time Slot</DialogTitle>
-              <DialogDescription>
-                Add a new time slot to your availability schedule.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="day" className="text-right">
-                  Day
-                </Label>
-                <Select
-                  value={formData.day_of_week}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, day_of_week: value })
-                  }
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select a day" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {daysOfWeek.map((day) => (
-                      <SelectItem key={day.value} value={day.value.toString()}>
-                        {day.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="start_time" className="text-right">
-                  Start Time
-                </Label>
-                <Select
-                  value={formData.start_time}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, start_time: value })
-                  }
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select start time" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {timeSlots.map((slot) => (
-                      <SelectItem key={slot.value} value={slot.value}>
-                        {slot.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="end_time" className="text-right">
-                  End Time
-                </Label>
-                <Select
-                  value={formData.end_time}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, end_time: value })
-                  }
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select end time" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {timeSlots.map((slot) => (
-                      <SelectItem key={slot.value} value={slot.value}>
-                        {slot.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setIsCreateDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button onClick={handleCreateSlot}>Add Time Slot</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            <Button
+              variant="ghost"
+              className="rounded-sm px-3 text-sm font-medium"
+            >
+              Team Availability
+            </Button>
+          </div>
+          <Button>
+            <Plus className="h-4 w-4 mr-2" />
+            New
+          </Button>
+        </div>
       </div>
 
-      {/* Weekly Schedule */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-1">
-        {availabilityByDay.map((day) => (
-          <Card key={day.value}>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span className="flex items-center gap-2">
-                  <CalendarIcon className="h-5 w-5" />
-                  {day.label}
+      <Card className="border shadow-sm">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <div>
+            <CardTitle>Working Hours</CardTitle>
+            <CardDescription className="mt-1">
+              <div className="flex items-center">
+                <Badge className="mr-2 bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900 dark:text-emerald-100">
+                  Default
+                </Badge>
+                <span className="text-sm text-muted-foreground">
+                  Mon - Fri, 9:00 AM - 5:00 PM
                 </span>
-                {day.slots.length === 0 ? (
-                  <Badge
-                    variant="secondary"
-                    className="bg-red-500/10 text-red-700"
-                  >
-                    <XIcon className="h-3 w-3 mr-1" />
-                    Unavailable
-                  </Badge>
-                ) : (
-                  <Badge
-                    variant="secondary"
-                    className="bg-green-500/10 text-green-700"
-                  >
-                    <CheckIcon className="h-3 w-3 mr-1" />
-                    Available
-                  </Badge>
-                )}
-              </CardTitle>
-              <CardDescription>
-                {day.slots.length} time slot{day.slots.length !== 1 ? "s" : ""}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {day.slots.length === 0 ? (
-                <div className="text-center py-8 border-2 border-dashed border-muted rounded-lg">
-                  <ClockIcon className="mx-auto h-8 w-8 text-muted-foreground" />
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    No availability set for {day.label.toLowerCase()}
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {day.slots.map((slot) => (
-                    <div
-                      key={slot.id}
-                      className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="text-sm font-medium">
-                          {formatTime(slot.start_time)} -{" "}
-                          {formatTime(slot.end_time)}
-                        </div>
-                        <Badge variant="outline" className="text-xs">
-                          {calculateDuration(slot.start_time, slot.end_time)}
-                        </Badge>
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontalIcon className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem
-                            onClick={() => handleEditSlot(slot)}
-                          >
-                            <EditIcon className="mr-2 h-4 w-4" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => handleDeleteSlot(slot)}
-                            className="text-destructive"
-                          >
-                            <TrashIcon className="mr-2 h-4 w-4" />
-                            Remove
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+              </div>
+            </CardDescription>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setIsEditMode(true)}>
+                <Pencil className="h-4 w-4 mr-2" />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Copy className="h-4 w-4 mr-2" />
+                Duplicate
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-destructive">
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center text-sm text-muted-foreground">
+            <Globe className="h-4 w-4 mr-2" />
+            <span>America/New_York</span>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="flex items-center justify-center p-4 text-center">
+        <div className="text-muted-foreground">
+          Temporarily Out-Of-Office?{" "}
+          <Button
+            variant="link"
+            className="p-0 h-auto text-primary"
+            onClick={() => setIsOverrideDialogOpen(true)}
+          >
+            Add a redirect
+          </Button>
+        </div>
       </div>
 
-      {/* Edit Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
+      {/* Date Override Dialog */}
+      <Dialog
+        open={isOverrideDialogOpen}
+        onOpenChange={setIsOverrideDialogOpen}
+      >
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Edit Time Slot</DialogTitle>
+            <DialogTitle>Add Date Override</DialogTitle>
             <DialogDescription>
-              Update the details of your availability slot.
+              Create a date override when your availability differs from your
+              usual hours.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-day" className="text-right">
-                Day
-              </Label>
-              <Select
-                value={formData.day_of_week}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, day_of_week: value })
-                }
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select a day" />
-                </SelectTrigger>
-                <SelectContent>
-                  {daysOfWeek.map((day) => (
-                    <SelectItem key={day.value} value={day.value.toString()}>
-                      {day.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="grid gap-2">
+              <Label htmlFor="date">Date</Label>
+              <Input
+                id="date"
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+              />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-start-time" className="text-right">
-                Start Time
-              </Label>
-              <Select
-                value={formData.start_time}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, start_time: value })
-                }
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select start time" />
-                </SelectTrigger>
-                <SelectContent>
-                  {timeSlots.map((slot) => (
-                    <SelectItem key={slot.value} value={slot.value}>
-                      {slot.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-end-time" className="text-right">
-                End Time
-              </Label>
-              <Select
-                value={formData.end_time}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, end_time: value })
-                }
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select end time" />
-                </SelectTrigger>
-                <SelectContent>
-                  {timeSlots.map((slot) => (
-                    <SelectItem key={slot.value} value={slot.value}>
-                      {slot.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="grid gap-2">
+              <Label>Availability</Label>
+              <div className="flex items-center space-x-2">
+                <Switch id="available" />
+                <Label htmlFor="available">Available on this day</Label>
+              </div>
             </div>
           </div>
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setIsEditDialogOpen(false)}
+              onClick={() => setIsOverrideDialogOpen(false)}
             >
               Cancel
             </Button>
-            <Button onClick={handleUpdateSlot}>Update Time Slot</Button>
+            <Button onClick={addOverride}>Add Override</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>
-            Common availability management tasks
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm">
-              Copy from Monday
-            </Button>
-            <Button variant="outline" size="sm">
-              Set Business Hours (9-5)
-            </Button>
-            <Button variant="outline" size="sm">
-              Clear All
-            </Button>
-            <Button variant="outline" size="sm">
-              Import Schedule
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

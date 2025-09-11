@@ -14,7 +14,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
+import { Pie, PieChart } from "recharts";
 import { PieChart as PieChartIcon, TrendingUp } from "lucide-react";
 
 const COLORS = [

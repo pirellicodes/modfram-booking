@@ -14,7 +14,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Legend } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import { Users, TrendingUp } from "lucide-react";
 
 const chartConfig = {

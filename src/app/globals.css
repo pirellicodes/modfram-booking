@@ -91,4 +91,74 @@ body,
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Custom focus styles - remove black highlights */
+  *:focus {
+    outline: none !important;
+  }
+
+  *:focus-visible {
+    outline: none !important;
+    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring)) !important;
+    border-color: hsl(var(--ring)) !important;
+  }
+
+  /* Improve input focus states */
+  input:focus,
+  textarea:focus,
+  select:focus,
+  button:focus,
+  [role="button"]:focus,
+  [role="combobox"]:focus,
+  [role="listbox"]:focus,
+  [role="switch"]:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring)) !important;
+    border-color: hsl(var(--ring)) !important;
+    transition: box-shadow 150ms ease, border-color 150ms ease;
+    background-color: transparent !important;
+    color: inherit !important;
+  }
+
+  /* Prevent selection highlight color from taking over */
+  ::selection {
+    background-color: hsl(var(--primary) / 0.2);
+    color: hsl(var(--primary-foreground));
+  }
+
+  /* Calendar component specific fixes */
+  .calendar-container button:focus {
+    background-color: transparent;
+    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring)) !important;
+  }
+
+  /* Input/select component styles */
+  .SelectTrigger:focus,
+  .SelectContent:focus,
+  .DropdownMenuTrigger:focus {
+    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring)) !important;
+    border-color: hsl(var(--ring)) !important;
+    background-color: transparent !important;
+  }
+
+  /* Sidebar and content blending */
+  .sidebar-content {
+    border-radius: 0 12px 12px 0;
+    transition: border-radius 0.2s ease;
+  }
+
+  .sidebar-inset {
+    border-radius: 12px 0 0 12px;
+    overflow: hidden;
+  }
+
+  /* Better card height consistency */
+  .insights-card-grid .card {
+    height: 400px;
+  }
+
+  /* Smooth transitions for sidebar collapse */
+  .sidebar-collapsed .sidebar-content {
+    border-radius: 0 8px 8px 0;
+  }
 }

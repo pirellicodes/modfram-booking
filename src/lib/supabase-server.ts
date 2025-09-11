@@ -11,9 +11,17 @@ export function supabaseServer() {
       cookies: {
         get: (name: string) => store.get(name)?.value,
         set: (name: string, value: string, options: CookieOptions) =>
-          (store as any).set(name, value, options), // cast fixes TS
+          (
+            store as {
+              set(name: string, value: string, options: CookieOptions): void;
+            }
+          ).set(name, value, options),
         remove: (name: string, options: CookieOptions) =>
-          (store as any).set(name, "", options), // cast fixes TS
+          (
+            store as {
+              set(name: string, value: string, options: CookieOptions): void;
+            }
+          ).set(name, "", options),
       },
     }
   );
