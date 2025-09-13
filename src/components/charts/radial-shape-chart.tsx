@@ -1,6 +1,6 @@
 "use client";
 
-import { TrendingUp } from "lucide-react";
+// Chart component for radial bar display with shape
 import {
   Label,
   PolarGrid,
@@ -9,7 +9,13 @@ import {
   RadialBarChart,
 } from "recharts";
 
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
 
 const chartData = [

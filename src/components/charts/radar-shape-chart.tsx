@@ -1,6 +1,6 @@
 "use client";
 
-import { TrendingUp } from "lucide-react";
+// Chart component for radar display
 import {
   PolarAngleAxis,
   PolarGrid,

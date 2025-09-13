@@ -1,9 +1,15 @@
 "use client";
 
-import { TrendingUp } from "lucide-react";
+// Chart component for radial bar display with grid
 import { PolarGrid, RadialBar, RadialBarChart } from "recharts";
 
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import {
   ChartConfig,
   ChartContainer,

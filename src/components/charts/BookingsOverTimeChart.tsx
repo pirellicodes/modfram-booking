@@ -14,7 +14,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, XAxis, YAxis } from "recharts";
 import { CalendarDays, TrendingUp } from "lucide-react";
 
 const chartConfig = {
@@ -35,7 +35,9 @@ export function BookingsOverTimeChart() {
             <CalendarDays className="h-5 w-5" />
             Bookings Over Time
           </CardTitle>
-          <CardDescription>Daily booking trends for the last 30 days</CardDescription>
+          <CardDescription>
+            Daily booking trends for the last 30 days
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-[300px] flex items-center justify-center">
@@ -54,7 +56,9 @@ export function BookingsOverTimeChart() {
             <CalendarDays className="h-5 w-5" />
             Bookings Over Time
           </CardTitle>
-          <CardDescription>Daily booking trends for the last 30 days</CardDescription>
+          <CardDescription>
+            Daily booking trends for the last 30 days
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-[300px] flex items-center justify-center text-muted-foreground">
@@ -66,7 +70,8 @@ export function BookingsOverTimeChart() {
   }
 
   const totalBookings = data.reduce((sum, item) => sum + item.bookings, 0);
-  const averageBookings = data.length > 0 ? (totalBookings / data.length).toFixed(1) : "0";
+  const averageBookings =
+    data.length > 0 ? (totalBookings / data.length).toFixed(1) : "0";
 
   return (
     <Card>
