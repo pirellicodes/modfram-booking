@@ -274,7 +274,7 @@ export interface BookingFiltersProps extends FilterProps<BookingFilters> {
   statuses?: Array<{ label: string; value: Booking["status"] }>;
 }
 
-export interface ClientFiltersProps extends FilterProps<ClientFilters> {}
+export type ClientFiltersProps = FilterProps<ClientFilters>;
 
 export interface SearchProps {
   value: string;

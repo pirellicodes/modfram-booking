@@ -134,12 +134,10 @@ export interface CreateAvailabilityRequest {
   }>;
 }
 
-export interface UpdateAvailabilityRequest
-  extends Partial<CreateAvailabilityRequest> {}
+export type UpdateAvailabilityRequest = Partial<CreateAvailabilityRequest>;
 
-export interface AvailabilityResponse extends ApiResponse<Availability> {}
-export interface AvailabilitiesListResponse
-  extends ApiResponse<Availability[]> {}
+export type AvailabilityResponse = ApiResponse<Availability>;
+export type AvailabilitiesListResponse = ApiResponse<Availability[]>;
 
 // Event Type API types
 export interface CreateEventTypeRequest {
@@ -155,8 +153,7 @@ export interface CreateEventTypeRequest {
   minimum_notice_hours?: number;
 }
 
-export interface UpdateEventTypeRequest
-  extends Partial<CreateEventTypeRequest> {}
+export type UpdateEventTypeRequest = Partial<CreateEventTypeRequest>;
 
 export interface EventTypesListRequest extends PaginationParams {
   is_active?: boolean;
@@ -192,8 +189,7 @@ export interface TallyWebhookPayload {
 export type TallyWebhookResponse = ApiResponse<{ received: boolean }>;
 
 // Google Calendar integration types
-export interface GoogleOAuthStartResponse
-  extends ApiResponse<{ auth_url: string }> {}
+export type GoogleOAuthStartResponse = ApiResponse<{ auth_url: string }>;
 
 export interface GoogleOAuthCallbackRequest {
   code: string;
