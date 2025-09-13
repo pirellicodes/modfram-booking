@@ -13,10 +13,11 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { EventTypeWithParsedFields } from "@/lib/types";
+import { FormData } from "@/types/event-types";
 
 interface EventTypeAvailabilityFormProps {
-  formData: Partial<EventTypeWithParsedFields>;
-  setFormData: (data: Partial<EventTypeWithParsedFields>) => void;
+  formData: FormData;
+  setFormData: (data: FormData) => void;
 }
 
 export function EventTypeAvailabilityForm({
@@ -112,7 +113,11 @@ export function EventTypeAvailabilityForm({
                           type="date"
                           value={
                             formData.periodStartDate
-                              ? formData.periodStartDate.split("T")[0]
+                              ? formData.periodStartDate instanceof Date
+                                ? formData.periodStartDate
+                                    .toISOString()
+                                    .split("T")[0]
+                                : String(formData.periodStartDate).split("T")[0]
                               : ""
                           }
                           onChange={(e) =>
@@ -131,7 +136,11 @@ export function EventTypeAvailabilityForm({
                           type="date"
                           value={
                             formData.periodEndDate
-                              ? formData.periodEndDate.split("T")[0]
+                              ? formData.periodEndDate instanceof Date
+                                ? formData.periodEndDate
+                                    .toISOString()
+                                    .split("T")[0]
+                                : String(formData.periodEndDate).split("T")[0]
                               : ""
                           }
                           onChange={(e) =>

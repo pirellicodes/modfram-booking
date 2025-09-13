@@ -1,6 +1,6 @@
-'use client';
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+"use client";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import {
   Dialog,
   DialogContent,
@@ -8,37 +8,37 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { ScrollArea } from '../ui/scroll-area';
-import { DeleteAlert } from '@/components/event-calendar/ui/delete-alert';
-import { FormFooter } from '@/components/event-calendar/ui/form-footer';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { ensureDate } from '@/lib/date';
-import { useEventCalendarStore } from '@/hooks/use-event';
-import { eventFormSchema } from '@/lib/validations';
-import { EventDetailsForm } from './event-detail-form';
-import { toast } from 'sonner';
-import { deleteEvent, updateEvent } from '@/app/actions';
-import { useShallow } from 'zustand/shallow';
-import { getLocaleFromCode } from '@/lib/event';
+} from "@/components/ui/dialog";
+import { ScrollArea } from "../ui/scroll-area";
+import { DeleteAlert } from "@/components/event-calendar/ui/delete-alert";
+import { FormFooter } from "@/components/event-calendar/ui/form-footer";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { ensureDate } from "@/lib/date";
+import { useEventCalendarStore } from "@/hooks/use-event";
+import { eventFormSchema } from "@/lib/validations";
+import { EventDetailsForm } from "./event-detail-form";
+import { toast } from "sonner";
+import { deleteEvent, updateEvent } from "@/app/actions";
+import { useShallow } from "zustand/shallow";
+import { getLocaleFromCode } from "@/lib/event";
 
-const DEFAULT_START_TIME = '09:00';
-const DEFAULT_END_TIME = '10:00';
-const DEFAULT_COLOR = 'bg-red-600';
-const DEFAULT_CATEGORY = 'workshop';
+const DEFAULT_START_TIME = "09:00";
+const DEFAULT_END_TIME = "10:00";
+const DEFAULT_COLOR = "bg-red-600";
+const DEFAULT_CATEGORY = "workshop";
 
 type EventFormValues = z.infer<typeof eventFormSchema>;
 
 const DEFAULT_FORM_VALUES: EventFormValues = {
-  title: '',
-  description: '',
+  title: "",
+  description: "",
   startDate: new Date(),
   endDate: new Date(),
   category: DEFAULT_CATEGORY,
   startTime: DEFAULT_START_TIME,
   endTime: DEFAULT_END_TIME,
-  location: '',
+  location: "",
   color: DEFAULT_COLOR,
 };
 
@@ -67,7 +67,7 @@ export default function EventDialog() {
       isDialogOpen: state.isDialogOpen,
       closeEventDialog: state.closeEventDialog,
       isSubmitting: state.isSubmitting,
-    })),
+    }))
   );
   const localeObj = getLocaleFromCode(locale);
 
@@ -77,7 +77,7 @@ export default function EventDialog() {
   const form = useForm<EventFormValues>({
     resolver: zodResolver(eventFormSchema),
     defaultValues: DEFAULT_FORM_VALUES,
-    mode: 'onChange',
+    mode: "onChange",
   });
 
   useEffect(() => {
@@ -87,18 +87,18 @@ export default function EventDialog() {
         const endDate = ensureDate(selectedEvent.endDate);
 
         form.reset({
-          title: selectedEvent.title || '',
-          description: selectedEvent.description || '',
+          title: selectedEvent.title || "",
+          description: selectedEvent.description || "",
           startDate,
           endDate,
           category: selectedEvent.category || DEFAULT_CATEGORY,
           startTime: selectedEvent.startTime || DEFAULT_START_TIME,
           endTime: selectedEvent.endTime || DEFAULT_END_TIME,
-          location: selectedEvent.location || '',
+          location: selectedEvent.location || "",
           color: selectedEvent.color,
         });
       } catch (error) {
-        console.error('Error resetting form with event data:', error);
+        console.error("Error resetting form with event data:", error);
       }
     }
   }, [selectedEvent, form]);
@@ -107,19 +107,16 @@ export default function EventDialog() {
     if (!selectedEvent?.id) return;
 
     toast.promise(updateEvent(selectedEvent.id, values), {
-      loading: 'Updating event...',
+      loading: "Updating event...",
       success: (result) => {
-        if (!result.success) {
-          throw new Error(result.error || 'Failed to update event');
-        }
         closeEventDialog();
-        return 'Event updated successfully!';
+        return "Event updated successfully!";
       },
       error: (error) => {
-        console.error('Error:', error);
+        console.error("Error:", error);
         return error instanceof Error
           ? error.message
-          : 'Ops! Something went wrong';
+          : "Ops! Something went wrong";
       },
     });
   };
@@ -129,19 +126,16 @@ export default function EventDialog() {
     setIsDeleteAlertOpen(false);
 
     toast.promise(deleteEvent(selectedEvent.id), {
-      loading: 'Deleting event...',
+      loading: "Deleting event...",
       success: (result) => {
-        if (!result.success) {
-          throw new Error(result.error || 'Failed to delete event');
-        }
         closeEventDialog();
-        return 'Event deleted successfully!';
+        return "Event deleted successfully!";
       },
       error: (error) => {
-        console.error('Error:', error);
+        console.error("Error:", error);
         return error instanceof Error
           ? error.message
-          : 'Ops! Something went wrong';
+          : "Ops! Something went wrong";
       },
     });
   };

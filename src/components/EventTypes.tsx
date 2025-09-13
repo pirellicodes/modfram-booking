@@ -223,7 +223,7 @@ export function EventTypes() {
                         </div>
                         <div className="flex-1">
                           <h3 className="font-semibold text-lg text-foreground mb-1">
-                            {eventType.name}
+                            {eventType.title}
                           </h3>
                           <div className="flex items-center gap-4 text-sm text-muted-foreground">
                             <div className="flex items-center">

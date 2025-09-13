@@ -1,10 +1,11 @@
-import { type EventType } from '@/db/schema';
+import type { EventType } from "./index";
 
 export interface LocationObject {
   type: string;
   address?: string;
   link?: string;
   phone?: string;
+  text?: string;
 }
 
 export interface BookingField {
@@ -34,7 +35,16 @@ export interface RecurringEvent {
   until?: string;
 }
 
-export interface EventTypeWithParsedFields extends Omit<EventType, 'locations' | 'metadata' | 'bookingFields' | 'bookingLimits' | 'durationLimits' | 'recurringEvent'> {
+export interface EventTypeWithParsedFields
+  extends Omit<
+    EventType,
+    | "locations"
+    | "metadata"
+    | "bookingFields"
+    | "bookingLimits"
+    | "durationLimits"
+    | "recurringEvent"
+  > {
   locations?: LocationObject[];
   metadata?: Record<string, unknown>;
   bookingFields?: BookingField[];
@@ -45,4 +55,9 @@ export interface EventTypeWithParsedFields extends Omit<EventType, 'locations' |
 
 export interface FormData extends Partial<EventTypeWithParsedFields> {
   slugManuallySet?: boolean;
+  is_paid?: boolean;
+  deposit_cents?: number;
+  require_agreement?: boolean;
+  agreement_text?: string;
+  allow_cancellation?: boolean;
 }

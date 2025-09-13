@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase-browser";
 import {
   Payment,
+  PaymentWithBooking,
   BookingWithClient,
   Availability,
   EventTypeWithParsedFields,
@@ -253,7 +254,7 @@ export function usePopularCategories() {
 
 // Recent payments
 export function useRecentPayments(limit: number = 10) {
-  const [data, setData] = useState<Payment[]>([]);
+  const [data, setData] = useState<PaymentWithBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

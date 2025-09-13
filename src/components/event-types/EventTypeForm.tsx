@@ -14,6 +14,7 @@ import { EventTypeAvailabilityForm } from "./EventTypeAvailabilityForm";
 import { EventTypeBookingForm } from "./EventTypeBookingForm";
 import { EventTypeAdvancedForm } from "./EventTypeAdvancedForm";
 import { type EventType } from "@/db/schema";
+import { FormData } from "@/types/event-types";
 
 interface LocationObject {
   type: string;
@@ -82,7 +83,7 @@ export function EventTypeForm({
 }: EventTypeFormProps) {
   const isEditing = !!eventType;
 
-  const getInitialFormData = (): Partial<EventTypeWithParsedFields> => ({
+  const getInitialFormData = (): FormData => ({
     title: "",
     slug: "",
     description: "",
@@ -109,14 +110,12 @@ export function EventTypeForm({
     bookingFields: [],
     bookingLimits: {},
     durationLimits: {},
-    recurringEvent: null,
+    recurringEvent: undefined,
     metadata: {},
     allow_cancellation: true,
   });
 
-  const [formData, setFormData] = useState<Partial<EventTypeWithParsedFields>>(
-    getInitialFormData()
-  );
+  const [formData, setFormData] = useState<FormData>(getInitialFormData());
 
   // Sync form data when eventType changes
   useEffect(() => {
@@ -187,7 +186,7 @@ export function EventTypeForm({
             bookingFields: [],
             bookingLimits: {},
             durationLimits: {},
-            recurringEvent: null,
+            recurringEvent: undefined,
             metadata: {},
           });
           setActiveTab("basic");

@@ -1,24 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
-    // Disable ESLint during build to prevent deployment blocking
-    ignoreDuringBuilds: true,
+    // Allow build to complete but show ESLint warnings
+    ignoreDuringBuilds: false,
   },
   typescript: {
-    // Disable type checking during build to prevent deployment blocking
-    ignoreBuildErrors: true,
+    // Allow build to complete but show TypeScript warnings
+    ignoreBuildErrors: false,
   },
-  experimental: {
-    // Enable experimental features if needed
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
-      },
-    },
-  },
-}
+  // Remove deprecated experimental.turbo config
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

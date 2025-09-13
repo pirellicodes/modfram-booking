@@ -15,10 +15,11 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { Users, Repeat, Settings, Clock } from "lucide-react";
 import { EventTypeWithParsedFields } from "@/lib/types";
+import { RecurringEvent, FormData } from "@/types/event-types";
 
 interface EventTypeAdvancedFormProps {
-  formData: Partial<EventTypeWithParsedFields>;
-  setFormData: (data: Partial<EventTypeWithParsedFields>) => void;
+  formData: FormData;
+  setFormData: (data: FormData) => void;
 }
 
 export function EventTypeAdvancedForm({
@@ -32,12 +33,15 @@ export function EventTypeAdvancedForm({
     setFormData({ ...formData, [field]: value });
   };
 
-  const updateRecurringEvent = (field: string, value: unknown) => {
+  const updateRecurringEvent = (
+    field: keyof RecurringEvent,
+    value: unknown
+  ) => {
     const recurring = { ...formData.recurringEvent };
     if (value === null || value === "" || value === false) {
       delete recurring[field];
     } else {
-      recurring[field] = value;
+      (recurring as Record<string, unknown>)[field] = value;
     }
     updateField(
       "recurringEvent",
@@ -98,7 +102,7 @@ export function EventTypeAdvancedForm({
                 <div>
                   <Label>Show Attendees</Label>
                   <p className="text-sm text-muted-foreground">
-                    Display other attendees' names to bookers
+                    Display other attendees&apos; names to bookers
                   </p>
                 </div>
                 <Switch
@@ -391,7 +395,7 @@ export function EventTypeAdvancedForm({
                   const parsed = JSON.parse(e.target.value);
                   updateField("metadata", parsed);
                 } catch {
-                  // Invalid JSON - don't update
+                  // Invalid JSON - don&apos;t update
                 }
               }}
               placeholder='{\n  "customField": "value",\n  "integrations": {\n    "zoom": true\n  }\n}'

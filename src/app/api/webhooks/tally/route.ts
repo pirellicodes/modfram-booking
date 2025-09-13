@@ -5,7 +5,7 @@ import { headers } from "next/headers";
 export async function POST(request: NextRequest) {
   try {
     // Verify webhook signature (optional but recommended)
-    const headersList = headers();
+    const headersList = await headers();
     const signature = headersList.get("tally-signature");
     // TODO: Implement signature verification for webhook security
 

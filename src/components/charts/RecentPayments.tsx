@@ -20,15 +20,27 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { CreditCard, ArrowUpRight } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import type { Payment } from "@/types";
 
-const statusColors = {
+interface RecentPaymentsProps {
+  className?: string;
+  limit?: number;
+}
+
+const statusColors: Record<string, string> = {
+  requires_payment_method: "bg-gray-500/10 text-gray-700 hover:bg-gray-500/20",
+  requires_confirmation: "bg-blue-500/10 text-blue-700 hover:bg-blue-500/20",
+  processing: "bg-yellow-500/10 text-yellow-700 hover:bg-yellow-500/20",
   succeeded: "bg-green-500/10 text-green-700 hover:bg-green-500/20",
-  pending: "bg-yellow-500/10 text-yellow-700 hover:bg-yellow-500/20",
   failed: "bg-red-500/10 text-red-700 hover:bg-red-500/20",
+  pending: "bg-yellow-500/10 text-yellow-700 hover:bg-yellow-500/20", // Legacy status
 } as const;
 
-export function RecentPayments() {
-  const { data, loading, error } = useRecentPayments(10);
+export function RecentPayments({
+  className,
+  limit = 10,
+}: RecentPaymentsProps = {}) {
+  const { data, loading, error } = useRecentPayments(limit);
 
   if (loading) {
     return (
@@ -120,10 +132,11 @@ export function RecentPayments() {
           <TableBody>
             {data.map((payment) => {
               // Handle potentially different data structures
-              const client = payment.bookings?.clients || {
-                name: "Unknown",
-                email: "unknown@example.com",
-              };
+              const client = payment.bookings?.client ||
+                payment.bookings?.clients || {
+                  name: "Unknown",
+                  email: "unknown@example.com",
+                };
               const booking = payment.bookings || {
                 session_type: "Unknown",
                 category: null,

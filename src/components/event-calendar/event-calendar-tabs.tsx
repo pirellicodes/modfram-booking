@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import React, { useState, useRef, useTransition, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { cn } from '@/lib/utils';
-import { CalendarViewType } from '@/types/event';
-import { MoreHorizontal, ChevronDown } from 'lucide-react';
+import React, { useState, useRef, useTransition, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
+import { CalendarViewType } from "@/types/event";
+import { MoreHorizontal, ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { parseAsInteger, parseAsString, useQueryState } from 'nuqs';
-import { useEventCalendarStore } from '@/hooks/use-event';
+} from "@/components/ui/dropdown-menu";
+import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
+import { useEventCalendarStore } from "@/hooks/use-event";
 
 interface CalendarTabsProps {
   viewType: CalendarViewType;
@@ -29,24 +29,24 @@ type TabConfig = {
 
 const tabsConfig: TabConfig[] = [
   {
-    label: 'Day',
+    label: "Day",
     value: CalendarViewType.DAY,
   },
   {
-    label: 'Days',
+    label: "Days",
     value: CalendarViewType.DAYS,
     hasDropdown: true,
   },
   {
-    label: 'Week',
+    label: "Week",
     value: CalendarViewType.WEEK,
   },
   {
-    label: 'Month',
+    label: "Month",
     value: CalendarViewType.MONTH,
   },
   {
-    label: 'Year',
+    label: "Year",
     value: CalendarViewType.YEAR,
   },
 ];
@@ -54,8 +54,8 @@ const tabsConfig: TabConfig[] = [
 const daysOptions = [3, 5, 7, 10, 14, 31];
 
 const transition = {
-  type: 'tween',
-  ease: 'easeOut',
+  type: "tween" as const,
+  ease: "easeOut" as const,
   duration: 0.15,
 };
 
@@ -69,14 +69,14 @@ const getHoverAnimationProps = (hoveredRect: DOMRect, navRect: DOMRect) => ({
 export function EventCalendarTabs({
   viewType,
   onChange,
-  className = '',
+  className = "",
   disabledViews = [],
 }: CalendarTabsProps) {
   const desktopButtonRefs = useRef<(HTMLButtonElement | null)[]>(
-    new Array(tabsConfig.length).fill(null),
+    new Array(tabsConfig.length).fill(null)
   );
   const mobileButtonRefs = useRef<(HTMLButtonElement | null)[]>(
-    new Array(tabsConfig.length).fill(null),
+    new Array(tabsConfig.length).fill(null)
   );
   const navRef = useRef<HTMLDivElement>(null);
   const mobileNavRef = useRef<HTMLDivElement>(null);
@@ -91,27 +91,27 @@ export function EventCalendarTabs({
   const { daysCount: storeDaysCount, setDaysCount: setStoreDaysCount } =
     useEventCalendarStore();
   const [, setQueryDaysCount] = useQueryState(
-    'daysCount',
+    "daysCount",
     parseAsInteger.withDefault(7).withOptions({
       shallow: false,
       throttleMs: 3,
       startTransition,
-    }),
+    })
   );
   const [, setView] = useQueryState(
-    'view',
+    "view",
     parseAsString.withOptions({
       shallow: false,
       throttleMs: 3,
       startTransition,
-    }),
+    })
   );
 
   const visibleTabs = tabsConfig.filter(
-    (tab) => !disabledViews.includes(tab.value),
+    (tab) => !disabledViews.includes(tab.value)
   );
   const selectedTabIndex = visibleTabs.findIndex(
-    (tab) => tab.value === viewType,
+    (tab) => tab.value === viewType
   );
   const [primaryTabs, secondaryTabs] = useMemo(() => {
     const primary = visibleTabs.slice(0, 2);
@@ -121,10 +121,10 @@ export function EventCalendarTabs({
 
   const hasSecondaryTabs = secondaryTabs.length > 0;
   const primarySelectedTabIndex = primaryTabs.findIndex(
-    (tab) => tab.value === viewType,
+    (tab) => tab.value === viewType
   );
   const isSecondaryTabActive = secondaryTabs.some(
-    (tab) => tab.value === viewType,
+    (tab) => tab.value === viewType
   );
 
   const navRect = navRef.current?.getBoundingClientRect();
@@ -153,7 +153,7 @@ export function EventCalendarTabs({
   const handleTabClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     const tabValue = e.currentTarget.dataset.value as CalendarViewType;
-    if (e.currentTarget.dataset.dropdown !== 'true') {
+    if (e.currentTarget.dataset.dropdown !== "true") {
       updateView(tabValue);
     }
   };
@@ -170,12 +170,12 @@ export function EventCalendarTabs({
       await setQueryDaysCount(days);
       updateView(CalendarViewType.DAYS);
     } catch (error) {
-      console.error('Failed to update URL state:', error);
+      console.error("Failed to update URL state:", error);
     }
   };
 
   return (
-    <div className={cn('border-border relative border-b', className)}>
+    <div className={cn("border-border relative border-b", className)}>
       <div
         ref={navRef}
         className="relative z-0 hidden items-center justify-start py-2 md:flex"
@@ -198,12 +198,12 @@ export function EventCalendarTabs({
                     onPointerEnter={() => setHoveredTabIndex(i)}
                     onFocus={() => setHoveredTabIndex(i)}
                     className={cn(
-                      'relative z-20 flex h-8 cursor-pointer items-center gap-1 rounded-md bg-transparent px-4 text-sm select-none',
+                      "relative z-20 flex h-8 cursor-pointer items-center gap-1 rounded-md bg-transparent px-4 text-sm select-none",
                       isActive
-                        ? 'text-foreground font-medium'
-                        : 'text-muted-foreground',
+                        ? "text-foreground font-medium"
+                        : "text-muted-foreground",
                       disabledViews.includes(tab.value) &&
-                        'cursor-not-allowed opacity-50',
+                        "cursor-not-allowed opacity-50"
                     )}
                     aria-selected={isActive}
                     role="tab"
@@ -218,8 +218,8 @@ export function EventCalendarTabs({
                       key={option}
                       onClick={() => handleDaysOptionClick(option)}
                       className={cn(
-                        'cursor-pointer',
-                        storeDaysCount === option && 'bg-muted font-medium',
+                        "cursor-pointer",
+                        storeDaysCount === option && "bg-muted font-medium"
                       )}
                     >
                       {option} hari
@@ -242,12 +242,12 @@ export function EventCalendarTabs({
               onPointerEnter={() => setHoveredTabIndex(i)}
               onFocus={() => setHoveredTabIndex(i)}
               className={cn(
-                'relative z-20 flex h-8 cursor-pointer items-center rounded-md bg-transparent px-4 text-sm select-none',
+                "relative z-20 flex h-8 cursor-pointer items-center rounded-md bg-transparent px-4 text-sm select-none",
                 isActive
-                  ? 'text-foreground font-medium'
-                  : 'text-muted-foreground',
+                  ? "text-foreground font-medium"
+                  : "text-muted-foreground",
                 disabledViews.includes(tab.value) &&
-                  'cursor-not-allowed opacity-50',
+                  "cursor-not-allowed opacity-50"
               )}
               aria-selected={isActive}
               role="tab"
@@ -314,12 +314,12 @@ export function EventCalendarTabs({
                     onPointerEnter={() => setHoveredMobileTabIndex(i)}
                     onFocus={() => setHoveredMobileTabIndex(i)}
                     className={cn(
-                      'relative z-20 flex h-8 cursor-pointer items-center gap-1 rounded-md bg-transparent px-4 text-sm select-none',
+                      "relative z-20 flex h-8 cursor-pointer items-center gap-1 rounded-md bg-transparent px-4 text-sm select-none",
                       isActive
-                        ? 'text-foreground font-medium'
-                        : 'text-muted-foreground',
+                        ? "text-foreground font-medium"
+                        : "text-muted-foreground",
                       disabledViews.includes(tab.value) &&
-                        'cursor-not-allowed opacity-50',
+                        "cursor-not-allowed opacity-50"
                     )}
                     aria-selected={isActive}
                     role="tab"
@@ -334,8 +334,8 @@ export function EventCalendarTabs({
                       key={option}
                       onClick={() => handleDaysOptionClick(option)}
                       className={cn(
-                        'cursor-pointer',
-                        storeDaysCount === option && 'bg-muted font-medium',
+                        "cursor-pointer",
+                        storeDaysCount === option && "bg-muted font-medium"
                       )}
                     >
                       {option} hari
@@ -358,12 +358,12 @@ export function EventCalendarTabs({
               onPointerEnter={() => setHoveredMobileTabIndex(i)}
               onFocus={() => setHoveredMobileTabIndex(i)}
               className={cn(
-                'relative z-20 flex h-8 cursor-pointer items-center rounded-md bg-transparent px-4 text-sm select-none',
+                "relative z-20 flex h-8 cursor-pointer items-center rounded-md bg-transparent px-4 text-sm select-none",
                 isActive
-                  ? 'text-foreground font-medium'
-                  : 'text-muted-foreground',
+                  ? "text-foreground font-medium"
+                  : "text-muted-foreground",
                 disabledViews.includes(tab.value) &&
-                  'cursor-not-allowed opacity-50',
+                  "cursor-not-allowed opacity-50"
               )}
               aria-selected={isActive}
               role="tab"
@@ -415,11 +415,11 @@ export function EventCalendarTabs({
               <motion.button
                 ref={dropdownButtonRef}
                 className={cn(
-                  'text-muted-foreground relative z-20 ml-3 flex items-center justify-center rounded-md px-3 py-2 text-sm',
-                  isSecondaryTabActive && 'text-foreground font-medium',
+                  "text-muted-foreground relative z-20 ml-3 flex items-center justify-center rounded-md px-3 py-2 text-sm",
+                  isSecondaryTabActive && "text-foreground font-medium"
                 )}
                 whileHover={{
-                  backgroundColor: 'var(--muted)',
+                  backgroundColor: "var(--muted)",
                   transition: { duration: 0.2 },
                 }}
               >
@@ -434,8 +434,8 @@ export function EventCalendarTabs({
                   onClick={handleDropdownClick}
                   disabled={disabledViews.includes(tab.value)}
                   className={cn(
-                    'cursor-pointer',
-                    viewType === tab.value && 'bg-muted font-medium',
+                    "cursor-pointer",
+                    viewType === tab.value && "bg-muted font-medium"
                   )}
                 >
                   {tab.label}

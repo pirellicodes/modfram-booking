@@ -2,7 +2,7 @@
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+
 import {
   Select,
   SelectContent,
@@ -15,17 +15,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, X, DollarSign } from "lucide-react";
 import { EventTypeWithParsedFields } from "@/lib/types";
+import { BookingLimits, FormData } from "@/types/event-types";
 
 interface EventTypeBookingFormProps {
-  formData: Partial<EventTypeWithParsedFields>;
-  setFormData: (data: Partial<EventTypeWithParsedFields>) => void;
+  formData: FormData;
+  setFormData: (data: FormData) => void;
 }
 
 export function EventTypeBookingForm({
   formData,
   setFormData,
 }: EventTypeBookingFormProps) {
-  const updateField = (field: string, value: any) => {
+  const updateField = (
+    field: keyof EventTypeWithParsedFields,
+    value: unknown
+  ) => {
     setFormData({ ...formData, [field]: value });
   };
 
@@ -43,7 +47,7 @@ export function EventTypeBookingForm({
     updateField("bookingFields", newFields);
   };
 
-  const updateBookingField = (index: number, field: string, value: any) => {
+  const updateBookingField = (index: number, field: string, value: unknown) => {
     const newFields = [...(formData.bookingFields || [])];
     newFields[index] = { ...newFields[index], [field]: value };
     updateField("bookingFields", newFields);
@@ -51,17 +55,17 @@ export function EventTypeBookingForm({
 
   const removeBookingField = (index: number) => {
     const newFields = formData.bookingFields?.filter(
-      (_: any, i: number) => i !== index
+      (_, i: number) => i !== index
     );
     updateField("bookingFields", newFields);
   };
 
-  const updateBookingLimit = (period: string, value: number) => {
+  const updateBookingLimit = (period: keyof BookingLimits, value: number) => {
     const limits = { ...formData.bookingLimits };
     if (value === 0 || !value) {
       delete limits[period];
     } else {
-      limits[period] = value;
+      (limits as Record<string, unknown>)[period] = value;
     }
     updateField("bookingLimits", limits);
   };
@@ -232,7 +236,8 @@ export function EventTypeBookingForm({
             <div>
               <Label>Hide Calendar Notes</Label>
               <p className="text-sm text-muted-foreground">
-                Don't show booking form responses in calendar event description
+                Don&apos;t show booking form responses in calendar event
+                description
               </p>
             </div>
             <Switch
@@ -288,7 +293,7 @@ export function EventTypeBookingForm({
             </p>
           )}
 
-          {formData.bookingFields?.map((field: any, index: number) => (
+          {formData.bookingFields?.map((field, index: number) => (
             <div key={index} className="p-4 border rounded-lg space-y-3">
               <div className="flex items-center justify-between">
                 <h4 className="font-medium">Field {index + 1}</h4>

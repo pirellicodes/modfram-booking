@@ -1,12 +1,12 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
-import { Loader2, Search } from 'lucide-react';
-import { Input } from '../ui/input';
-import { EventCard } from './ui/events';
-import { Events, TimeFormatType } from '@/types/event';
-import { ScrollArea } from '../ui/scroll-area';
-import { SearchEventFilter } from '@/lib/validations';
-import { searchEvents } from '@/app/actions';
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Loader2, Search } from "lucide-react";
+import { Input } from "../ui/input";
+import { EventCard } from "./ui/events";
+import { Events, TimeFormatType } from "@/types/event";
+import { ScrollArea } from "../ui/scroll-area";
+import { SearchEventFilter } from "@/lib/validations";
+import { searchEvents } from "@/app/actions";
 interface EventSearchDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -69,23 +69,19 @@ export const EventSearchDialog = ({
             isRepeating: options?.isRepeating,
           };
 
-          const result = await searchEvents(searchParams);
+          const result = await searchEvents(query.trim());
 
           if (abortControllerRef.current?.signal.aborted) {
             return;
           }
 
-          if (result.success) {
-            setSearchResults(result.events);
-            setTotalCount(result.totalCount);
-            setHasMore(result.hasMore);
-          } else {
-            setError(result.error || 'Failed to search events');
-            setSearchResults([]);
-          }
+          // Since searchEvents currently returns an empty array (TODO implementation)
+          setSearchResults(result);
+          setTotalCount(result.length);
+          setHasMore(false);
         } catch (err) {
-          if (err instanceof Error && err.name !== 'AbortError') {
-            setError('An error occurred while searching events');
+          if (err instanceof Error && err.name !== "AbortError") {
+            setError("An error occurred while searching events");
             setSearchResults([]);
           }
         } finally {
@@ -93,7 +89,7 @@ export const EventSearchDialog = ({
         }
       }, 300); // 300ms debounce delay
     },
-    [],
+    []
   );
 
   useEffect(() => {
@@ -144,15 +140,14 @@ export const EventSearchDialog = ({
         offset: searchResults.length,
       };
 
-      const result = await searchEvents(searchParams);
+      const result = await searchEvents(searchQuery.trim());
 
-      if (result.success) {
-        setSearchResults((prev) => [...prev, ...result.events]);
-        setHasMore(result.hasMore);
-      }
+      // Since searchEvents currently returns an empty array (TODO implementation)
+      setSearchResults((prev) => [...prev, ...result]);
+      setHasMore(false);
     } catch (err) {
       console.error(err);
-      setError('Failed to load more events');
+      setError("Failed to load more events");
     } finally {
       setIsLoading(false);
     }
@@ -178,7 +173,7 @@ export const EventSearchDialog = ({
             <div className="text-muted-foreground text-sm">
               {totalCount > 0 ? (
                 <>
-                  Found {totalCount} event{totalCount !== 1 ? 's' : ''} matching
+                  Found {totalCount} event{totalCount !== 1 ? "s" : ""} matching
                   &quot;{searchQuery}&quot;
                   {hasMore && ` • Showing first ${searchResults.length}`}
                 </>
@@ -224,7 +219,7 @@ export const EventSearchDialog = ({
                             Loading more...
                           </>
                         ) : (
-                          'Load more events'
+                          "Load more events"
                         )}
                       </button>
                     </div>

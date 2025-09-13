@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useBookings, Booking } from "@/hooks/use-bookings";
+import { useBookings } from "@/hooks/use-bookings";
+import { BookingWithClient } from "@/lib/types";
 import {
   Card,
   CardContent,
@@ -62,12 +63,13 @@ import {
 
 export function Bookings() {
   const { data: bookings, loading, error, refetch } = useBookings();
-  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [selectedBooking, setSelectedBooking] =
+    useState<BookingWithClient | null>(null);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const getBookingStatus = (booking: Booking) => {
+  const getBookingStatus = (booking: BookingWithClient) => {
     const now = new Date();
     const startTime = parseISO(booking.start_time);
     const endTime = parseISO(booking.end_time);
@@ -153,7 +155,7 @@ export function Bookings() {
     );
   }, [bookings, activeTab, searchQuery]);
 
-  const handleViewDetails = (booking: Booking) => {
+  const handleViewDetails = (booking: BookingWithClient) => {
     setSelectedBooking(booking);
     setIsDetailsDialogOpen(true);
   };

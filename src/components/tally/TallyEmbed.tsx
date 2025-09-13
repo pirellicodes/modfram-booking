@@ -1,14 +1,19 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface TallyEmbedProps {
   formId: string;
   mode?: "inline" | "modal";
   isOpen?: boolean;
   onClose?: () => void;
-  onSubmit?: (data: any) => void;
+  onSubmit?: (data: Record<string, unknown>) => void;
   className?: string;
   width?: string;
   height?: string;
@@ -19,7 +24,7 @@ declare global {
   interface Window {
     Tally?: {
       loadEmbeds: () => void;
-      openPopup: (formId: string, options?: any) => void;
+      openPopup: (formId: string, options?: Record<string, unknown>) => void;
     };
   }
 }
@@ -63,7 +68,10 @@ export function TallyEmbed({
     const handleMessage = (event: MessageEvent) => {
       if (event.origin !== "https://tally.so") return;
 
-      if (event.data.type === "TALLY_FORM_SUBMIT" && event.data.formId === formId) {
+      if (
+        event.data.type === "TALLY_FORM_SUBMIT" &&
+        event.data.formId === formId
+      ) {
         if (onSubmit) {
           onSubmit(event.data.payload);
         }
@@ -135,10 +143,13 @@ export function TallyEmbed({
 
 // Hook for using Tally forms in booking flow
 export function useTallyForm() {
-  const openTallyModal = (formId: string, options?: {
-    hiddenFields?: Record<string, string>;
-    onSubmit?: (data: any) => void;
-  }) => {
+  const openTallyModal = (
+    formId: string,
+    options?: {
+      hiddenFields?: Record<string, string>;
+      onSubmit?: (data: Record<string, unknown>) => void;
+    }
+  ) => {
     if (window.Tally) {
       window.Tally.openPopup(formId, {
         hideTitle: true,

@@ -3,21 +3,21 @@
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 
-function sb() {
-  const store = cookies();
+async function sb() {
+  const store = await cookies();
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get: (name: string) => store.get(name)?.value,
-        set: (
-          name: string,
-          value: string,
-          options: Parameters<typeof store.set>[0]
-        ) => store.set({ name, value, ...options }),
-        remove: (name: string, options: Parameters<typeof store.set>[0]) =>
-          store.set({ name, value: "", ...options, maxAge: 0 }),
+        getAll() {
+          return store.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            store.set(name, value, options)
+          );
+        },
       },
     }
   );
@@ -31,7 +31,7 @@ export type NewEvent = {
 };
 
 export async function createEvent(input: NewEvent) {
-  const supabase = sb();
+  const supabase = await sb();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -59,7 +59,7 @@ export type UpsertAvailability = {
 };
 
 export async function upsertAvailability(params: UpsertAvailability) {
-  const supabase = sb();
+  const supabase = await sb();
   const {
     data: { user },
   } = await supabase.auth.getUser();

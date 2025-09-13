@@ -14,11 +14,11 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, X, MapPin, Video, Users } from "lucide-react";
-import { EventTypeWithParsedFields } from "@/lib/types";
+import type { EventTypeFormData } from "@/types/forms";
 
 interface EventTypeBasicFormProps {
-  formData: Partial<EventTypeWithParsedFields>;
-  setFormData: (data: Partial<EventTypeWithParsedFields>) => void;
+  formData: EventTypeFormData;
+  setFormData: (data: EventTypeFormData) => void;
 }
 
 function slugify(text: string): string {
@@ -34,11 +34,8 @@ export function EventTypeBasicForm({
   formData,
   setFormData,
 }: EventTypeBasicFormProps) {
-  const updateField = (
-    field: keyof EventTypeWithParsedFields,
-    value: unknown
-  ) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+  const updateField = (field: keyof EventTypeFormData, value: unknown) => {
+    setFormData({ ...formData, [field]: value });
   };
 
   const handleTitleChange = (title: string) => {
@@ -251,7 +248,7 @@ export function EventTypeBasicForm({
                 )}
               </div>
 
-              {formData.locations.length > 1 && (
+              {formData.locations && formData.locations.length > 1 && (
                 <Button
                   variant="ghost"
                   size="sm"
