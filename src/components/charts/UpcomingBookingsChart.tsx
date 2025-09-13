@@ -14,7 +14,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Pie, PieChart } from "recharts";
+import { RadialBar, RadialBarChart } from "recharts";
 import { Calendar, TrendingUp } from "lucide-react";
 
 const chartConfig = {
@@ -35,7 +35,9 @@ export function UpcomingBookingsChart() {
             <Calendar className="h-5 w-5" />
             Upcoming Bookings
           </CardTitle>
-          <CardDescription>Bookings scheduled for the next 30 days</CardDescription>
+          <CardDescription>
+            Bookings scheduled for the next 30 days
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-[300px] flex items-center justify-center">
@@ -54,7 +56,9 @@ export function UpcomingBookingsChart() {
             <Calendar className="h-5 w-5" />
             Upcoming Bookings
           </CardTitle>
-          <CardDescription>Bookings scheduled for the next 30 days</CardDescription>
+          <CardDescription>
+            Bookings scheduled for the next 30 days
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-[300px] flex items-center justify-center text-muted-foreground">
@@ -66,9 +70,10 @@ export function UpcomingBookingsChart() {
   }
 
   // Calculate percentage based on total bookings
-  const percentage = stats.totalBookings > 0
-    ? Math.round((stats.upcomingBookings / stats.totalBookings) * 100)
-    : 0;
+  const percentage =
+    stats.totalBookings > 0
+      ? Math.round((stats.upcomingBookings / stats.totalBookings) * 100)
+      : 0;
 
   const chartData = [
     {
@@ -76,7 +81,7 @@ export function UpcomingBookingsChart() {
       value: stats.upcomingBookings,
       total: stats.totalBookings,
       fill: "var(--color-upcoming)",
-    }
+    },
   ];
 
   // For radial bar chart, we need to show progress
@@ -85,7 +90,7 @@ export function UpcomingBookingsChart() {
       name: "progress",
       value: percentage,
       fill: "hsl(var(--chart-3))",
-    }
+    },
   ];
 
   return (
@@ -129,9 +134,7 @@ export function UpcomingBookingsChart() {
             <div className="text-3xl font-bold text-foreground">
               {stats.upcomingBookings}
             </div>
-            <div className="text-sm text-muted-foreground">
-              Upcoming
-            </div>
+            <div className="text-sm text-muted-foreground">Upcoming</div>
           </div>
         </div>
 
@@ -141,17 +144,13 @@ export function UpcomingBookingsChart() {
             <div className="text-2xl font-semibold text-foreground">
               {stats.totalBookings}
             </div>
-            <div className="text-sm text-muted-foreground">
-              Total Bookings
-            </div>
+            <div className="text-sm text-muted-foreground">Total Bookings</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-semibold text-foreground">
               {percentage}%
             </div>
-            <div className="text-sm text-muted-foreground">
-              Upcoming Ratio
-            </div>
+            <div className="text-sm text-muted-foreground">Upcoming Ratio</div>
           </div>
         </div>
 
@@ -160,8 +159,7 @@ export function UpcomingBookingsChart() {
           <span className="text-muted-foreground">
             {stats.upcomingBookings > 0
               ? `${stats.upcomingBookings} bookings in the next 30 days`
-              : "No upcoming bookings scheduled"
-            }
+              : "No upcoming bookings scheduled"}
           </span>
         </div>
       </CardContent>

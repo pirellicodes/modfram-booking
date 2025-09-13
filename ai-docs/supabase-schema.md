@@ -42,11 +42,35 @@ create table if not exists public.payments (
   status text not null default 'requires_payment_method',
   created_at timestamptz default now()
 );
+create table if not exists public.tally_submissions (
+  id uuid primary key default gen_random_uuid(),
+  event_id text not null unique,
+  form_id text not null,
+  form_name text,
+  respondent_id text,
+  booking_draft_id uuid references public.bookings(id) on delete set null,
+  fields jsonb not null default '{}',
+  raw_payload jsonb not null default '{}',
+  created_at timestamptz default now()
+);
+create table if not exists public.user_integrations (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null,
+  integration_type text not null,
+  access_token text,
+  refresh_token text,
+  token_expires_at timestamptz,
+  integration_data jsonb default '{}',
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
 alter table public.clients enable row level security;
 alter table public.events enable row level security;
 alter table public.availability enable row level security;
 alter table public.bookings enable row level security;
 alter table public.payments enable row level security;
+alter table public.tally_submissions enable row level security;
+alter table public.user_integrations enable row level security;
 create policy "owner_select" on public.clients for select using (auth.uid() = user_id);
 create policy "owner_crud"   on public.clients for all    using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "owner_select" on public.events  for select using (auth.uid() = user_id);
@@ -57,3 +81,13 @@ create policy "owner_select" on public.bookings for select using (auth.uid() = u
 create policy "owner_crud"   on public.bookings for all    using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "owner_select" on public.payments for select using (auth.uid() = user_id);
 create policy "owner_crud"   on public.payments for all    using (auth.uid() = user_id) with check (auth.uid() = user_id);
+-- Tally submissions are linked via booking, so we check ownership through booking's user_id
+create policy "owner_via_booking" on public.tally_submissions for all using (
+  exists (
+    select 1 from public.bookings 
+    where bookings.id = tally_submissions.booking_draft_id 
+    and bookings.user_id = auth.uid()
+  )
+);
+create policy "owner_select" on public.user_integrations for select using (auth.uid() = user_id);
+create policy "owner_crud"   on public.user_integrations for all    using (auth.uid() = user_id) with check (auth.uid() = user_id);

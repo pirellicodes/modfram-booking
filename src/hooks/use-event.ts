@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 import {
   CalendarViewConfigs,
   CalendarViewType,
@@ -11,9 +11,9 @@ import {
   ViewModeType,
   WeekViewConfig,
   YearViewConfig,
-} from '@/types/event';
-import { EventTypes } from '@/db/schema';
-import { persist } from 'zustand/middleware';
+} from "@/types/event";
+import { EventTypes } from "@/db/schema";
+import { persist } from "zustand/middleware";
 
 const DEFAULT_VIEW_CONFIGS: CalendarViewConfigs = {
   day: {
@@ -54,6 +54,7 @@ const DEFAULT_VIEW_CONFIGS: CalendarViewConfigs = {
 
 interface EventCalendarState {
   selectedEvent: EventTypes | null;
+  selectedDate: Date;
   currentView: CalendarViewType;
   viewMode: ViewModeType;
   timeFormat: TimeFormatType;
@@ -74,6 +75,7 @@ interface EventCalendarState {
   quickAddData: QuickAddDialogData;
   isQuickAddDialogOpen: boolean;
   setLoading: (loading: boolean) => void;
+  setSelectedDate: (date: Date) => void;
   setView: (type: CalendarViewType) => void;
   setMode: (type: ViewModeType) => void;
   setTimeFormat: (format: TimeFormatType) => void;
@@ -94,7 +96,7 @@ interface EventCalendarState {
     event: EventTypes,
     position?: EventPosition,
     leftOffset?: number,
-    rightOffset?: number,
+    rightOffset?: number
   ) => void;
   closeEventDialog: () => void;
   openDayEventsDialog: (date: Date, events: EventTypes[]) => void;
@@ -107,10 +109,11 @@ export const useEventCalendarStore = create<EventCalendarState>()(
   persist(
     (set, get) => ({
       selectedEvent: null,
+      selectedDate: new Date(),
       currentView: CalendarViewType.DAY,
       viewMode: ViewModeType.CALENDAR,
       timeFormat: TimeFormatType.HOUR_24,
-      locale: 'en-US',
+      locale: "en-US",
       firstDayOfWeek: 0, // sunday
       daysCount: 7,
       loading: false,
@@ -132,6 +135,7 @@ export const useEventCalendarStore = create<EventCalendarState>()(
       },
       isQuickAddDialogOpen: false,
       setLoading: (loading) => set({ loading }),
+      setSelectedDate: (date) => set({ selectedDate: date }),
       updateDayViewConfig: (config) =>
         set((state) => ({
           viewSettings: {
@@ -217,8 +221,8 @@ export const useEventCalendarStore = create<EventCalendarState>()(
         set({
           quickAddData: {
             date: data.date || new Date(),
-            startTime: data.startTime || '12:00',
-            endTime: data.endTime || '13:00',
+            startTime: data.startTime || "12:00",
+            endTime: data.endTime || "13:00",
             position: data.position,
           },
           isQuickAddDialogOpen: true,
@@ -243,8 +247,9 @@ export const useEventCalendarStore = create<EventCalendarState>()(
       setDaysCount: (count) => set({ daysCount: count }),
     }),
     {
-      name: 'event-calendar',
+      name: "event-calendar",
       partialize: (state) => ({
+        selectedDate: state.selectedDate,
         currentView: state.currentView,
         viewMode: state.viewMode,
         timeFormat: state.timeFormat,
@@ -253,6 +258,6 @@ export const useEventCalendarStore = create<EventCalendarState>()(
         daysCount: state.daysCount,
         viewSettings: state.viewSettings,
       }),
-    },
-  ),
+    }
+  )
 );

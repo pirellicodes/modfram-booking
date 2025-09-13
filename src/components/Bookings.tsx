@@ -2,7 +2,13 @@
 
 import { useState, useMemo } from "react";
 import { useBookings, Booking } from "@/hooks/use-bookings";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -45,7 +51,14 @@ import {
   SearchIcon,
   Plus,
 } from "lucide-react";
-import { format, parseISO, isAfter, isBefore, isToday, isTomorrow } from "date-fns";
+import {
+  format,
+  parseISO,
+  isAfter,
+  isBefore,
+  isToday,
+  isTomorrow,
+} from "date-fns";
 
 export function Bookings() {
   const { data: bookings, loading, error, refetch } = useBookings();
@@ -68,31 +81,36 @@ export function Bookings() {
     switch (status) {
       case "upcoming":
         return (
-          <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50">
+          <Badge
+            variant="outline"
+            className="text-blue-600 border-blue-200 bg-blue-50"
+          >
             <ClockIcon className="h-3 w-3 mr-1" />
             Upcoming
           </Badge>
         );
       case "completed":
         return (
-          <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50">
+          <Badge
+            variant="outline"
+            className="text-green-600 border-green-200 bg-green-50"
+          >
             <CheckCircleIcon className="h-3 w-3 mr-1" />
             Completed
           </Badge>
         );
       case "in-progress":
         return (
-          <Badge variant="outline" className="text-amber-600 border-amber-200 bg-amber-50">
+          <Badge
+            variant="outline"
+            className="text-amber-600 border-amber-200 bg-amber-50"
+          >
             <RefreshCwIcon className="h-3 w-3 mr-1" />
             In Progress
           </Badge>
         );
       default:
-        return (
-          <Badge variant="outline">
-            {status}
-          </Badge>
-        );
+        return <Badge variant="outline">{status}</Badge>;
     }
   };
 
@@ -106,23 +124,32 @@ export function Bookings() {
         if (activeTab === "upcoming") return status === "upcoming";
         if (activeTab === "completed") return status === "completed";
         if (activeTab === "today") return isToday(parseISO(booking.start_time));
-        if (activeTab === "tomorrow") return isTomorrow(parseISO(booking.start_time));
+        if (activeTab === "tomorrow")
+          return isTomorrow(parseISO(booking.start_time));
         return true;
       });
     }
 
     // Filter by search query
     if (searchQuery) {
-      filtered = filtered.filter((booking) =>
-        booking.session_type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        booking.client?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        booking.client?.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        booking.category?.toLowerCase().includes(searchQuery.toLowerCase())
+      filtered = filtered.filter(
+        (booking) =>
+          booking.session_type
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          booking.client?.name
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          booking.client?.email
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          booking.category?.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
-    return filtered.sort((a, b) =>
-      new Date(b.start_time).getTime() - new Date(a.start_time).getTime()
+    return filtered.sort(
+      (a, b) =>
+        new Date(b.start_time).getTime() - new Date(a.start_time).getTime()
     );
   }, [bookings, activeTab, searchQuery]);
 
@@ -184,10 +211,11 @@ export function Bookings() {
 
   if (loading) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-6">
+        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Bookings</h1>
+            <h2 className="text-3xl font-bold tracking-tight">Bookings</h2>
             <p className="text-muted-foreground">
               View and manage all your photography session bookings.
             </p>
@@ -204,10 +232,11 @@ export function Bookings() {
 
   if (error) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-6">
+        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Bookings</h1>
+            <h2 className="text-3xl font-bold tracking-tight">Bookings</h2>
             <p className="text-muted-foreground">
               View and manage all your photography session bookings.
             </p>
@@ -233,7 +262,7 @@ export function Bookings() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Bookings</h1>
+          <h2 className="text-3xl font-bold tracking-tight">Bookings</h2>
           <p className="text-muted-foreground">
             View and manage all your photography session bookings.
           </p>
@@ -268,20 +297,29 @@ export function Bookings() {
       </div>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="space-y-4"
+      >
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="all">All ({bookings.length})</TabsTrigger>
           <TabsTrigger value="upcoming">
-            Upcoming ({bookings.filter(b => getBookingStatus(b) === "upcoming").length})
+            Upcoming (
+            {bookings.filter((b) => getBookingStatus(b) === "upcoming").length})
           </TabsTrigger>
           <TabsTrigger value="today">
-            Today ({bookings.filter(b => isToday(parseISO(b.start_time))).length})
+            Today (
+            {bookings.filter((b) => isToday(parseISO(b.start_time))).length})
           </TabsTrigger>
           <TabsTrigger value="tomorrow">
-            Tomorrow ({bookings.filter(b => isTomorrow(parseISO(b.start_time))).length})
+            Tomorrow (
+            {bookings.filter((b) => isTomorrow(parseISO(b.start_time))).length})
           </TabsTrigger>
           <TabsTrigger value="completed">
-            Completed ({bookings.filter(b => getBookingStatus(b) === "completed").length})
+            Completed (
+            {bookings.filter((b) => getBookingStatus(b) === "completed").length}
+            )
           </TabsTrigger>
         </TabsList>
 
@@ -293,7 +331,9 @@ export function Bookings() {
                 <CardContent className="flex flex-col items-center justify-center h-64 text-center">
                   <CalendarIcon className="h-12 w-12 text-muted-foreground mb-4" />
                   <p className="text-muted-foreground">
-                    {searchQuery ? "No bookings match your search" : `No ${tab === "all" ? "" : tab} bookings found`}
+                    {searchQuery
+                      ? "No bookings match your search"
+                      : `No ${tab === "all" ? "" : tab} bookings found`}
                   </p>
                   {searchQuery && (
                     <Button
@@ -323,7 +363,10 @@ export function Bookings() {
                     {filteredBookings.map((booking) => {
                       const status = getBookingStatus(booking);
                       const startDateTime = formatDateTime(booking.start_time);
-                      const duration = formatDuration(booking.start_time, booking.end_time);
+                      const duration = formatDuration(
+                        booking.start_time,
+                        booking.end_time
+                      );
 
                       return (
                         <TableRow key={booking.id}>
@@ -346,7 +389,9 @@ export function Bookings() {
                           </TableCell>
                           <TableCell>
                             <div>
-                              <div className="font-medium">{booking.session_type}</div>
+                              <div className="font-medium">
+                                {booking.session_type}
+                              </div>
                               {booking.category && (
                                 <div className="text-sm text-muted-foreground">
                                   {booking.category}
@@ -356,7 +401,9 @@ export function Bookings() {
                           </TableCell>
                           <TableCell>
                             <div>
-                              <div className="font-medium">{startDateTime.date}</div>
+                              <div className="font-medium">
+                                {startDateTime.date}
+                              </div>
                               <div className="text-sm text-muted-foreground">
                                 {startDateTime.time}
                               </div>
@@ -365,9 +412,7 @@ export function Bookings() {
                           <TableCell>
                             <div className="font-medium">{duration}</div>
                           </TableCell>
-                          <TableCell>
-                            {getStatusBadge(status)}
-                          </TableCell>
+                          <TableCell>{getStatusBadge(status)}</TableCell>
                           <TableCell className="text-right">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
@@ -377,7 +422,9 @@ export function Bookings() {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <DropdownMenuItem onClick={() => handleViewDetails(booking)}>
+                                <DropdownMenuItem
+                                  onClick={() => handleViewDetails(booking)}
+                                >
                                   <EyeIcon className="h-4 w-4 mr-2" />
                                   View Details
                                 </DropdownMenuItem>
@@ -429,48 +476,79 @@ export function Bookings() {
 
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <label className="font-medium text-muted-foreground">Session Type</label>
+                  <label className="font-medium text-muted-foreground">
+                    Session Type
+                  </label>
                   <p className="mt-1">{selectedBooking.session_type}</p>
                 </div>
                 {selectedBooking.category && (
                   <div>
-                    <label className="font-medium text-muted-foreground">Category</label>
+                    <label className="font-medium text-muted-foreground">
+                      Category
+                    </label>
                     <p className="mt-1">{selectedBooking.category}</p>
                   </div>
                 )}
                 <div>
-                  <label className="font-medium text-muted-foreground">Date</label>
-                  <p className="mt-1">{formatDateTime(selectedBooking.start_time).date}</p>
-                </div>
-                <div>
-                  <label className="font-medium text-muted-foreground">Time</label>
+                  <label className="font-medium text-muted-foreground">
+                    Date
+                  </label>
                   <p className="mt-1">
-                    {formatDateTime(selectedBooking.start_time).time} - {formatDateTime(selectedBooking.end_time).time}
+                    {formatDateTime(selectedBooking.start_time).date}
                   </p>
                 </div>
                 <div>
-                  <label className="font-medium text-muted-foreground">Duration</label>
-                  <p className="mt-1">{formatDuration(selectedBooking.start_time, selectedBooking.end_time)}</p>
+                  <label className="font-medium text-muted-foreground">
+                    Time
+                  </label>
+                  <p className="mt-1">
+                    {formatDateTime(selectedBooking.start_time).time} -{" "}
+                    {formatDateTime(selectedBooking.end_time).time}
+                  </p>
                 </div>
                 <div>
-                  <label className="font-medium text-muted-foreground">Status</label>
-                  <p className="mt-1">{getStatusBadge(getBookingStatus(selectedBooking))}</p>
+                  <label className="font-medium text-muted-foreground">
+                    Duration
+                  </label>
+                  <p className="mt-1">
+                    {formatDuration(
+                      selectedBooking.start_time,
+                      selectedBooking.end_time
+                    )}
+                  </p>
+                </div>
+                <div>
+                  <label className="font-medium text-muted-foreground">
+                    Status
+                  </label>
+                  <p className="mt-1">
+                    {getStatusBadge(getBookingStatus(selectedBooking))}
+                  </p>
                 </div>
               </div>
 
               <div>
-                <label className="font-medium text-muted-foreground">Booking ID</label>
+                <label className="font-medium text-muted-foreground">
+                  Booking ID
+                </label>
                 <p className="mt-1 font-mono text-sm">{selectedBooking.id}</p>
               </div>
 
               <div>
-                <label className="font-medium text-muted-foreground">Created</label>
-                <p className="mt-1 text-sm">{formatDateTime(selectedBooking.created_at).fullDateTime}</p>
+                <label className="font-medium text-muted-foreground">
+                  Created
+                </label>
+                <p className="mt-1 text-sm">
+                  {formatDateTime(selectedBooking.created_at).fullDateTime}
+                </p>
               </div>
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDetailsDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsDetailsDialogOpen(false)}
+            >
               Close
             </Button>
           </DialogFooter>

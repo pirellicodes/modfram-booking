@@ -10,16 +10,18 @@ export default function AdminPagesLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SidebarProvider className="h-full">
-      <AppSidebar variant="inset" />
-      <SidebarInset className="flex flex-col h-full">
-        <SiteHeader />
-        <div className="flex-1 overflow-y-auto">
-          <div className="flex flex-col gap-4 p-4 pt-0">
-            {children}
+    <div className="flex h-screen bg-background">
+      <SidebarProvider className="h-full w-full">
+        <AppSidebar />
+        <SidebarInset className="flex flex-col h-full min-w-0 flex-1">
+          <SiteHeader />
+          <div className="flex-1 overflow-y-auto">
+            <main className="flex flex-1 flex-col gap-4 p-2 pt-4 sm:p-4 sm:pt-6 lg:p-6 lg:pt-8">
+              {children}
+            </main>
           </div>
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+        </SidebarInset>
+      </SidebarProvider>
+    </div>
   );
 }

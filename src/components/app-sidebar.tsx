@@ -17,6 +17,7 @@ import {
   CalendarDays,
   Clock,
   Camera,
+  Settings,
 } from "lucide-react";
 import { type SidebarData } from "./types";
 
@@ -35,7 +36,7 @@ const sidebarData: SidebarData = {
   ],
   navGroups: [
     {
-      title: "General",
+      title: "Overview",
       items: [
         {
           title: "Dashboard",
@@ -43,29 +44,49 @@ const sidebarData: SidebarData = {
           icon: LayoutDashboard,
         },
         {
-          title: "Insights",
-          url: "/admin/insights",
+          title: "Analytics",
+          url: "/admin/analytics",
           icon: BarChart3,
         },
-        {
-          title: "Event Types",
-          url: "/admin/event-types",
-          icon: Camera,
-        },
+      ],
+    },
+    {
+      title: "Bookings",
+      items: [
         {
           title: "Bookings",
           url: "/admin/bookings",
           icon: CalendarDays,
         },
         {
+          title: "Calendar",
+          url: "/admin/calendar",
+          icon: Calendar,
+        },
+        {
           title: "Availability",
           url: "/admin/availability",
           icon: Clock,
         },
+      ],
+    },
+    {
+      title: "Management",
+      items: [
         {
-          title: "Calendar",
-          url: "/admin/calendar",
-          icon: Calendar,
+          title: "Event Types",
+          url: "/admin/event-types",
+          icon: Camera,
+        },
+      ],
+    },
+    {
+      title: "Settings",
+      items: [
+        {
+          title: "Integrations",
+          url: "/admin/settings/integrations",
+          icon: Settings,
         },
       ],
     },
@@ -74,7 +95,7 @@ const sidebarData: SidebarData = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar variant="inset" {...props}>
+    <Sidebar variant="floating" {...props}>
       <SidebarHeader>
         <TeamSwitcher teams={sidebarData.teams} />
       </SidebarHeader>

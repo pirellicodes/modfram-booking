@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Search, Plus } from "lucide-react";
+import { Search, Plus, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { MainNav } from "@/components/main-nav";
+import { ModeToggle } from "@/components/mode-toggle";
 import { cn } from "@/lib/utils";
 import {
   CommandDialog,
@@ -51,12 +52,7 @@ export function SiteHeader({ className, fixed = true, ...props }: HeaderProps) {
 
   const getPageTitle = () => {
     if (pathname === "/admin") return "Dashboard";
-    if (
-      pathname === "/admin/insights" ||
-      pathname.startsWith("/admin/insights")
-    ) {
-      return "Insights";
-    }
+    if (pathname.startsWith("/admin/analytics")) return "Analytics";
     if (pathname.startsWith("/admin/event-types")) return "Event Types";
     if (pathname.startsWith("/admin/bookings")) return "Bookings";
     if (pathname.startsWith("/admin/availability")) return "Availability";
@@ -77,23 +73,13 @@ export function SiteHeader({ className, fixed = true, ...props }: HeaderProps) {
         className={cn(
           "group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:gap-2",
           fixed && "sticky top-0 z-50 w-full",
-          offset > 10 && fixed
-            ? "border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
-            : "border-b bg-background",
+          "bg-background",
           className
         )}
         {...props}
       >
         <div className="flex w-full items-center gap-2 px-4">
           <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 h-4" />
-
-          {/* Page Title */}
-          <div className="flex items-center gap-2">
-            <h1 className="text-lg font-semibold text-foreground">
-              {getPageTitle()}
-            </h1>
-          </div>
 
           {/* Spacer */}
           <div className="flex-1" />
@@ -112,30 +98,27 @@ export function SiteHeader({ className, fixed = true, ...props }: HeaderProps) {
               </kbd>
             </Button>
 
-            {/* Create Event Button */}
-            <Button size="sm" className="gap-2">
-              <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">Create Event</span>
-            </Button>
+            {/* Theme Toggle */}
+            <ModeToggle />
           </div>
         </div>
       </header>
 
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput placeholder="Search events, bookings, clients..." />
+        <CommandInput placeholder="Type a command or search..." />
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
           <CommandGroup heading="Quick Actions">
             <CommandItem
-              onSelect={() => runCommand(() => console.log("Create Event"))}
+              onSelect={() => runCommand(() => router.push("/admin/events"))}
             >
               <Plus className="mr-2 h-4 w-4" />
-              Create New Event Type
+              Create New Event
             </CommandItem>
             <CommandItem
-              onSelect={() => runCommand(() => console.log("View Calendar"))}
+              onSelect={() => runCommand(() => router.push("/admin/calendar"))}
             >
-              <Search className="mr-2 h-4 w-4" />
+              <Calendar className="mr-2 h-4 w-4" />
               View Calendar
             </CommandItem>
           </CommandGroup>
@@ -147,14 +130,19 @@ export function SiteHeader({ className, fixed = true, ...props }: HeaderProps) {
               Dashboard
             </CommandItem>
             <CommandItem
-              onSelect={() => runCommand(() => router.push("/admin/insights"))}
+              onSelect={() => runCommand(() => router.push("/admin/analytics"))}
             >
-              Insights
+              Analytics
             </CommandItem>
             <CommandItem
               onSelect={() => runCommand(() => router.push("/admin/bookings"))}
             >
               Bookings
+            </CommandItem>
+            <CommandItem
+              onSelect={() => runCommand(() => router.push("/admin/events"))}
+            >
+              Events
             </CommandItem>
             <CommandItem
               onSelect={() => runCommand(() => router.push("/admin/calendar"))}

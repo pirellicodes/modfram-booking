@@ -2,7 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase-browser";
-import { Payment } from "@/lib/types";
+import {
+  Payment,
+  BookingWithClient,
+  Availability,
+  EventTypeWithParsedFields,
+} from "@/lib/types";
 
 // Dashboard stats hook
 export function useDashboardStats() {
@@ -155,26 +160,24 @@ export function useRevenueBySession() {
 
         // Handle different possible data structures
         revenueData?.forEach((payment) => {
-            let sessionType = "";
+          let sessionType = "";
 
-            // Handle different possible structures from Supabase
-            if (payment.bookings && typeof payment.bookings === "object") {
-              if (Array.isArray(payment.bookings)) {
-                // If it's an array, take the first item's session_type
-                sessionType = payment.bookings[0]?.session_type || "Unknown";
-              } else {
-                // If it's an object with session_type
-                sessionType =
-                  payment.bookings.session_type || "Unknown";
-              }
-            }
-
-            if (sessionType && payment.amount_cents) {
-              groupedRevenue[sessionType] =
-                (groupedRevenue[sessionType] || 0) + payment.amount_cents;
+          // Handle different possible structures from Supabase
+          if (payment.bookings && typeof payment.bookings === "object") {
+            if (Array.isArray(payment.bookings)) {
+              // If it's an array, take the first item's session_type
+              sessionType = payment.bookings[0]?.session_type || "Unknown";
+            } else {
+              // If it's an object with session_type
+              sessionType = payment.bookings.session_type || "Unknown";
             }
           }
-        );
+
+          if (sessionType && payment.amount_cents) {
+            groupedRevenue[sessionType] =
+              (groupedRevenue[sessionType] || 0) + payment.amount_cents;
+          }
+        });
 
         const chartData = Object.entries(groupedRevenue).map(
           ([sessionType, revenue]) => ({
@@ -293,7 +296,7 @@ export function useRecentPayments(limit: number = 10) {
 
 // Event types
 export function useEventTypes() {
-  const [data, setData] = useState<EventType[]>([]);
+  const [data, setData] = useState<EventTypeWithParsedFields[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -324,44 +327,7 @@ export function useEventTypes() {
   return { data, loading, error, refetch: fetchEventTypes };
 }
 
-// Bookings with clients
-export function useBookings() {
-  const [data, setData] = useState<BookingWithClient[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function fetchBookings() {
-      try {
-        const supabase = supabaseBrowser();
-
-        const { data: bookings } = await supabase
-          .from("bookings")
-          .select(
-            `
-            *,
-            clients!inner (
-              name,
-              email
-            )
-          `
-          )
-          .order("start_time", { ascending: false });
-
-        setData((bookings as BookingWithClient[]) || []);
-      } catch (err) {
-        console.error("Error fetching bookings:", err);
-        setError("Failed to fetch bookings");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchBookings();
-  }, []);
-
-  return { data, loading, error };
-}
+// Bookings with clients (deprecated - use useBookings from use-bookings.ts instead)
 
 // Availability
 export function useAvailability(userId?: string) {

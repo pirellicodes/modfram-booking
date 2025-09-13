@@ -56,8 +56,8 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-background overflow-hidden">
-      <main className="h-screen overflow-hidden rounded-lg">{children}</main>
+    <div className="min-h-screen bg-background">
+      <main className="h-screen">{children}</main>
     </div>
   );
 }

@@ -2,7 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { useAvailability } from "@/hooks/use-dashboard-data";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -26,18 +32,15 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
-  ClockIcon,
   Plus,
   Copy,
   Trash2,
   Globe,
   Calendar,
   Info,
-  Settings,
   MoreVertical,
   Pencil,
   ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 import {
   DropdownMenu,

@@ -14,7 +14,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Pie, PieChart } from "recharts";
+import { Pie, PieChart, Cell } from "recharts";
 import { PieChart as PieChartIcon, TrendingUp } from "lucide-react";
 
 const COLORS = [
@@ -92,8 +92,8 @@ export function PopularSessionCategoriesChart() {
   }
 
   const totalBookings = data.reduce((sum, item) => sum + item.count, 0);
-  const topCategory = data.reduce((top, current) =>
-    current.count > top.count ? current : top,
+  const topCategory = data.reduce(
+    (top, current) => (current.count > top.count ? current : top),
     data[0]
   );
 
@@ -110,9 +110,7 @@ export function PopularSessionCategoriesChart() {
           <PieChartIcon className="h-5 w-5" />
           Popular Session Categories
         </CardTitle>
-        <CardDescription>
-          Most booked session categories
-        </CardDescription>
+        <CardDescription>Most booked session categories</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer
@@ -160,7 +158,8 @@ export function PopularSessionCategoriesChart() {
         <div className="flex items-center gap-2 pt-4 text-sm">
           <TrendingUp className="h-4 w-4" />
           <span className="text-muted-foreground">
-            Most popular: {topCategory.category} ({Math.round((topCategory.count / totalBookings) * 100)}%)
+            Most popular: {topCategory.category} (
+            {Math.round((topCategory.count / totalBookings) * 100)}%)
           </span>
         </div>
       </CardContent>

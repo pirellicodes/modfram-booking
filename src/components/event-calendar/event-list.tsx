@@ -1,6 +1,6 @@
-'use client';
-import { useCallback } from 'react';
-import { ScrollArea } from '@/components/ui/scroll-area';
+"use client";
+import { useCallback } from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   addDays,
   endOfDay,
@@ -10,32 +10,33 @@ import {
   isSameYear,
   isWithinInterval,
   startOfDay,
-} from 'date-fns';
-import { CalendarViewType, Events, TimeFormatType } from '@/types/event';
-import { EventGroup, NoEvents } from './ui/events';
-import { useEventCalendarStore } from '@/hooks/use-event';
+} from "date-fns";
+import { CalendarViewType, TimeFormatType } from "@/types/event";
+import { EventTypes } from "@/db/schema";
+import { EventGroup, NoEvents } from "./ui/events";
+import { useEventCalendarStore } from "@/hooks/use-event";
 import {
   getLocaleFromCode,
   useEventFilter,
   useEventGrouper,
-} from '@/lib/event';
-import { useShallow } from 'zustand/shallow';
+} from "@/lib/event";
+import { useShallow } from "zustand/shallow";
 
 interface EventsListProps {
-  events: Events[];
+  events: EventTypes[];
   currentDate: Date;
 }
 
 export const EVENT_VIEW_CONFIG = {
   [CalendarViewType.DAY]: {
-    groupFormat: 'HH:mm',
-    titleFormat: 'EEEE, d MMMM yyyy',
+    groupFormat: "HH:mm",
+    titleFormat: "EEEE, d MMMM yyyy",
     filterFn: (eventDate: Date, currentDate: Date) =>
       isSameDay(eventDate, currentDate),
   },
   [CalendarViewType.DAYS]: {
-    groupFormat: 'EEEE, d MMMM',
-    titleFormat: 'd MMMM yyyy',
+    groupFormat: "EEEE, d MMMM",
+    titleFormat: "d MMMM yyyy",
     filterFn: (eventDate: Date, currentDate: Date, daysCount: number = 7) => {
       const start = startOfDay(currentDate);
       const end = endOfDay(addDays(currentDate, daysCount - 1));
@@ -43,20 +44,20 @@ export const EVENT_VIEW_CONFIG = {
     },
   },
   [CalendarViewType.WEEK]: {
-    groupFormat: 'yyyy-MM-dd',
-    titleFormat: 'EEEE, d MMMM yyyy',
+    groupFormat: "yyyy-MM-dd",
+    titleFormat: "EEEE, d MMMM yyyy",
     filterFn: (eventDate: Date, currentDate: Date) =>
       isSameWeek(eventDate, currentDate),
   },
   [CalendarViewType.MONTH]: {
-    groupFormat: 'yyyy-MM-dd',
-    titleFormat: 'EEEE, d MMMM yyyy',
+    groupFormat: "yyyy-MM-dd",
+    titleFormat: "EEEE, d MMMM yyyy",
     filterFn: (eventDate: Date, currentDate: Date) =>
       isSameMonth(eventDate, currentDate),
   },
   [CalendarViewType.YEAR]: {
-    groupFormat: 'yyyy-MM-dd',
-    titleFormat: 'EEEE, d MMMM yyyy',
+    groupFormat: "yyyy-MM-dd",
+    titleFormat: "EEEE, d MMMM yyyy",
     filterFn: (eventDate: Date, currentDate: Date) =>
       isSameYear(eventDate, currentDate),
   },
@@ -71,9 +72,9 @@ const EventSection = ({
 }: {
   title: string;
   timeKey: string;
-  events: Events[];
+  events: EventTypes[];
   timeFormat: TimeFormatType;
-  onEventClick: (event: Events) => void;
+  onEventClick: (event: EventTypes) => void;
 }) => (
   <div className="space-y-2">
     <h3 className="text-muted-foreground text-sm font-medium">{title}</h3>
@@ -94,7 +95,7 @@ export function EventsList({ events, currentDate }: EventsListProps) {
         currentView: state.currentView,
         locale: state.locale,
         openEventDialog: state.openEventDialog,
-      })),
+      }))
     );
   const localeObj = getLocaleFromCode(locale);
 
@@ -104,14 +105,14 @@ export function EventsList({ events, currentDate }: EventsListProps) {
     filteredEvents,
     currentView,
     timeFormat,
-    localeObj,
+    localeObj
   );
 
   const handleEventClick = useCallback(
-    (event: Events) => {
+    (event: EventTypes) => {
       openEventDialog(event);
     },
-    [openEventDialog],
+    [openEventDialog]
   );
 
   if (groupedEvents.length === 0) {

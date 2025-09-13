@@ -12,13 +12,10 @@ import {
   EventPosition,
   MultiDayEventRowType,
   TimeFormatType,
-} from "@/libs/shadcn-event-calendar/src/types/event";
-import {
-  CATEGORY_OPTIONS,
-  LOCALES,
-} from "@/libs/shadcn-event-calendar/src/constants/calendar-constant";
-import { EventTypes } from "@/libs/shadcn-event-calendar/src/db/schema";
-import { EVENT_VIEW_CONFIG } from "@/libs/shadcn-event-calendar/src/components/event-calendar/event-list";
+} from "@/types/event";
+import { CATEGORY_OPTIONS, LOCALES } from "@/constants/calendar-constant";
+import { EventTypes } from "@/db/schema";
+import { EVENT_VIEW_CONFIG } from "@/components/event-calendar/event-list";
 import { convertTimeToMinutes, formatTimeDisplay, isSameDay } from "./date";
 import { enUS } from "date-fns/locale";
 

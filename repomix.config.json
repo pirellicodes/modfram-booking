@@ -1,0 +1,29 @@
+{
+  "$schema": "https://repomix.com/schemas/latest/schema.json",
+  "output": {
+    "filePath": "REPO_SNAPSHOT.md",
+    "style": "markdown",
+    "fileSummary": true,
+    "directoryStructure": true,
+    "files": true
+  },
+  "include": [
+    "src/**/*.{ts,tsx,js,jsx,css,scss,md,json,sql}",
+    "ai-docs/**/*.md",
+    "specs/**/*.md",
+    ".claude/**/*.md"
+  ],
+  "ignore": {
+    "useGitignore": true,
+    "useDefaultPatterns": true,
+    "customPatterns": [
+      "cal.com/**",
+      "shadcn-admin/**",
+      "libs/shadcn-event-calendar/**",
+      "public/**",
+      "**/*.{svg,webp,avif,mp4,mp3,woff,woff2,png,jpg,jpeg,gif}",
+      "dist/**",
+      "build/**"
+    ]
+  }
+}

@@ -14,7 +14,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { Users, TrendingUp } from "lucide-react";
 
 const chartConfig = {
@@ -39,7 +39,9 @@ export function ClientAcquisitionChart() {
             <Users className="h-5 w-5" />
             Client Acquisition
           </CardTitle>
-          <CardDescription>New vs returning clients over the last 30 days</CardDescription>
+          <CardDescription>
+            New vs returning clients over the last 30 days
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-[300px] flex items-center justify-center">
@@ -58,7 +60,9 @@ export function ClientAcquisitionChart() {
             <Users className="h-5 w-5" />
             Client Acquisition
           </CardTitle>
-          <CardDescription>New vs returning clients over the last 30 days</CardDescription>
+          <CardDescription>
+            New vs returning clients over the last 30 days
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-[300px] flex items-center justify-center text-muted-foreground">
@@ -77,7 +81,9 @@ export function ClientAcquisitionChart() {
             <Users className="h-5 w-5" />
             Client Acquisition
           </CardTitle>
-          <CardDescription>New vs returning clients over the last 30 days</CardDescription>
+          <CardDescription>
+            New vs returning clients over the last 30 days
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-[300px] flex items-center justify-center text-muted-foreground">
@@ -89,10 +95,16 @@ export function ClientAcquisitionChart() {
   }
 
   const totalNewClients = data.reduce((sum, item) => sum + item.newClients, 0);
-  const totalReturningClients = data.reduce((sum, item) => sum + item.returningClients, 0);
-  const newClientRatio = totalNewClients + totalReturningClients > 0
-    ? Math.round((totalNewClients / (totalNewClients + totalReturningClients)) * 100)
-    : 0;
+  const totalReturningClients = data.reduce(
+    (sum, item) => sum + item.returningClients,
+    0
+  );
+  const newClientRatio =
+    totalNewClients + totalReturningClients > 0
+      ? Math.round(
+          (totalNewClients / (totalNewClients + totalReturningClients)) * 100
+        )
+      : 0;
 
   return (
     <Card>
@@ -159,9 +171,7 @@ export function ClientAcquisitionChart() {
             <div className="text-2xl font-semibold text-chart-1">
               {totalNewClients}
             </div>
-            <div className="text-sm text-muted-foreground">
-              New Clients
-            </div>
+            <div className="text-sm text-muted-foreground">New Clients</div>
           </div>
           <div className="text-center p-3 bg-muted/50 rounded-lg">
             <div className="text-2xl font-semibold text-chart-2">

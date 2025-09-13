@@ -1,0 +1,10 @@
+cal.com/
+shadcn-admin/
+node_modules/
+.next/
+out/
+dist/
+build/
+coverage/
+*.config.js
+*.config.ts
