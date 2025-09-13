@@ -311,7 +311,17 @@ export function useEventTypes() {
         .select("*")
         .order("created_at", { ascending: false });
 
-      setData(eventTypes || []);
+      // Transform data to match EventTypeWithParsedFields interface
+      const transformedData = (eventTypes || []).map((eventType: any) => ({
+        ...eventType,
+        // Add alias properties
+        duration_minutes: eventType.length || eventType.duration_minutes,
+        price_cents: eventType.price
+          ? Math.round(parseFloat(eventType.price) * 100)
+          : eventType.price_cents,
+      }));
+
+      setData(transformedData);
       setError(null);
     } catch (err) {
       console.error("Error fetching event types:", err);

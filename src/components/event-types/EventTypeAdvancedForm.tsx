@@ -15,11 +15,12 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { Users, Repeat, Settings, Clock } from "lucide-react";
 import { EventTypeWithParsedFields } from "@/lib/types";
-import { RecurringEvent, FormData } from "@/types/event-types";
+import { RecurringEvent } from "@/types/event-types";
+import type { EventTypeFormData } from "@/types/forms";
 
 interface EventTypeAdvancedFormProps {
-  formData: FormData;
-  setFormData: (data: FormData) => void;
+  formData: EventTypeFormData;
+  setFormData: (data: EventTypeFormData) => void;
 }
 
 export function EventTypeAdvancedForm({

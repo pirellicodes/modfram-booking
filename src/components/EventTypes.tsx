@@ -35,15 +35,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-
-interface EventType {
-  id: string;
-  name: string;
-  duration_minutes: number;
-  description: string | null;
-  price_cents: number | null;
-  created_at: string;
-}
+import type { EventType } from "@/types";
 
 export function EventTypes() {
   const { data: eventTypes, loading, error, refetch } = useEventTypes();
@@ -66,7 +58,7 @@ export function EventTypes() {
   const handleEditEventType = (eventType: EventType) => {
     setSelectedEventType(eventType);
     setEditForm({
-      name: eventType.name,
+      name: eventType.title,
       duration_minutes: eventType.duration_minutes,
       description: eventType.description || "",
       price_cents: eventType.price_cents ? eventType.price_cents / 100 : 0,
@@ -108,7 +100,7 @@ export function EventTypes() {
   const handleDeleteEventType = async (eventType: EventType) => {
     if (
       !confirm(
-        `Are you sure you want to delete "${eventType.name}"? This action cannot be undone.`
+        `Are you sure you want to delete "${eventType.title}"? This action cannot be undone.`
       )
     ) {
       return;
@@ -151,7 +143,7 @@ export function EventTypes() {
   };
 
   const copyEventTypeUrl = (eventType: EventType) => {
-    const url = `modfram.com/${eventType.name
+    const url = `modfram.com/${eventType.title
       .toLowerCase()
       .replace(/\s+/g, "-")}`;
     navigator.clipboard.writeText(url);

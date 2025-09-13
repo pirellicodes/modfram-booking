@@ -14,7 +14,7 @@ import { EventTypeAvailabilityForm } from "./EventTypeAvailabilityForm";
 import { EventTypeBookingForm } from "./EventTypeBookingForm";
 import { EventTypeAdvancedForm } from "./EventTypeAdvancedForm";
 import { type EventType } from "@/db/schema";
-import { FormData } from "@/types/event-types";
+import type { EventTypeFormData } from "@/types/forms";
 
 interface LocationObject {
   type: string;
@@ -83,7 +83,7 @@ export function EventTypeForm({
 }: EventTypeFormProps) {
   const isEditing = !!eventType;
 
-  const getInitialFormData = (): FormData => ({
+  const getInitialFormData = (): EventTypeFormData => ({
     title: "",
     slug: "",
     description: "",
@@ -115,7 +115,9 @@ export function EventTypeForm({
     allow_cancellation: true,
   });
 
-  const [formData, setFormData] = useState<FormData>(getInitialFormData());
+  const [formData, setFormData] = useState<EventTypeFormData>(
+    getInitialFormData()
+  );
 
   // Sync form data when eventType changes
   useEffect(() => {

@@ -15,11 +15,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, X, DollarSign } from "lucide-react";
 import { EventTypeWithParsedFields } from "@/lib/types";
-import { BookingLimits, FormData } from "@/types/event-types";
+import { BookingLimits } from "@/types/event-types";
+import type { EventTypeFormData } from "@/types/forms";
 
 interface EventTypeBookingFormProps {
-  formData: FormData;
-  setFormData: (data: FormData) => void;
+  formData: EventTypeFormData;
+  setFormData: (data: EventTypeFormData) => void;
 }
 
 export function EventTypeBookingForm({

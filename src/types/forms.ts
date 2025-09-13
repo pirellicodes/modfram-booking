@@ -108,6 +108,27 @@ export interface EventTypeFormData {
   durationLimits?: DurationLimits;
   recurringEvent?: RecurringEvent;
   metadata?: Record<string, unknown>;
+
+  // Missing properties from form components
+  afterEventBuffer?: number;
+  beforeEventBuffer?: number;
+  disableGuests?: boolean;
+  hideCalendarNotes?: boolean;
+  minimumBookingNotice?: number;
+  onlyShowFirstAvailableSlot?: boolean;
+  periodCountCalendarDays?: boolean;
+  periodDays?: number[];
+  periodEndDate?: Date | string;
+  periodStartDate?: Date | string;
+  periodType?: string;
+  requiresConfirmation?: boolean; // alias for requires_confirmation
+  scheduleId?: string;
+  seatsPerTimeSlot?: number;
+  seatsShowAttendees?: boolean;
+  seatsShowAvailabilityCount?: boolean;
+  successRedirectUrl?: string;
+  userId?: string; // alias for user_id
+  user_id?: string;
 }
 
 // Zod schemas for form validation

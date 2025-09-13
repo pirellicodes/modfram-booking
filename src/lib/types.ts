@@ -118,6 +118,7 @@ export type EventTypeWithParsedFields = {
   slug: string;
   description?: string;
   length: number;
+  duration_minutes: number; // Alias for length
   hidden: boolean;
   position: number;
   eventName?: string;
@@ -135,10 +136,18 @@ export type EventTypeWithParsedFields = {
   beforeEventBuffer?: number;
   afterEventBuffer?: number;
   price?: string;
+  price_cents?: number; // Numeric version of price
   currency?: string;
   slotInterval?: number;
   successRedirectUrl?: string;
   onlyShowFirstAvailableSlot?: boolean;
+  is_active: boolean;
+  // Add other missing properties that EventTypeFormData expects
+  buffer_time_minutes?: number;
+  max_bookings_per_day?: number;
+  requires_confirmation?: boolean;
+  booking_window_days?: number;
+  minimum_notice_hours?: number;
   seatsPerTimeSlot?: number;
   seatsShowAttendees?: boolean;
   seatsShowAvailabilityCount?: boolean;
