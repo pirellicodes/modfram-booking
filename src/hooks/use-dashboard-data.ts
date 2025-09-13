@@ -312,14 +312,18 @@ export function useEventTypes() {
         .order("created_at", { ascending: false });
 
       // Transform data to match EventTypeWithParsedFields interface
-      const transformedData = (eventTypes || []).map((eventType: any) => ({
-        ...eventType,
-        // Add alias properties
-        duration_minutes: eventType.length || eventType.duration_minutes,
-        price_cents: eventType.price
-          ? Math.round(parseFloat(eventType.price) * 100)
-          : eventType.price_cents,
-      }));
+      const transformedData = (eventTypes || []).map(
+        (eventType: Record<string, unknown>) => ({
+          ...eventType,
+          // Add alias properties
+          duration_minutes:
+            (eventType.length as number) ||
+            (eventType.duration_minutes as number),
+          price_cents: eventType.price
+            ? Math.round(parseFloat(eventType.price as string) * 100)
+            : (eventType.price_cents as number),
+        })
+      );
 
       setData(transformedData);
       setError(null);
