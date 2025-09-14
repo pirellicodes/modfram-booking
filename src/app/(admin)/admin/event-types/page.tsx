@@ -77,6 +77,58 @@ interface EventTypeWithParsedFields
   recurringEvent?: RecurringEvent;
 }
 
+interface LocationObject {
+  type: string;
+  address?: string;
+  link?: string;
+  phone?: string;
+}
+
+interface BookingField {
+  name: string;
+  type: string;
+  label: string;
+  required: boolean;
+  placeholder?: string;
+}
+
+interface BookingLimits {
+  day?: number;
+  week?: number;
+  month?: number;
+  year?: number;
+}
+
+interface DurationLimits {
+  min?: number;
+  max?: number;
+}
+
+interface RecurringEvent {
+  freq?: string;
+  interval?: number;
+  count?: number;
+  until?: string;
+}
+
+interface EventTypeWithParsedFields
+  extends Omit<
+    EventType,
+    | "locations"
+    | "metadata"
+    | "bookingFields"
+    | "bookingLimits"
+    | "durationLimits"
+    | "recurringEvent"
+  > {
+  locations?: LocationObject[];
+  metadata?: Record<string, unknown>;
+  bookingFields?: BookingField[];
+  bookingLimits?: BookingLimits;
+  durationLimits?: DurationLimits;
+  recurringEvent?: RecurringEvent;
+}
+
 export default function EventTypesPage() {
   const [eventTypes, setEventTypes] = useState<EventTypeWithParsedFields[]>([]);
   const [loading, setLoading] = useState(true);

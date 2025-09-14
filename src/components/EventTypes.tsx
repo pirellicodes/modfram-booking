@@ -35,7 +35,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import type { EventType } from "@/types";
+import type { EventTypeWithParsedFields } from "@/lib/types";
 
 export function EventTypes() {
   const { data: eventTypes, loading, error, refetch } = useEventTypes();
@@ -75,7 +75,7 @@ export function EventTypes() {
         .from("event_types")
         .update({
           name: editForm.name,
-          duration_minutes: editForm.duration_minutes,
+          length: editForm.length,
           description: editForm.description || null,
           price_cents: editForm.price_cents
             ? Math.round(editForm.price_cents * 100)

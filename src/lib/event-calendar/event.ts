@@ -14,7 +14,7 @@ import {
   TimeFormatType,
 } from "@/types/event";
 import { CATEGORY_OPTIONS, LOCALES } from "@/constants/calendar-constant";
-import { EventTypes } from "@/db/schema";
+import { Event } from "@/db/schema";
 import { EVENT_VIEW_CONFIG } from "@/components/event-calendar/event-list";
 import { convertTimeToMinutes, formatTimeDisplay, isSameDay } from "./date";
 import { enUS } from "date-fns/locale";

@@ -4,7 +4,7 @@ import { formatTimeDisplay } from "@/lib/date";
 import { getColorClasses } from "@/lib/event";
 import { cn } from "@/lib/utils";
 import { CalendarViewType, TimeFormatType } from "@/types/event";
-import { EventTypes } from "@/db/schema";
+import { Event } from "@/db/schema";
 import { endOfWeek, format, Locale, startOfWeek } from "date-fns";
 import { Calendar, Clock, MapPin } from "lucide-react";
 import { memo } from "react";

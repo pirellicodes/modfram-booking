@@ -12,7 +12,7 @@ import {
   WeekViewConfig,
   YearViewConfig,
 } from "@/types/event";
-import { EventTypes } from "@/db/schema";
+import { Event } from "@/db/schema";
 import { persist } from "zustand/middleware";
 
 const DEFAULT_VIEW_CONFIGS: CalendarViewConfigs = {

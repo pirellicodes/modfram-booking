@@ -18,32 +18,25 @@ type ToasterToast = ToastProps & {
   action?: ToastActionElement
 }
 
-let count = 0
-
-function genId() {
-  count = (count + 1) % Number.MAX_SAFE_INTEGER
-  return count.toString()
-}
-
 type ActionType = typeof actionTypes
 
 type Action =
   | {
-      type: ActionType["ADD_TOAST"]
-      toast: ToasterToast
+      type: ActionType["ADD_TOAST"];
+      toast: ToasterToast;
     }
   | {
-      type: ActionType["UPDATE_TOAST"]
-      toast: Partial<ToasterToast>
+      type: ActionType["UPDATE_TOAST"];
+      toast: Partial<ToasterToast>;
     }
   | {
-      type: ActionType["DISMISS_TOAST"]
-      toastId?: ToasterToast["id"]
+      type: ActionType["DISMISS_TOAST"];
+      toastId?: ToasterToast["id"];
     }
   | {
-      type: ActionType["REMOVE_TOAST"]
-      toastId?: ToasterToast["id"]
-    }
+      type: ActionType["REMOVE_TOAST"];
+      toastId?: ToasterToast["id"];
+    };
 
 interface State {
   toasts: ToasterToast[]
@@ -84,7 +77,7 @@ export const reducer = (state: State, action: Action): State => {
       }
 
     case "DISMISS_TOAST": {
-      const { toastId } = action
+      const { toastId } = action;
 
       // ! Side effects ! - This could be extracted into a dismissToast() action,
       // but I'll keep it here for simplicity
@@ -118,7 +111,7 @@ export const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         toasts: state.toasts.filter((t) => t.id !== action.toastId),
-      }
+      };
   }
 }
 

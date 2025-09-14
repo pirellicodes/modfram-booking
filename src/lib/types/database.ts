@@ -151,16 +151,16 @@ export interface Database {
           created_at?: string
         }
         Update: {
-          id?: string
-          name?: string
-          duration_minutes?: number
-          description?: string | null
-          price_cents?: number | null
-          created_at?: string
-        }
-        Relationships: []
-      }
-    }
+          id?: string;
+          name?: string;
+          duration_minutes?: number;
+          description?: string | null;
+          price_cents?: number | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+    };
     Views: {
       [_ in never]: never
     }

@@ -1,5 +1,5 @@
-import { EventTypes } from '@/db/schema';
-import { enUS, enGB, id, es, fr, de, ja, ko } from 'date-fns/locale';
+import { Event } from "@/db/schema";
+import { enUS, enGB, id, es, fr, de, ja, ko } from "date-fns/locale";
 
 export const EVENT_DEFAULTS = {
   START_TIME: '09:00',

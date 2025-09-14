@@ -12,7 +12,7 @@ import {
   startOfDay,
 } from "date-fns";
 import { CalendarViewType, TimeFormatType } from "@/types/event";
-import { EventTypes } from "@/db/schema";
+import { Event } from "@/types";
 import { EventGroup, NoEvents } from "./ui/events";
 import { useEventCalendarStore } from "@/hooks/use-event";
 import {
@@ -23,7 +23,7 @@ import {
 import { useShallow } from "zustand/shallow";
 
 interface EventsListProps {
-  events: EventTypes[];
+  events: Event[];
   currentDate: Date;
 }
 

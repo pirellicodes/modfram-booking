@@ -7,12 +7,11 @@ import type {
   Payment,
   Availability,
   EventType,
-  TallySubmission,
   PaginationMeta,
   BookingFilters,
   ClientFilters,
   PaginationParams,
-} from "./index";
+} from "@/types";
 
 // Base API response structure
 export interface ApiResponse<TData = unknown> {
@@ -167,26 +166,6 @@ export interface EventTypeWithStats extends EventType {
 
 export type EventTypeResponse = ApiResponse<EventTypeWithStats>;
 export type EventTypesListResponse = PaginatedResponse<EventTypeWithStats>;
-
-// Tally webhook types
-export interface TallyWebhookPayload {
-  eventId: string;
-  eventType: "FORM_RESPONSE";
-  createdAt: string;
-  data: {
-    formId: string;
-    formName: string;
-    respondentId: string;
-    fields: Array<{
-      key: string;
-      label: string;
-      type: string;
-      value: unknown;
-    }>;
-  };
-}
-
-export type TallyWebhookResponse = ApiResponse<{ received: boolean }>;
 
 // Google Calendar integration types
 export type GoogleOAuthStartResponse = ApiResponse<{ auth_url: string }>;

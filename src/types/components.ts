@@ -12,13 +12,28 @@ import type {
   BookingFilters,
   ClientFilters,
   PaginationMeta,
-} from "./index";
-import type {
-  SelectOption,
-  FormFieldProps,
-  DateFieldProps,
-  TimeFieldProps,
-} from "./forms";
+} from "@/lib/types";
+// Form component types (define locally since they're UI-specific)
+export type SelectOption = {
+  label: string;
+  value: string;
+};
+
+export type FormFieldProps = {
+  label: string;
+  required?: boolean;
+  error?: string;
+};
+
+export type DateFieldProps = FormFieldProps & {
+  value?: Date | string;
+  onChange: (date: Date | undefined) => void;
+};
+
+export type TimeFieldProps = FormFieldProps & {
+  value?: string;
+  onChange: (time: string) => void;
+};
 
 // Layout and navigation types
 export interface LayoutProps {

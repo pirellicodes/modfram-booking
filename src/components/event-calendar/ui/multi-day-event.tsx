@@ -1,10 +1,10 @@
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { memo } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { EventTypes } from '@/db/schema';
-import { getColorClasses } from '@/lib/event';
-import { formatTimeDisplay, calculateDuration } from '@/lib/date';
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { memo } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { Event } from "@/db/schema";
+import { getColorClasses } from "@/lib/event";
+import { formatTimeDisplay, calculateDuration } from "@/lib/date";
 
 interface MultiDayEventProps {
   event: EventTypes;

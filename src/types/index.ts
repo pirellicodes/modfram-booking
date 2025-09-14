@@ -82,22 +82,10 @@ export interface Availability {
   slots: TimeSlot[];
 }
 
-export interface TallySubmission {
-  id: string;
-  event_id: string;
-  form_id: string;
-  form_name?: string;
-  respondent_id?: string;
-  booking_draft_id?: string;
-  fields: Record<string, unknown>;
-  raw_payload: Record<string, unknown>;
-  created_at: string;
-}
-
 export interface UserIntegration {
   id: string;
   user_id: string;
-  integration_type: "google_calendar" | "stripe" | "tally";
+  integration_type: "google_calendar" | "stripe";
   access_token?: string;
   refresh_token?: string;
   token_expires_at?: string;
