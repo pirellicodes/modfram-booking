@@ -96,16 +96,16 @@ export function EventTypeForm({
     minimumBookingNotice: 120,
     beforeEventBuffer: 0,
     afterEventBuffer: 0,
-    price: "0.00",
+    price: 0,
     currency: "USD",
-    slotInterval: null,
+    slotInterval: undefined,
     onlyShowFirstAvailableSlot: false,
-    seatsPerTimeSlot: null,
+    seatsPerTimeSlot: undefined,
     seatsShowAttendees: false,
     seatsShowAvailabilityCount: true,
-    assignAllTeamMembers: false,
+
     periodType: "UNLIMITED",
-    periodDays: null,
+    periodDays: undefined,
     periodCountCalendarDays: false,
     bookingFields: [],
     bookingLimits: {},
@@ -113,6 +113,7 @@ export function EventTypeForm({
     recurringEvent: undefined,
     metadata: {},
     allow_cancellation: true,
+    is_active: true,
   });
 
   const [formData, setFormData] = useState<EventTypeFormData>(
@@ -122,7 +123,10 @@ export function EventTypeForm({
   // Sync form data when eventType changes
   useEffect(() => {
     if (eventType) {
-      setFormData(eventType);
+      setFormData({
+        ...eventType,
+        is_active: true, // Provide default for missing property
+      });
     } else {
       setFormData(getInitialFormData());
     }

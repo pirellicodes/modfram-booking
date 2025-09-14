@@ -77,8 +77,8 @@ export interface RecurringEvent {
 export interface EventTypeFormData {
   title: string;
   description?: string;
-  duration_minutes: number;
-  price_cents?: number;
+  length: number; // duration in minutes - matches database
+  price?: number; // price in dollars - matches database
   buffer_time_minutes?: number;
   max_bookings_per_day?: number;
   requires_confirmation?: boolean;
@@ -89,7 +89,7 @@ export interface EventTypeFormData {
   // Extended form fields
   slug?: string;
   slugManuallySet?: boolean;
-  length?: number; // alias for duration_minutes
+
   eventName?: string;
   hidden?: boolean;
   locations?: LocationObject[];
@@ -201,12 +201,12 @@ export const eventTypeFormSchema = z.object({
     .max(1000, "Description too long")
     .optional()
     .or(z.literal("")),
-  duration_minutes: z
+  length: z
     .number()
     .int()
     .min(5, "Minimum duration is 5 minutes")
     .max(1440, "Maximum duration is 24 hours"),
-  price_cents: z.number().int().min(0, "Price cannot be negative").optional(),
+  price: z.number().min(0, "Price cannot be negative").optional(),
   buffer_time_minutes: z
     .number()
     .int()

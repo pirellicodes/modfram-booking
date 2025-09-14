@@ -77,7 +77,11 @@ export function EventTypeAvailabilityForm({
                     <div className="mt-3 flex items-center gap-2">
                       <Input
                         type="number"
-                        value={formData.periodDays || 30}
+                        value={
+                          Array.isArray(formData.periodDays)
+                            ? formData.periodDays[0] || 30
+                            : formData.periodDays || 30
+                        }
                         onChange={(e) =>
                           updateField(
                             "periodDays",

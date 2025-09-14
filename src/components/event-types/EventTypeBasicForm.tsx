@@ -307,7 +307,7 @@ export function EventTypeBasicForm({
             </div>
           </div>
 
-          {parseFloat(formData.price || "0") > 0 && (
+          {(formData.price || 0) > 0 && (
             <div className="space-y-4 p-4 border rounded-lg bg-blue-50/50">
               <div>
                 <Label htmlFor="deposit_cents">Deposit Required (cents)</Label>

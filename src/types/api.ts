@@ -142,8 +142,8 @@ export type AvailabilitiesListResponse = ApiResponse<Availability[]>;
 export interface CreateEventTypeRequest {
   title: string;
   description?: string;
-  duration_minutes: number;
-  price_cents?: number;
+  length: number; // duration in minutes
+  price?: number; // price in dollars
   buffer_time_minutes?: number;
   max_bookings_per_day?: number;
   requires_confirmation?: boolean;

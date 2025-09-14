@@ -47,10 +47,10 @@ export function EventTypes() {
 
   // Form state for editing
   const [editForm, setEditForm] = useState({
-    name: "",
-    duration_minutes: 30,
+    title: "",
+    length: 30,
     description: "",
-    price_cents: 0,
+    price: 0,
   });
 
   const supabase = supabaseBrowser();
@@ -58,10 +58,10 @@ export function EventTypes() {
   const handleEditEventType = (eventType: EventType) => {
     setSelectedEventType(eventType);
     setEditForm({
-      name: eventType.title,
-      duration_minutes: eventType.duration_minutes,
+      title: eventType.title,
+      length: eventType.length,
       description: eventType.description || "",
-      price_cents: eventType.price_cents ? eventType.price_cents / 100 : 0,
+      price: eventType.price || 0,
     });
     setIsEditDialogOpen(true);
   };
@@ -74,12 +74,10 @@ export function EventTypes() {
       const { error } = await supabase
         .from("event_types")
         .update({
-          name: editForm.name,
+          title: editForm.title,
           length: editForm.length,
           description: editForm.description || null,
-          price_cents: editForm.price_cents
-            ? Math.round(editForm.price_cents * 100)
-            : null,
+          price: editForm.price || null,
         })
         .eq("id", selectedEventType.id);
 
@@ -297,9 +295,9 @@ export function EventTypes() {
               <Label htmlFor="name">Event Name</Label>
               <Input
                 id="name"
-                value={editForm.name}
+                value={editForm.title}
                 onChange={(e) =>
-                  setEditForm({ ...editForm, name: e.target.value })
+                  setEditForm({ ...editForm, title: e.target.value })
                 }
                 placeholder="Meeting"
               />
@@ -309,7 +307,8 @@ export function EventTypes() {
               <Label>URL</Label>
               <div className="flex items-center border rounded-md px-3 py-2">
                 <span className="text-muted-foreground">
-                  modfram.com/{editForm.name.toLowerCase().replace(/\s+/g, "-")}
+                  modfram.com/
+                  {editForm.title.toLowerCase().replace(/\s+/g, "-")}
                 </span>
               </div>
             </div>
@@ -319,11 +318,11 @@ export function EventTypes() {
               <Input
                 id="duration"
                 type="number"
-                value={editForm.duration_minutes}
+                value={editForm.length}
                 onChange={(e) =>
                   setEditForm({
                     ...editForm,
-                    duration_minutes: parseInt(e.target.value) || 0,
+                    length: parseInt(e.target.value) || 0,
                   })
                 }
                 placeholder="30"
@@ -348,11 +347,11 @@ export function EventTypes() {
                 id="price"
                 type="number"
                 step="0.01"
-                value={editForm.price_cents}
+                value={editForm.price}
                 onChange={(e) =>
                   setEditForm({
                     ...editForm,
-                    price_cents: parseFloat(e.target.value) || 0,
+                    price: parseFloat(e.target.value) || 0,
                   })
                 }
                 placeholder="0.00"

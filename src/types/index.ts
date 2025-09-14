@@ -100,8 +100,8 @@ export interface EventType {
   user_id: string;
   title: string;
   description?: string;
-  duration_minutes: number;
-  price_cents?: number;
+  length: number; // duration in minutes - matches database schema
+  price?: number; // price in dollars - matches database schema
   buffer_time_minutes?: number;
   max_bookings_per_day?: number;
   requires_confirmation?: boolean;
