@@ -1,7 +1,8 @@
-import { cn } from '@/lib/utils';
-import { TimeFormatType } from '@/types/event';
 import { cva, type VariantProps } from 'class-variance-authority';
 import React, { forwardRef, useCallback } from 'react';
+
+import { cn } from '@/lib/utils';
+import { TimeFormatType } from '@/types/event';
 
 const timeColumnVariants = cva('flex h-16 w-full cursor-pointer ', {
   variants: {

@@ -1,18 +1,5 @@
-'use client';
+"use client";
 
-import React, { useEffect, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
-import { Button } from '../ui/button';
-import { TimeFormatToggle } from './ui/time-format-toggel';
-import { TodayButton } from './ui/today-button';
-import { ViewModeToggle } from './ui/view-mode-toggle';
-import { SearchYearPicker } from './ui/search-year-picker';
-import { SearchMonthPicker } from './ui/search-month-picker';
-import { SearchDayPicker } from './ui/search-day-picker.fallback';
-import { CalendarViewType, TimeFormatType, ViewModeType } from '@/types/event';
-import { useEventCalendarStore } from '@/hooks/use-event';
-import { EventCalendarTabs } from './event-calendar-tabs';
-import { useShallow } from 'zustand/shallow';
 import {
   addDays,
   addMonths,
@@ -22,15 +9,32 @@ import {
   subMonths,
   subWeeks,
   subYears,
-} from 'date-fns';
-import { EventCalendarFilters } from './event-calendar-filters';
-import CalendarSettingsDialog from './event-calendar-setting-dialog';
-import { getLocaleFromCode } from '@/lib/event';
+} from "date-fns";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import React, { useCallback, useEffect, useMemo } from "react";
+import { useShallow } from "zustand/shallow";
+
+import { useEventCalendarStore } from "@/hooks/use-event";
+import { getLocaleFromCode } from "@/lib/event";
+import { CalendarViewType, TimeFormatType, ViewModeType } from "@/types/event";
+
+import { Button } from "../ui/button";
+import { EventCalendarFilters } from "./event-calendar-filters";
+import CalendarSettingsDialog from "./event-calendar-setting-dialog";
+import { EventCalendarTabs } from "./event-calendar-tabs";
+import { SearchDayPicker } from "./ui/search-day-picker.fallback";
+import { SearchMonthPicker } from "./ui/search-month-picker";
+import { SearchYearPicker } from "./ui/search-year-picker";
+import { TimeFormatToggle } from "./ui/time-format-toggel";
+import { TodayButton } from "./ui/today-button";
+import { ViewModeToggle } from "./ui/view-mode-toggle";
 
 export default function EventCalendarToolbar() {
-  // Use the store's selectedDate instead of local state
-  const date = useEventCalendarStore(state => state.selectedDate) || new Date();
-  const setDate = useEventCalendarStore(state => state.setSelectedDate);
+  // Pull selectedDate from the store and memoize fallback so deps stay stable
+  const selectedDate = useEventCalendarStore((state) => state.selectedDate);
+  const date = useMemo(() => selectedDate ?? new Date(), [selectedDate]);
+
+  const setDate = useEventCalendarStore((state) => state.setSelectedDate);
   const {
     viewMode,
     locale,
@@ -50,24 +54,26 @@ export default function EventCalendarToolbar() {
       setTimeFormat: state.setTimeFormat,
       setMode: state.setMode,
       openQuickAddDialog: state.openQuickAddDialog,
-    })),
+    }))
   );
-  const localeObj = getLocaleFromCode(locale);
+
+  // Memoize locale object so callbacks/effects don’t see a new ref each render
+  const localeObj = useMemo(() => getLocaleFromCode(locale), [locale]);
 
   const handleNavigateNext = useCallback(() => {
     let newDate = new Date(date);
 
     switch (currentView) {
-      case 'day':
+      case "day":
         newDate = addDays(newDate, 1);
         break;
-      case 'week':
+      case "week":
         newDate = addWeeks(newDate, 1);
         break;
-      case 'month':
+      case "month":
         newDate = addMonths(newDate, 1);
         break;
-      case 'year':
+      case "year":
         newDate = addYears(newDate, 1);
         break;
     }
@@ -79,16 +85,16 @@ export default function EventCalendarToolbar() {
     let newDate = new Date(date);
 
     switch (currentView) {
-      case 'day':
+      case "day":
         newDate = subDays(newDate, 1);
         break;
-      case 'week':
+      case "week":
         newDate = subWeeks(newDate, 1);
         break;
-      case 'month':
+      case "month":
         newDate = subMonths(newDate, 1);
         break;
-      case 'year':
+      case "year":
         newDate = subYears(newDate, 1);
         break;
     }
@@ -100,35 +106,37 @@ export default function EventCalendarToolbar() {
     (format: TimeFormatType) => {
       setTimeFormat(format);
     },
-    [setTimeFormat],
+    [setTimeFormat]
   );
 
   const handleViewModeChange = useCallback(
     (mode: ViewModeType) => {
       setMode(mode);
     },
-    [setMode],
+    [setMode]
   );
 
   const handleViewTypeChange = useCallback(
     (viewType: CalendarViewType) => {
       setView(viewType);
     },
-    [setView],
+    [setView]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Only handle keyboard navigation if not typing in an input
-      if (document.activeElement?.tagName !== 'INPUT' &&
-          document.activeElement?.tagName !== 'TEXTAREA') {
-        if (e.key === 'ArrowLeft') handleNavigatePrevious();
-        if (e.key === 'ArrowRight') handleNavigateNext();
+      if (
+        document.activeElement?.tagName !== "INPUT" &&
+        document.activeElement?.tagName !== "TEXTAREA"
+      ) {
+        if (e.key === "ArrowLeft") handleNavigatePrevious();
+        if (e.key === "ArrowRight") handleNavigateNext();
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleNavigatePrevious, handleNavigateNext]);
 
   return (
@@ -146,7 +154,7 @@ export default function EventCalendarToolbar() {
                 Previous
               </Button>
               <Button
-                variant={'outline'}
+                variant={"outline"}
                 className="hover:bg-muted rounded-full"
                 onClick={handleNavigateNext}
               >
@@ -163,14 +171,14 @@ export default function EventCalendarToolbar() {
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <div className="flex items-center space-x-2">
-              {currentView === 'day' && (
+              {currentView === "day" && (
                 <SearchDayPicker
                   locale={localeObj}
                   weekStartsOn={0}
                   placeholder="Select day"
                 />
               )}
-              {currentView !== 'year' && (
+              {currentView !== "year" && (
                 <SearchMonthPicker locale={localeObj} monthFormat="LLLL" />
               )}
               <SearchYearPicker yearRange={20} minYear={2000} maxYear={2030} />

@@ -1,4 +1,19 @@
+import {
+  Calendar,
+  CalendarDays,
+  Clock,
+  Eye,
+  Globe,
+  Settings,
+  Sun,
+  Zap,
+} from 'lucide-react';
+import { parseAsString, useQueryState } from 'nuqs';
 import { useState, useTransition } from 'react';
+import { useShallow } from 'zustand/shallow';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -7,8 +22,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -18,18 +31,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import {
-  Settings,
-  Calendar,
-  Clock,
-  Eye,
-  Globe,
-  Zap,
-  CalendarDays,
-  Sun,
-} from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { LOCALES } from '@/constants/calendar-constant';
 import { useEventCalendarStore } from '@/hooks/use-event';
+import { getLocalizedDaysOfWeek } from '@/lib/date';
+import { getLocaleFromCode } from '@/lib/event';
 import {
   CalendarViewConfigs,
   CalendarViewType,
@@ -41,12 +47,8 @@ import {
   WeekViewConfig,
   YearViewConfig,
 } from '@/types/event';
-import { useShallow } from 'zustand/shallow';
+
 import { ScrollArea } from '../ui/scroll-area';
-import { parseAsString, useQueryState } from 'nuqs';
-import { LOCALES } from '@/constants/calendar-constant';
-import { getLocaleFromCode } from '@/lib/event';
-import { getLocalizedDaysOfWeek } from '@/lib/date';
 
 const VIEW_TYPES = [
   { value: 'day', label: 'Day View' },

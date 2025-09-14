@@ -1,29 +1,31 @@
-'use client';
+"use client";
 
-import { useCallback, useMemo, useRef, useState } from 'react';
-import { formatDate, generateTimeSlots, isSameDay } from '@/lib/date';
-import { ScrollArea } from '../ui/scroll-area';
-import { WeekDayHeaders } from './ui/week-days-header';
-import { TimeGrid } from './ui/time-grid';
-import { EventDialogTrigger } from './event-dialog-trigger';
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { useShallow } from "zustand/shallow";
+
+import { useEventCalendarStore } from "@/hooks/use-event";
+import { formatDate, generateTimeSlots, isSameDay } from "@/lib/date";
 import {
   getLocaleFromCode,
   useEventPositions,
   useFilteredEvents,
   useMultiDayEventRows,
   useWeekDays,
-} from '@/lib/event';
-import { useEventCalendarStore } from '@/hooks/use-event';
-import { useShallow } from 'zustand/shallow';
-import { MultiDayEventSection } from './ui/multi-day-event';
-import { TimeColumn } from './ui/time-column';
-import { Events, HoverPositionType } from '@/types/event';
-import { CurrentTimeIndicator } from './ui/current-time-indicator';
-import { HoverTimeIndicator } from './ui/hover-time-indicator';
-import { cn } from '@/lib/utils';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
-import { Button } from '../ui/button';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+} from "@/lib/event";
+import { cn } from "@/lib/utils";
+import { Events, HoverPositionType } from "@/types/event";
+
+import { Button } from "../ui/button";
+import { ScrollArea } from "../ui/scroll-area";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { EventDialogTrigger } from "./event-dialog-trigger";
+import { CurrentTimeIndicator } from "./ui/current-time-indicator";
+import { HoverTimeIndicator } from "./ui/hover-time-indicator";
+import { MultiDayEventSection } from "./ui/multi-day-event";
+import { TimeColumn } from "./ui/time-column";
+import { TimeGrid } from "./ui/time-grid";
+import { WeekDayHeaders } from "./ui/week-days-header";
 
 const HOUR_HEIGHT = 64;
 const START_HOUR = 0;
@@ -56,7 +58,7 @@ export function EventCalendarDays({
       firstDayOfWeek: state.firstDayOfWeek,
       openEventDialog: state.openEventDialog,
       openQuickAddDialog: state.openQuickAddDialog,
-    })),
+    }))
   );
   const [hoverPosition, setHoverPosition] = useState<
     HoverPositionType | undefined
@@ -75,17 +77,17 @@ export function EventCalendarDays({
   const { weekDays, todayIndex } = useWeekDays(
     currentDate,
     daysCount,
-    localeObj,
+    localeObj
   );
 
   const { singleDayEvents, multiDayEvents } = useFilteredEvents(
     events,
-    weekDays,
+    weekDays
   );
   const eventsPositions = useEventPositions(
     singleDayEvents,
     weekDays,
-    HOUR_HEIGHT,
+    HOUR_HEIGHT
   );
   const multiDayEventRows = useMultiDayEventRows(multiDayEvents, weekDays);
   const timeSlots = useMemo(() => generateTimeSlots(START_HOUR, END_HOUR), []);
@@ -113,7 +115,7 @@ export function EventCalendarDays({
         dayIndex: -1,
       });
     },
-    [],
+    []
   );
 
   const handleTimeLeave = useCallback(() => {
@@ -138,7 +140,7 @@ export function EventCalendarDays({
     (_event: Events) => {
       openEventDialog(_event);
     },
-    [openEventDialog],
+    [openEventDialog]
   );
 
   const handleTimeBlockClick = useCallback(
@@ -151,7 +153,7 @@ export function EventCalendarDays({
         position: hoverPosition,
       });
     },
-    [hoverPosition, openQuickAddDialog, viewSettings.days.enableTimeBlockClick],
+    [hoverPosition, openQuickAddDialog, viewSettings.days.enableTimeBlockClick]
   );
 
   const toggleMultiDayExpand = useCallback(() => {
@@ -187,13 +189,13 @@ export function EventCalendarDays({
                       onClick={toggleMultiDayExpand}
                     >
                       <span className="sr-only">
-                        {isMultiDayExpanded ? 'Collapse' : 'Expand'} multi-day
+                        {isMultiDayExpanded ? "Collapse" : "Expand"} multi-day
                       </span>
                       {isMultiDayExpanded ? <ChevronUp /> : <ChevronDown />}
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    {isMultiDayExpanded ? 'Collapse' : 'Expand'} multi-day
+                    {isMultiDayExpanded ? "Collapse" : "Expand"} multi-day
                   </TooltipContent>
                 </Tooltip>
               )}
@@ -204,7 +206,7 @@ export function EventCalendarDays({
                 height: isMultiDayExpanded
                   ? `${totalMultiDayRows * MULTI_DAY_ROW_HEIGHT}px`
                   : `${MULTI_DAY_ROW_HEIGHT}px`,
-                transition: 'height 0.3s ease',
+                transition: "height 0.3s ease",
               }}
             >
               <div className="absolute inset-0">
@@ -222,9 +224,9 @@ export function EventCalendarDays({
                           key={`multi-day-cell-${rowIndex}-${dayIndex}`}
                           data-testid={`multi-day-cell-${rowIndex}-${dayIndex}`}
                           className={cn(
-                            'relative flex items-center justify-center border-r last:border-r-0',
-                            todayIndex === dayIndex && 'bg-primary/10',
-                            'flex-none',
+                            "relative flex items-center justify-center border-r last:border-r-0",
+                            todayIndex === dayIndex && "bg-primary/10",
+                            "flex-none"
                           )}
                           style={{ width: `${dayWidthPercent}%` }}
                         ></div>
@@ -286,9 +288,9 @@ export function EventCalendarDays({
               />
               <div className="pointer-events-none absolute inset-0">
                 {singleDayEvents.map((event) => {
-                  const eventDate = new Date(event.startDate);
+                  const eventDate = event.start;
                   const dayIndex = weekDays.findIndex((day) =>
-                    isSameDay(day, eventDate),
+                    isSameDay(day, eventDate)
                   );
                   if (dayIndex === -1) return null;
 

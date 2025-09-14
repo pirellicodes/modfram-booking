@@ -1,4 +1,3 @@
-import { CalendarViewType } from '@/types/event';
 import {
   createSearchParamsCache,
   parseAsArrayOf,
@@ -7,6 +6,8 @@ import {
   parseAsIsoDate,
   parseAsString,
 } from 'nuqs/server';
+
+import { CalendarViewType } from '@/types/event';
 
 export const searchParamsCache = createSearchParamsCache({
   date: parseAsIsoDate.withDefault(new Date()),

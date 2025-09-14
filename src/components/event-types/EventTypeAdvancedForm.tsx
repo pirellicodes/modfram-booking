@@ -1,7 +1,11 @@
 "use client";
 
+import { Clock,Repeat, Settings, Users } from "lucide-react";
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -9,28 +13,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
-import { Users, Repeat, Settings, Clock } from "lucide-react";
-import { EventTypeWithParsedFields } from "@/lib/types";
-import { RecurringEvent } from "@/types/event-types";
+import { Switch } from "@/components/ui/switch";
+import type { RecurringEvent } from "@/types/event-types";
 import type { EventTypeFormData } from "@/types/forms";
 
 interface EventTypeAdvancedFormProps {
   formData: EventTypeFormData;
-  setFormData: (data: EventTypeFormData) => void;
+  setFormData: (
+    data: EventTypeFormData | ((prev: EventTypeFormData) => EventTypeFormData)
+  ) => void;
 }
 
 export function EventTypeAdvancedForm({
   formData,
   setFormData,
 }: EventTypeAdvancedFormProps) {
-  const updateField = (
-    field: keyof EventTypeWithParsedFields,
-    value: unknown
-  ) => {
+  const updateField = (field: keyof EventTypeFormData, value: unknown) => {
     setFormData({ ...formData, [field]: value });
   };
 
@@ -38,25 +37,37 @@ export function EventTypeAdvancedForm({
     field: keyof RecurringEvent,
     value: unknown
   ) => {
-    const recurring = { ...formData.recurringEvent };
+    type RecurringField = keyof RecurringEvent;
+    const prev = (formData.recurringEvent ?? {}) as RecurringEvent;
+
+    let recurring: RecurringEvent;
     if (value === null || value === "" || value === false) {
-      delete recurring[field];
+      const { [field as RecurringField]: _omit, ...rest } = prev as Record<
+        string,
+        unknown
+      >;
+      recurring = rest as RecurringEvent;
     } else {
-      (recurring as Record<string, unknown>)[field] = value;
+      recurring = {
+        ...prev,
+        [field as RecurringField]: value,
+      } as RecurringEvent;
     }
-    updateField(
-      "recurringEvent",
-      Object.keys(recurring).length > 0 ? recurring : null
-    );
+
+    setFormData((f) => ({ ...f, recurringEvent: recurring }));
   };
 
   const updateDurationLimit = (type: "min" | "max", value: number) => {
-    const limits = { ...formData.durationLimits };
+    const prev = formData.durationLimits || {};
+    let limits: Record<string, unknown>;
+
     if (value === 0 || !value) {
-      delete limits[type];
+      const { [type]: _omit, ...rest } = prev;
+      limits = rest;
     } else {
-      limits[type] = value;
+      limits = { ...prev, [type]: value };
     }
+
     updateField("durationLimits", limits);
   };
 
@@ -293,7 +304,7 @@ export function EventTypeAdvancedForm({
                 type="number"
                 min="5"
                 max="1440"
-                value={formData.durationLimits?.min || ""}
+                value={(formData.durationLimits?.min as number) || ""}
                 onChange={(e) =>
                   updateDurationLimit("min", parseInt(e.target.value) || 0)
                 }
@@ -307,7 +318,7 @@ export function EventTypeAdvancedForm({
                 type="number"
                 min="5"
                 max="1440"
-                value={formData.durationLimits?.max || ""}
+                value={(formData.durationLimits?.max as number) || ""}
                 onChange={(e) =>
                   updateDurationLimit("max", parseInt(e.target.value) || 0)
                 }

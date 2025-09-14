@@ -1,6 +1,6 @@
 "use client";
 
-import { Pie, PieChart, Cell } from "recharts";
+import { Cell,Pie, PieChart } from "recharts";
 
 import {
   Card,

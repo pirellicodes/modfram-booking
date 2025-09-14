@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { supabaseServer } from "@/lib/supabase-server";
 
 function slugify(text: string): string {
@@ -12,7 +13,7 @@ function slugify(text: string): string {
 
 export async function GET() {
   try {
-    const supabase = supabaseServer();
+    const supabase = await supabaseServer();
 
     // Check authentication
     const {
@@ -79,7 +80,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = supabaseServer();
+    const supabase = await supabaseServer();
 
     // Check authentication
     const {

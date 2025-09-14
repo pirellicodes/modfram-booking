@@ -171,3 +171,4 @@ export type EventTypeWithParsedFields = {
   agreement_text?: string;
   allow_cancellation?: boolean;
 };
+// Remove conflicting export - LocationObject is already exported from @/types/location

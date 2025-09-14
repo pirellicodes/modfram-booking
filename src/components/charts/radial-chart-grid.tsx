@@ -6,9 +6,6 @@ import { PolarGrid, RadialBar, RadialBarChart } from "recharts";
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import {
   ChartConfig,

@@ -1,9 +1,10 @@
 "use client";
 
-import { EventCalendar } from "@/components/event-calendar/event-calendar";
+import { useMemo,useState } from "react";
+
 import { Availability } from "@/components/Availability";
+import { EventCalendar } from "@/components/event-calendar/event-calendar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState, useMemo } from "react";
 import { Events } from "@/types/event";
 
 export default function AvailabilityPage() {

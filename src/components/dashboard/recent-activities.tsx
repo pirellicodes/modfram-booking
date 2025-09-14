@@ -35,8 +35,8 @@ export function RecentActivities() {
     <div className="space-y-4">
       {payments.map((payment) => {
         const clientName =
-          payment.bookings?.clients?.name ||
-          payment.bookings?.client?.name ||
+          (payment.bookings as any)?.clients?.name ||
+          (payment.bookings as any)?.client?.name ||
           "Unknown Client";
         const sessionType = payment.bookings?.session_type || "Unknown Session";
         const amount = payment.amount_cents / 100;
@@ -44,7 +44,7 @@ export function RecentActivities() {
         // Get client initials
         const initials = clientName
           .split(" ")
-          .map((name) => name[0])
+          .map((name: any) => name[0])
           .join("")
           .toUpperCase()
           .slice(0, 2);
@@ -59,7 +59,7 @@ export function RecentActivities() {
                 {clientName}
               </p>
               <p className="text-sm text-muted-foreground truncate">
-                {sessionType}
+                {String(sessionType || "")}
               </p>
             </div>
             <div className="font-medium">+${amount.toFixed(2)}</div>

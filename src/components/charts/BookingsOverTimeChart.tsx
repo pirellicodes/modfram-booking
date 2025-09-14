@@ -1,6 +1,8 @@
 "use client";
 
-import { useBookingsOverTime } from "@/hooks/use-dashboard-data";
+import { CalendarDays, TrendingUp } from "lucide-react";
+import { Area, AreaChart, XAxis, YAxis } from "recharts";
+
 import {
   Card,
   CardContent,
@@ -14,8 +16,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Area, AreaChart, XAxis, YAxis } from "recharts";
-import { CalendarDays, TrendingUp } from "lucide-react";
+import { useBookingsOverTime } from "@/hooks/use-dashboard-data";
 
 const chartConfig = {
   bookings: {

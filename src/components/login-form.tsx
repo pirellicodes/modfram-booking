@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { supabaseBrowser } from "@/lib/supabase-browser";
-import { toast } from "sonner";
 import { Github } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
+import { supabaseBrowser } from "@/lib/supabase-browser";
 
 export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);

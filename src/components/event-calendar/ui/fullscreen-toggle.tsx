@@ -1,5 +1,9 @@
 'use client';
 
+import { Maximize, Minimize } from 'lucide-react';
+import { AnimatePresence,motion } from 'motion/react';
+import { useEffect,useState } from 'react';
+
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,
@@ -7,9 +11,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Maximize, Minimize } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
-import { useState, useEffect } from 'react';
 
 interface FullScreenToggleProps {
   isFullscreen: boolean;

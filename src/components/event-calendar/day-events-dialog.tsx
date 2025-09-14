@@ -1,4 +1,8 @@
 'use client';
+import { useMemo } from 'react';
+import { useShallow } from 'zustand/shallow';
+
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -7,15 +11,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useEventCalendarStore } from '@/hooks/use-event';
 import { formatDate } from '@/lib/date';
-import { useMemo } from 'react';
-import { Events, TimeFormatType } from '@/types/event';
-import { EventCard } from './ui/events';
 import { getLocaleFromCode } from '@/lib/event';
-import { useShallow } from 'zustand/shallow';
+import { Events, TimeFormatType } from '@/types/event';
+
+import { EventCard } from './ui/events';
 
 const EmptyState = () => (
   <div className="text-muted-foreground py-12 text-center">

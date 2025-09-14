@@ -1,13 +1,15 @@
 'use client';
 
+import { isThisMonth, isThisWeek, isThisYear,isToday } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
-import { Button } from '../../ui/button';
-import { useEffect, useState } from 'react';
-import { isToday, isThisWeek, isThisMonth, isThisYear } from 'date-fns';
-import { CalendarViewType } from '@/types/event';
-import { motion, AnimatePresence } from 'motion/react';
+import { AnimatePresence,motion } from 'motion/react';
 import { useQueryState } from 'nuqs';
 import { parseAsIsoDate } from 'nuqs/server';
+import { useEffect, useState } from 'react';
+
+import { CalendarViewType } from '@/types/event';
+
+import { Button } from '../../ui/button';
 
 interface TodayButtonProps {
   viewType?: CalendarViewType;

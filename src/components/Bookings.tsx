@@ -1,20 +1,54 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo,useState } from "react";
+
 import { useBookings } from "@/hooks/use-bookings";
-import { BookingWithClient } from "@/lib/types";
+// Use the same interface as defined in use-bookings.ts
+interface BookingWithClient {
+  id: string;
+  client_id: string;
+  session_type: string;
+  category: string;
+  start_time: string;
+  end_time: string;
+  created_at: string;
+  status?: string;
+  notes?: string;
+  user_id: string;
+  client?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+}
+import {
+  format,
+  isAfter,
+  isBefore,
+  isToday,
+  isTomorrow,
+  parseISO,
+} from "date-fns";
+import {
+  CalendarIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  EyeIcon,
+  FilterIcon,
+  MoreHorizontalIcon,
+  Plus,
+  RefreshCwIcon,
+  SearchIcon,
+  XCircleIcon,
+} from "lucide-react";
+
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -31,6 +65,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -39,27 +74,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  CalendarIcon,
-  FilterIcon,
-  MoreHorizontalIcon,
-  EyeIcon,
-  XCircleIcon,
-  RefreshCwIcon,
-  ClockIcon,
-  CheckCircleIcon,
-  UserIcon,
-  SearchIcon,
-  Plus,
-} from "lucide-react";
-import {
-  format,
-  parseISO,
-  isAfter,
-  isBefore,
-  isToday,
-  isTomorrow,
-} from "date-fns";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function Bookings() {
   const { data: bookings, loading, error, refetch } = useBookings();

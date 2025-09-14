@@ -1,9 +1,12 @@
-import { EventPosition, Events } from '@/types/event';
-import { cn } from '@/lib/utils';
-import { Button } from '../ui/button';
-import { calculateDuration, formatTimeDisplay } from '@/lib/date';
-import { getColorClasses } from '@/lib/event';
-import { AnimatePresence, motion } from 'framer-motion';
+import { format } from "date-fns";
+import { AnimatePresence, motion } from "framer-motion";
+
+import { calculateDuration, formatTimeDisplay } from "@/lib/date";
+import { getColorClasses } from "@/lib/event";
+import { cn } from "@/lib/utils";
+import { EventPosition, Events } from "@/types/event";
+
+import { Button } from "../ui/button";
 
 type EventDialogTriggerProps = {
   event: Events;
@@ -14,7 +17,7 @@ type EventDialogTriggerProps = {
     event: Events,
     position: EventPosition,
     leftOffset: number,
-    rightOffset: number,
+    rightOffset: number
   ) => void;
 };
 
@@ -25,7 +28,7 @@ export const EventDialogTrigger = ({
   rightOffset,
   onClick,
 }: EventDialogTriggerProps) => {
-  const { bg } = getColorClasses(event.color);
+  const { bg } = getColorClasses(event.color || "gray");
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -40,7 +43,7 @@ export const EventDialogTrigger = ({
         exit={{ opacity: 0, y: -10, scale: 0.95 }}
         transition={{ duration: 0.2 }}
         style={{
-          position: 'absolute',
+          position: "absolute",
           top: `${position?.top}px`,
           height: `${position?.height}px`,
           left: `calc(${leftOffset}% + 4px)`,
@@ -50,21 +53,33 @@ export const EventDialogTrigger = ({
       >
         <Button
           className={cn(
-            'group absolute flex h-full w-full cursor-pointer flex-col items-start justify-start gap-0 overflow-hidden rounded bg-transparent p-2 text-white hover:bg-transparent',
-            'border-none shadow-none ring-0 focus:ring-0 focus:outline-none',
-            'transition-colors',
-            bg,
+            "group absolute flex h-full w-full cursor-pointer flex-col items-start justify-start gap-0 overflow-hidden rounded bg-transparent p-2 text-white hover:bg-transparent",
+            "border-none shadow-none ring-0 focus:ring-0 focus:outline-none",
+            "transition-colors",
+            bg
           )}
           onClick={handleClick}
         >
           <div className="text-xs font-medium sm:truncate">{event.title}</div>
           <div className="text-xs sm:truncate">
-            {formatTimeDisplay(event.startTime, '12')} -{' '}
-            {formatTimeDisplay(event.endTime, '12')}
+            {formatTimeDisplay(
+              event.startTime || format(event.start, "HH:mm"),
+              "12"
+            )}{" "}
+            -{" "}
+            {formatTimeDisplay(
+              event.endTime || format(event.end, "HH:mm"),
+              "12"
+            )}
           </div>
           {position?.height && position.height > 40 && (
             <div className="mt-1 text-xs sm:truncate">
-              {calculateDuration?.(event.startTime, event.endTime, 'auto')} Hour
+              {calculateDuration?.(
+                event.startTime || format(event.start, "HH:mm"),
+                event.endTime || format(event.end, "HH:mm"),
+                "auto"
+              )}{" "}
+              Hour
             </div>
           )}
         </Button>

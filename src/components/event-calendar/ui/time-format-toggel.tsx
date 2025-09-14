@@ -1,16 +1,18 @@
 'use client';
 
-import { Button } from '../../ui/button';
 import { Clock } from 'lucide-react';
+import { AnimatePresence,motion } from 'motion/react';
+import { useEffect,useState } from 'react';
+
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { useState, useEffect } from 'react';
 import { TimeFormatType } from '@/types/event';
-import { motion, AnimatePresence } from 'motion/react';
+
+import { Button } from '../../ui/button';
 
 interface TimeFormatToggleProps {
   format: TimeFormatType;

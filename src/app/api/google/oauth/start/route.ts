@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import { getAuthUrl } from "@/lib/google";
 import { supabaseServer } from "@/lib/supabase-server";
 
@@ -12,7 +13,7 @@ export async function GET() {
     }
 
     // Check if user is authenticated
-    const supabase = supabaseServer();
+    const supabase = await supabaseServer();
     const {
       data: { user },
       error: authError,

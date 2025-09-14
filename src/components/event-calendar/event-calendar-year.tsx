@@ -1,6 +1,5 @@
-'use client';
+"use client";
 
-import { useMemo, useCallback } from 'react';
 import {
   eachMonthOfInterval,
   endOfYear,
@@ -8,12 +7,15 @@ import {
   getMonth,
   isSameYear,
   startOfYear,
-} from 'date-fns';
-import { useEventCalendarStore } from '@/hooks/use-event';
-import { useShallow } from 'zustand/shallow';
-import { CalendarViewType, Events } from '@/types/event';
-import { MonthCard } from './ui/month-card';
-import { parseAsIsoDate, useQueryState } from 'nuqs';
+} from "date-fns";
+import { parseAsIsoDate, useQueryState } from "nuqs";
+import { useCallback,useMemo } from "react";
+import { useShallow } from "zustand/shallow";
+
+import { useEventCalendarStore } from "@/hooks/use-event";
+import { CalendarViewType, Events } from "@/types/event";
+
+import { MonthCard } from "./ui/month-card";
 
 interface CalendarYearProps {
   events: Events[];
@@ -34,14 +36,14 @@ export function EventCalendarYear({ events, currentDate }: CalendarYearProps) {
       openDayEventsDialog: state.openDayEventsDialog,
       setView: state.setView,
       viewSettings: state.viewSettings.year,
-    })),
+    }))
   );
 
   const [, setDate] = useQueryState(
-    'date',
+    "date",
     parseAsIsoDate.withDefault(new Date()).withOptions({
       shallow: false,
-    }),
+    })
   );
 
   const monthsInYear = useMemo(() => {
@@ -55,9 +57,9 @@ export function EventCalendarYear({ events, currentDate }: CalendarYearProps) {
     const counts = new Array(12).fill(0);
 
     events.forEach((event) => {
-      const eventDate = new Date(event.startDate);
+      const eventDate = event.start;
       if (isSameYear(eventDate, currentDate)) {
-        const dateKey = format(eventDate, 'yyyy-MM-dd');
+        const dateKey = format(eventDate, "yyyy-MM-dd");
         const monthIndex = getMonth(eventDate);
 
         (groupedEvents[dateKey] ||= []).push(event);
@@ -74,16 +76,16 @@ export function EventCalendarYear({ events, currentDate }: CalendarYearProps) {
       const newDate = new Date(
         month.getFullYear(),
         month.getMonth(),
-        currentDate.getDate(),
+        currentDate.getDate()
       );
       setDate(newDate);
     },
-    [setDate, setView, currentDate],
+    [setDate, setView, currentDate]
   );
 
   const handleDateClick = useCallback(
     (date: Date) => {
-      const dateKey = format(date, 'yyyy-MM-dd');
+      const dateKey = format(date, "yyyy-MM-dd");
       const eventsOnDate = eventsByDate[dateKey] || [];
       if (eventsOnDate.length > 0) {
         openDayEventsDialog(date, eventsOnDate);
@@ -91,12 +93,12 @@ export function EventCalendarYear({ events, currentDate }: CalendarYearProps) {
         openQuickAddDialog({ date });
       }
     },
-    [eventsByDate, openDayEventsDialog, openQuickAddDialog],
+    [eventsByDate, openDayEventsDialog, openQuickAddDialog]
   );
 
   const handleQuickAdd = useCallback(
     (date: Date) => openQuickAddDialog({ date }),
-    [openQuickAddDialog],
+    [openQuickAddDialog]
   );
 
   return (

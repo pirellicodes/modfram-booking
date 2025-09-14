@@ -1,6 +1,19 @@
 "use client";
 
 import {
+  Activity,
+  ArrowDownRight,
+  ArrowUpRight,
+  Calendar,
+  DollarSign,
+  Target,
+  TrendingUp,
+  Users,
+} from "lucide-react";
+
+import { Overview } from "@/components/dashboard/overview";
+import { RecentActivities } from "@/components/dashboard/recent-activities";
+import {
   Card,
   CardContent,
   CardDescription,
@@ -8,18 +21,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Overview } from "@/components/dashboard/overview";
-import { RecentActivities } from "@/components/dashboard/recent-activities";
-import {
-  TrendingUp,
-  Users,
-  DollarSign,
-  Calendar,
-  Target,
-  Activity,
-  ArrowUpRight,
-  ArrowDownRight,
-} from "lucide-react";
 
 function MetricCard({
   title,

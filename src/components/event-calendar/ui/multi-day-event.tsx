@@ -1,10 +1,12 @@
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { AnimatePresence,motion } from "motion/react";
 import { memo } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { Events } from "@/types/event";
+
+import { Button } from "@/components/ui/button";
+import { calculateDuration,formatTimeDisplay } from "@/lib/date";
 import { getColorClasses } from "@/lib/event";
-import { formatTimeDisplay, calculateDuration } from "@/lib/date";
+import { cn } from "@/lib/utils";
+import { Events } from "@/types/event";
 
 interface MultiDayEventProps {
   event: Events;
@@ -43,7 +45,7 @@ export const MultiDayEvent = ({
   const dayWidth = 100 / daysCount;
   const eventLeftPercent = startIndex * dayWidth;
   const eventWidthPercent = (endIndex - startIndex + 1) * dayWidth;
-  const { bg } = getColorClasses(event.color);
+  const { bg } = getColorClasses(event.color || "gray");
 
   return (
     <motion.div
@@ -70,11 +72,19 @@ export const MultiDayEvent = ({
       >
         <div className="text-xs font-medium sm:truncate">{event.title}</div>
         <div className="text-xs sm:truncate">
-          {formatTimeDisplay(event.startTime, "12")} -{" "}
-          {formatTimeDisplay(event.endTime, "12")}
+          {formatTimeDisplay(
+            event.startTime || format(event.start, "HH:mm"),
+            "12"
+          )}{" "}
+          -{" "}
+          {formatTimeDisplay(event.endTime || format(event.end, "HH:mm"), "12")}
         </div>
         <div className="mt-1 text-xs sm:truncate">
-          {calculateDuration(event.startTime, event.endTime, "auto")}
+          {calculateDuration(
+            event.startTime || format(event.start, "HH:mm"),
+            event.endTime || format(event.end, "HH:mm"),
+            "auto"
+          )}
         </div>
       </Button>
     </motion.div>

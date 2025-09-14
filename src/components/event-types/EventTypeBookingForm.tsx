@@ -1,8 +1,11 @@
 "use client";
 
+import { DollarSign,Plus, X } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
 import {
   Select,
   SelectContent,
@@ -11,11 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Plus, X, DollarSign } from "lucide-react";
-import { EventTypeWithParsedFields } from "@/lib/types";
-import { BookingLimits } from "@/types/event-types";
+import type { EventTypeWithParsedFields } from "@/types/event-types";
 import type { EventTypeFormData } from "@/types/forms";
 
 interface EventTypeBookingFormProps {
@@ -50,7 +49,10 @@ export function EventTypeBookingForm({
 
   const updateBookingField = (index: number, field: string, value: unknown) => {
     const newFields = [...(formData.bookingFields || [])];
-    newFields[index] = { ...newFields[index], [field]: value };
+    newFields[index] = {
+      ...(newFields[index] as Record<string, unknown>),
+      [field]: value,
+    };
     updateField("bookingFields", newFields);
   };
 
@@ -61,7 +63,7 @@ export function EventTypeBookingForm({
     updateField("bookingFields", newFields);
   };
 
-  const updateBookingLimit = (period: keyof BookingLimits, value: number) => {
+  const updateBookingLimit = (period: string, value: number) => {
     const limits = { ...formData.bookingLimits };
     if (value === 0 || !value) {
       delete limits[period];
@@ -147,7 +149,7 @@ export function EventTypeBookingForm({
               <Input
                 type="number"
                 min="0"
-                value={formData.bookingLimits?.day || ""}
+                value={(formData.bookingLimits?.day as number) || ""}
                 onChange={(e) =>
                   updateBookingLimit("day", parseInt(e.target.value) || 0)
                 }
@@ -160,7 +162,7 @@ export function EventTypeBookingForm({
               <Input
                 type="number"
                 min="0"
-                value={formData.bookingLimits?.week || ""}
+                value={(formData.bookingLimits?.week as number) || ""}
                 onChange={(e) =>
                   updateBookingLimit("week", parseInt(e.target.value) || 0)
                 }
@@ -173,7 +175,7 @@ export function EventTypeBookingForm({
               <Input
                 type="number"
                 min="0"
-                value={formData.bookingLimits?.month || ""}
+                value={(formData.bookingLimits?.month as number) || ""}
                 onChange={(e) =>
                   updateBookingLimit("month", parseInt(e.target.value) || 0)
                 }
@@ -186,7 +188,7 @@ export function EventTypeBookingForm({
               <Input
                 type="number"
                 min="0"
-                value={formData.bookingLimits?.year || ""}
+                value={(formData.bookingLimits?.year as number) || ""}
                 onChange={(e) =>
                   updateBookingLimit("year", parseInt(e.target.value) || 0)
                 }
@@ -311,7 +313,7 @@ export function EventTypeBookingForm({
                 <div>
                   <Label className="text-xs">Field Type</Label>
                   <Select
-                    value={field.type || "text"}
+                    value={(field as any)?.type || "text"}
                     onValueChange={(value) =>
                       updateBookingField(index, "type", value)
                     }
@@ -334,7 +336,7 @@ export function EventTypeBookingForm({
                 <div>
                   <Label className="text-xs">Name (ID)</Label>
                   <Input
-                    value={field.name || ""}
+                    value={(field as any)?.name || ""}
                     onChange={(e) =>
                       updateBookingField(index, "name", e.target.value)
                     }
@@ -346,7 +348,7 @@ export function EventTypeBookingForm({
               <div>
                 <Label className="text-xs">Label</Label>
                 <Input
-                  value={field.label || ""}
+                  value={(field as any)?.label || ""}
                   onChange={(e) =>
                     updateBookingField(index, "label", e.target.value)
                   }
@@ -357,7 +359,7 @@ export function EventTypeBookingForm({
               <div>
                 <Label className="text-xs">Placeholder</Label>
                 <Input
-                  value={field.placeholder || ""}
+                  value={(field as any)?.placeholder || ""}
                   onChange={(e) =>
                     updateBookingField(index, "placeholder", e.target.value)
                   }
@@ -368,7 +370,7 @@ export function EventTypeBookingForm({
               <div className="flex items-center space-x-2">
                 <Switch
                   id={`required-${index}`}
-                  checked={field.required || false}
+                  checked={(field as any)?.required || false}
                   onCheckedChange={(checked) =>
                     updateBookingField(index, "required", checked)
                   }

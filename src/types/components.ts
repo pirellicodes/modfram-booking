@@ -1,18 +1,70 @@
 // Component prop types and UI-specific interfaces
 
 import type { ReactNode } from "react";
-import type {
-  CalendarEvent,
-  CalendarSlotInfo,
-  ChartDataPoint,
-  Booking,
-  Client,
-  Event,
-  EventType,
-  BookingFilters,
-  ClientFilters,
-  PaginationMeta,
-} from "@/lib/types";
+
+import type { EventTypeWithParsedFields } from "@/types/event-types";
+
+// Define missing types locally since they're UI-specific
+export type CalendarEvent = {
+  id: string;
+  title: string;
+  start: Date;
+  end: Date;
+  allDay?: boolean;
+  resource?: unknown;
+};
+
+export type CalendarSlotInfo = {
+  start: Date;
+  end: Date;
+  slots: Date[];
+  action: "select" | "click" | "doubleClick";
+};
+
+export type ChartDataPoint = {
+  name: string;
+  value: number;
+  [key: string]: unknown;
+};
+
+export type Booking = {
+  id: string;
+  status: "confirmed" | "pending" | "cancelled";
+  [key: string]: unknown;
+};
+
+export type Client = {
+  id: string;
+  name: string;
+  email: string;
+  [key: string]: unknown;
+};
+
+export type Event = {
+  id: string;
+  title: string;
+  start: Date;
+  end: Date;
+  [key: string]: unknown;
+};
+
+export type BookingFilters = {
+  status?: string;
+  dateRange?: { start: Date; end: Date };
+  [key: string]: unknown;
+};
+
+export type ClientFilters = {
+  search?: string;
+  [key: string]: unknown;
+};
+
+export type PaginationMeta = {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
+};
 // Form component types (define locally since they're UI-specific)
 export type SelectOption = {
   label: string;
@@ -83,7 +135,7 @@ export interface CalendarProps {
 }
 
 export interface EventCalendarProps extends CalendarProps {
-  eventTypes?: EventType[];
+  eventTypes?: EventTypeWithParsedFields[];
   availability?: Array<{
     weekday: number;
     slots: Array<{ start: string; end: string }>;
@@ -225,7 +277,7 @@ export interface ClientFormProps {
 export interface BookingFormProps {
   booking?: Booking;
   clients?: Client[];
-  eventTypes?: EventType[];
+  eventTypes?: EventTypeWithParsedFields[];
   onSubmit: (data: Booking) => void | Promise<void>;
   onCancel?: () => void;
   loading?: boolean;
@@ -234,8 +286,8 @@ export interface BookingFormProps {
 }
 
 export interface EventTypeFormProps {
-  eventType?: EventType;
-  onSubmit: (data: EventType) => void | Promise<void>;
+  eventType?: EventTypeWithParsedFields;
+  onSubmit: (data: EventTypeWithParsedFields) => void | Promise<void>;
   onCancel?: () => void;
   loading?: boolean;
   error?: string;

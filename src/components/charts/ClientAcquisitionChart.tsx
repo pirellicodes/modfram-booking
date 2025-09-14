@@ -1,6 +1,8 @@
 "use client";
 
-import { useClientAcquisition } from "@/hooks/use-dashboard-data";
+import { TrendingUp,Users } from "lucide-react";
+import { Bar, BarChart, XAxis, YAxis } from "recharts";
+
 import {
   Card,
   CardContent,
@@ -14,8 +16,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Bar, BarChart, XAxis, YAxis } from "recharts";
-import { Users, TrendingUp } from "lucide-react";
+import { useClientAcquisition } from "@/hooks/use-dashboard-data";
 
 const chartConfig = {
   newClients: {

@@ -1,13 +1,21 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useEventCalendarStore } from "@/hooks/use-event";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Save } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
+import { useShallow } from "zustand/shallow";
+
+import { createEvent } from "@/app/actions";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { EVENT_DEFAULTS } from "@/constants/calendar-constant";
+import { useEventCalendarStore } from "@/hooks/use-event";
+import { getLocaleFromCode } from "@/lib/event";
+import { createEventSchema } from "@/lib/validations";
+
 import {
   Dialog,
   DialogContent,
@@ -19,12 +27,6 @@ import {
 import { ScrollArea } from "../ui/scroll-area";
 import { EventDetailsForm } from "./event-detail-form";
 import { EventPreviewCalendar } from "./event-preview-calendar";
-import { createEventSchema } from "@/lib/validations";
-import { EVENT_DEFAULTS } from "@/constants/calendar-constant";
-import { useShallow } from "zustand/shallow";
-import { toast } from "sonner";
-import { createEvent } from "@/app/actions";
-import { getLocaleFromCode } from "@/lib/event";
 
 type EventFormValues = z.infer<typeof createEventSchema>;
 
@@ -70,7 +72,15 @@ export default function EventCreateDialog() {
   const handleSubmit = async (formValues: EventFormValues) => {
     setIsSubmitting(true);
 
-    toast.promise(createEvent(formValues), {
+    // Transform form values to match expected API format
+    const eventData = {
+      ...formValues,
+      location:
+        typeof formValues.location === "string"
+          ? { type: "custom" as const, address: formValues.location }
+          : formValues.location,
+    };
+    toast.promise(createEvent(eventData), {
       loading: "Creating Event...",
       success: (result) => {
         form.reset(DEFAULT_FORM_VALUES);

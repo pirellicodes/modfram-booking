@@ -1,4 +1,6 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
+
 import {
   CalendarViewConfigs,
   CalendarViewType,
@@ -13,7 +15,6 @@ import {
   YearViewConfig,
 } from "@/types/event";
 import { Events } from "@/types/event";
-import { persist } from "zustand/middleware";
 
 const DEFAULT_VIEW_CONFIGS: CalendarViewConfigs = {
   day: {

@@ -1,6 +1,8 @@
 "use client";
 
-import { usePopularCategories } from "@/hooks/use-dashboard-data";
+import { PieChart as PieChartIcon, TrendingUp } from "lucide-react";
+import { Cell,Pie, PieChart } from "recharts";
+
 import {
   Card,
   CardContent,
@@ -14,8 +16,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Pie, PieChart, Cell } from "recharts";
-import { PieChart as PieChartIcon, TrendingUp } from "lucide-react";
+import { usePopularCategories } from "@/hooks/use-dashboard-data";
 
 const COLORS = [
   "hsl(var(--chart-1))",

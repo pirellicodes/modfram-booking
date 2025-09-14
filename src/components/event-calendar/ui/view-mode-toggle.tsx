@@ -1,5 +1,8 @@
 'use client';
 
+import { CalendarDays, List } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,
@@ -7,9 +10,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { CalendarDays, List } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { AnimatePresence, motion } from 'motion/react';
 import { ViewModeType } from '@/types/event';
 
 interface ViewModeToggleProps {

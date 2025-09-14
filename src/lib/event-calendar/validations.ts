@@ -1,6 +1,8 @@
 import { z } from 'zod';
-import { validateTimeOrder } from './date';
+
 import { CalendarViewType } from '@/types/event';
+
+import { validateTimeOrder } from './date';
 
 const timeRegex = /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/;
 

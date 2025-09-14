@@ -1,6 +1,7 @@
 "use client"
 
-import { ResponsiveContainer, Tooltip, XAxis, YAxis, BarChart, Bar } from "recharts"
+import { useTheme } from "next-themes"
+import { Bar,BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 
 import {
   Card,
@@ -9,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { useTheme } from "next-themes"
 
 const data = [
   {

@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useMemo, useEffect } from 'react';
 import {
   format,
   getDate,
@@ -10,12 +9,11 @@ import {
   Locale,
 } from 'date-fns';
 import { enUS } from 'date-fns/locale';
+import { AnimatePresence,motion } from 'framer-motion';
+import { Check, ChevronsUpDown } from 'lucide-react';
+import { useEffect,useMemo, useState } from 'react';
+
 import { Button } from '@/components/ui/button';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 import {
   Command,
   CommandEmpty,
@@ -24,11 +22,15 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command';
-import { Check, ChevronsUpDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { ScrollArea, ScrollBar } from '../../ui/scroll-area';
-import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
+
+import { ScrollArea, ScrollBar } from '../../ui/scroll-area';
 
 interface SearchDayPickerProps {
   locale?: Locale;

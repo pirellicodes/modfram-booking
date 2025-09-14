@@ -1,14 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Calendar,Plus, Search } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
-import { Search, Plus, Calendar } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { MainNav } from "@/components/main-nav";
+import { useEffect, useState } from "react";
+
 import { ModeToggle } from "@/components/mode-toggle";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   CommandDialog,
   CommandEmpty,
@@ -18,6 +15,8 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 
 type HeaderProps = React.HTMLAttributes<HTMLElement> & {
   fixed?: boolean;

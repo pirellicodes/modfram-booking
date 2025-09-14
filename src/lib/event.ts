@@ -1,23 +1,25 @@
 import {
   addDays,
   differenceInDays,
+  format,
   getWeek,
   Locale,
   startOfWeek,
-  format,
-} from 'date-fns';
-import { useMemo } from 'react';
+} from "date-fns";
+import { enUS } from "date-fns/locale";
+import { useMemo } from "react";
+
+import { EVENT_VIEW_CONFIG } from "@/components/event-calendar/event-list";
+import { CATEGORY_OPTIONS, LOCALES } from "@/constants/calendar-constant";
+import type { CalendarEvent } from "@/types/calendar";
 import {
   CalendarViewType,
   EventPosition,
   MultiDayEventRowType,
   TimeFormatType,
 } from "@/types/event";
-import { CATEGORY_OPTIONS, LOCALES } from "@/constants/calendar-constant";
-import { Event } from "@/db/schema";
-import { EVENT_VIEW_CONFIG } from "@/components/event-calendar/event-list";
+
 import { convertTimeToMinutes, formatTimeDisplay, isSameDay } from "./date";
-import { enUS } from "date-fns/locale";
 
 /**
  * @namespace CalendarHooks
@@ -44,16 +46,16 @@ import { enUS } from "date-fns/locale";
 export function useWeekDays(
   currentDate: Date,
   daysInWeek: number,
-  locale?: Locale,
+  locale?: Locale
 ) {
   const weekStart = useMemo(
     () => startOfWeek(currentDate, { locale }),
-    [currentDate, locale],
+    [currentDate, locale]
   );
 
   const weekNumber = useMemo(
     () => getWeek(currentDate, { locale }),
-    [currentDate, locale],
+    [currentDate, locale]
   );
 
   const weekDays = useMemo(() => {
@@ -89,16 +91,16 @@ export function useWeekDays(
  * @example
  * const { singleDayEvents, multiDayEvents } = useFilteredEvents(events, weekDays);
  */
-export function useFilteredEvents(events: EventTypes[], daysInWeek: Date[]) {
+export function useFilteredEvents(events: CalendarEvent[], daysInWeek: Date[]) {
   return useMemo(() => {
-    const singleDayEvents: EventTypes[] = [];
-    const multiDayEvents: EventTypes[] = [];
+    const singleDayEvents: CalendarEvent[] = [];
+    const multiDayEvents: CalendarEvent[] = [];
 
     const [firstDayOfWeek, lastDayOfWeek] = [daysInWeek[0], daysInWeek[6]];
 
     events.forEach((event) => {
-      const startDate = new Date(event.startDate);
-      const endDate = new Date(event.endDate);
+      const startDate = event.start;
+      const endDate = event.end;
       const dayDiff = differenceInDays(endDate, startDate);
 
       const isSingleDay = dayDiff <= 1;
@@ -136,15 +138,15 @@ export function useFilteredEvents(events: EventTypes[], daysInWeek: Date[]) {
  * const eventPositions = useEventPositions(singleDayEvents, weekDays, 60);
  */
 export function useEventPositions(
-  singleDayEvents: EventTypes[],
+  singleDayEvents: CalendarEvent[],
   daysInWeek: Date[],
-  hourHeight: number,
+  hourHeight: number
 ) {
   return useMemo(() => {
     const positions: Record<string, EventPosition> = {};
     const dayEvents: Record<
       number,
-      Array<{ event: EventTypes; start: number; end: number }>
+      Array<{ event: CalendarEvent; start: number; end: number }>
     > = {};
 
     // Initialize day events structure
@@ -154,14 +156,14 @@ export function useEventPositions(
 
     // Group events by day and convert times to minutes
     singleDayEvents.forEach((event) => {
-      const eventDate = new Date(event.startDate);
+      const eventDate = event.start;
       const dayIndex = daysInWeek.findIndex((day) => isSameDay(day, eventDate));
 
       if (dayIndex !== -1) {
         dayEvents[dayIndex].push({
           event,
-          start: convertTimeToMinutes(event.startTime),
-          end: convertTimeToMinutes(event.endTime),
+          start: convertTimeToMinutes(format(event.start, "HH:mm")),
+          end: convertTimeToMinutes(format(event.end, "HH:mm")),
         });
       }
     });
@@ -224,16 +226,16 @@ export function useEventPositions(
  * const multiDayRows = useMultiDayEventRows(multiDayEvents, weekDays);
  */
 export function useMultiDayEventRows(
-  multiDayEvents: EventTypes[],
-  daysInWeek: Date[],
+  multiDayEvents: CalendarEvent[],
+  daysInWeek: Date[]
 ) {
   return useMemo(() => {
-    const rows: Array<MultiDayEventRowType & { event: EventTypes }> = [];
+    const rows: Array<MultiDayEventRowType & { event: CalendarEvent }> = [];
     const [weekStart, weekEnd] = [daysInWeek[0], daysInWeek[6]];
 
     multiDayEvents.forEach((event) => {
-      const startDate = new Date(event.startDate);
-      const endDate = new Date(event.endDate);
+      const startDate = event.start;
+      const endDate = event.end;
 
       // Normalize times for comparison
       [startDate, endDate].forEach((d) => d.setHours(12, 0, 0, 0));
@@ -247,7 +249,7 @@ export function useMultiDayEventRows(
       if (isVisibleInWeek) {
         // Calculate visible range in week
         let startDayIndex = daysInWeek.findIndex((d) =>
-          isSameDay(d, startDate),
+          isSameDay(d, startDate)
         );
         let endDayIndex = daysInWeek.findIndex((d) => isSameDay(d, endDate));
 
@@ -260,7 +262,7 @@ export function useMultiDayEventRows(
           rows.some(
             (r) =>
               r.row === rowIndex &&
-              !(endDayIndex < r.startIndex || startDayIndex > r.endIndex),
+              !(endDayIndex < r.startIndex || startDayIndex > r.endIndex)
           )
         ) {
           rowIndex++;
@@ -289,14 +291,17 @@ export function useMultiDayEventRows(
  * @example
  * const dayEventPositions = useDayEventPositions(dayEvents, 60);
  */
-export function useDayEventPositions(events: EventTypes[], hourHeight: number) {
+export function useDayEventPositions(
+  events: CalendarEvent[],
+  hourHeight: number
+) {
   return useMemo(() => {
     const positions: Record<string, EventPosition> = {};
 
     // Convert event times to minutes for easier comparison
     const timeRanges = events.map((event) => {
-      const start = convertTimeToMinutes(event.startTime);
-      const end = convertTimeToMinutes(event.endTime);
+      const start = convertTimeToMinutes(format(event.start, "HH:mm"));
+      const end = convertTimeToMinutes(format(event.end, "HH:mm"));
       return { event, start, end };
     });
 
@@ -316,7 +321,7 @@ export function useDayEventPositions(events: EventTypes[], hourHeight: number) {
 
         // Check if this column is available
         const available = !columns[columnIndex].some(
-          (endTime) => start < endTime,
+          (endTime) => start < endTime
         );
 
         if (available) {
@@ -369,19 +374,19 @@ export function useDayEventPositions(events: EventTypes[], hourHeight: number) {
  * const filteredEvents = useEventFilter(events, currentDate, CalendarViewType.WEEK);
  */
 export function useEventFilter(
-  events: EventTypes[],
+  events: CalendarEvent[],
   currentDate: Date,
-  viewType: CalendarViewType,
+  viewType: CalendarViewType
 ) {
   return useMemo(() => {
     try {
       const { filterFn } = EVENT_VIEW_CONFIG[viewType];
       return events.filter((event) => {
-        const eventDate = new Date(event.startDate);
+        const eventDate = event.start;
         return filterFn(eventDate, currentDate);
       });
     } catch (error) {
-      console.error('Event filtering error:', error);
+      console.error("Event filtering error:", error);
       return [];
     }
   }, [events, currentDate, viewType]);
@@ -400,41 +405,35 @@ export function useEventFilter(
  * const groupedEvents = useEventGrouper(events, CalendarViewType.DAY, TimeFormatType.HOUR_12);
  */
 export function useEventGrouper(
-  events: EventTypes[],
+  events: CalendarEvent[],
   viewType: CalendarViewType,
   timeFormat: TimeFormatType,
-  locale?: Locale,
+  locale?: Locale
 ) {
   return useMemo(() => {
     const { groupFormat, titleFormat } = EVENT_VIEW_CONFIG[viewType];
     const isDayView = viewType === CalendarViewType.DAY;
 
-    const groupMap = events.reduce(
-      (acc, event) => {
-        const eventDate = new Date(event.startDate);
-        const groupKey = isDayView
-          ? event.startTime
-          : format(eventDate, groupFormat, { locale });
+    const groupMap = events.reduce((acc, event) => {
+      const eventDate = (event as any).startDate || event.start;
+      const groupKey = isDayView
+        ? (event as any).startTime || format(event.start, "HH:mm")
+        : format(eventDate, groupFormat, { locale });
 
-        const groupTitle = isDayView
-          ? formatTimeDisplay(groupKey, timeFormat)
-          : format(eventDate, titleFormat, { locale });
+      const groupTitle = isDayView
+        ? formatTimeDisplay(groupKey, timeFormat)
+        : format(eventDate, titleFormat, { locale });
 
-        if (!acc[groupKey]) {
-          acc[groupKey] = {
-            key: groupKey,
-            title: groupTitle,
-            events: [],
-          };
-        }
-        acc[groupKey].events.push(event);
-        return acc;
-      },
-      {} as Record<
-        string,
-        { key: string; title: string; events: EventTypes[] }
-      >,
-    );
+      if (!acc[groupKey]) {
+        acc[groupKey] = {
+          key: groupKey,
+          title: groupTitle,
+          events: [],
+        };
+      }
+      acc[groupKey].events.push(event);
+      return acc;
+    }, {} as Record<string, { key: string; title: string; events: CalendarEvent[] }>);
 
     return Object.values(groupMap).sort((a, b) => a.key.localeCompare(b.key));
   }, [events, viewType, timeFormat, locale]);
@@ -461,7 +460,7 @@ export function getContrastColor(hexColor: string): string {
     .match(/.{2}/g)!
     .map((x) => parseInt(x, 16));
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance > 0.5 ? '#000000' : '#ffffff';
+  return luminance > 0.5 ? "#000000" : "#ffffff";
 }
 
 /**
@@ -490,93 +489,93 @@ export function getCategoryLabel(categoryValue: string) {
  */
 export const COLOR_CLASSES = {
   blue: {
-    bg: 'bg-blue-700 hover:bg-blue-800',
-    border: 'border-blue-800 hover:border-blue-700',
-    text: 'text-blue-800 hover:text-blue-700',
+    bg: "bg-blue-700 hover:bg-blue-800",
+    border: "border-blue-800 hover:border-blue-700",
+    text: "text-blue-800 hover:text-blue-700",
     badge: {
-      bg: 'bg-blue-700 dark:bg-blue-900/20',
-      text: 'text-blue-800 dark:text-blue-200',
+      bg: "bg-blue-700 dark:bg-blue-900/20",
+      text: "text-blue-800 dark:text-blue-200",
     },
   },
   red: {
-    bg: 'bg-red-700 hover:bg-red-800',
-    border: 'border-red-800 hover:border-red-700',
-    text: 'text-red-800 hover:text-red-700',
+    bg: "bg-red-700 hover:bg-red-800",
+    border: "border-red-800 hover:border-red-700",
+    text: "text-red-800 hover:text-red-700",
     badge: {
-      bg: 'bg-red-700 dark:bg-red-900/20',
-      text: 'text-red-800 dark:text-red-200',
+      bg: "bg-red-700 dark:bg-red-900/20",
+      text: "text-red-800 dark:text-red-200",
     },
   },
   lime: {
-    bg: 'bg-lime-700 hover:bg-lime-800',
-    border: 'border-lime-800 hover:border-lime-700',
-    text: 'text-lime-800 hover:text-lime-700',
+    bg: "bg-lime-700 hover:bg-lime-800",
+    border: "border-lime-800 hover:border-lime-700",
+    text: "text-lime-800 hover:text-lime-700",
     badge: {
-      bg: 'bg-lime-700 dark:bg-lime-900/20',
-      text: 'text-lime-800 dark:text-lime-900',
+      bg: "bg-lime-700 dark:bg-lime-900/20",
+      text: "text-lime-800 dark:text-lime-900",
     },
   },
   green: {
-    bg: 'bg-green-700 hover:bg-green-800',
-    border: 'border-green-800 hover:border-green-700',
-    text: 'text-green-800 hover:text-green-700',
+    bg: "bg-green-700 hover:bg-green-800",
+    border: "border-green-800 hover:border-green-700",
+    text: "text-green-800 hover:text-green-700",
     badge: {
-      bg: 'bg-green-700 dark:bg-green-900/20',
-      text: 'text-green-800 dark:text-green-200',
+      bg: "bg-green-700 dark:bg-green-900/20",
+      text: "text-green-800 dark:text-green-200",
     },
   },
   amber: {
-    bg: 'bg-amber-700 hover:bg-amber-800',
-    border: 'border-amber-800 hover:border-amber-700',
-    text: 'text-amber-800 hover:text-amber-700',
+    bg: "bg-amber-700 hover:bg-amber-800",
+    border: "border-amber-800 hover:border-amber-700",
+    text: "text-amber-800 hover:text-amber-700",
     badge: {
-      bg: 'bg-amber-700 dark:bg-amber-900/20',
-      text: 'text-amber-800 dark:text-amber-900',
+      bg: "bg-amber-700 dark:bg-amber-900/20",
+      text: "text-amber-800 dark:text-amber-900",
     },
   },
   yellow: {
-    bg: 'bg-yellow-700 hover:bg-yellow-800',
-    border: 'border-yellow-800 hover:border-yellow-700',
-    text: 'text-yellow-800 hover:text-yellow-700',
+    bg: "bg-yellow-700 hover:bg-yellow-800",
+    border: "border-yellow-800 hover:border-yellow-700",
+    text: "text-yellow-800 hover:text-yellow-700",
     badge: {
-      bg: 'bg-yellow-700 dark:bg-yellow-900/20',
-      text: 'text-yellow-800 dark:text-yellow-900',
+      bg: "bg-yellow-700 dark:bg-yellow-900/20",
+      text: "text-yellow-800 dark:text-yellow-900",
     },
   },
   purple: {
-    bg: 'bg-purple-700 hover:bg-purple-800',
-    border: 'border-purple-800 hover:border-purple-700',
-    text: 'text-purple-800 hover:text-purple-700',
+    bg: "bg-purple-700 hover:bg-purple-800",
+    border: "border-purple-800 hover:border-purple-700",
+    text: "text-purple-800 hover:text-purple-700",
     badge: {
-      bg: 'bg-purple-700 dark:bg-purple-900/20',
-      text: 'text-purple-800 dark:text-purple-200',
+      bg: "bg-purple-700 dark:bg-purple-900/20",
+      text: "text-purple-800 dark:text-purple-200",
     },
   },
   pink: {
-    bg: 'bg-pink-700 hover:bg-pink-800',
-    border: 'border-pink-800 hover:border-pink-700',
-    text: 'text-pink-800 hover:text-pink-700',
+    bg: "bg-pink-700 hover:bg-pink-800",
+    border: "border-pink-800 hover:border-pink-700",
+    text: "text-pink-800 hover:text-pink-700",
     badge: {
-      bg: 'bg-pink-700 dark:bg-pink-900/20',
-      text: 'text-pink-800 dark:text-pink-200',
+      bg: "bg-pink-700 dark:bg-pink-900/20",
+      text: "text-pink-800 dark:text-pink-200",
     },
   },
   indigo: {
-    bg: 'bg-indigo-700 hover:bg-indigo-800',
-    border: 'border-indigo-800 hover:border-indigo-700',
-    text: 'text-indigo-800 hover:text-indigo-700',
+    bg: "bg-indigo-700 hover:bg-indigo-800",
+    border: "border-indigo-800 hover:border-indigo-700",
+    text: "text-indigo-800 hover:text-indigo-700",
     badge: {
-      bg: 'bg-indigo-700 dark:bg-indigo-900/20',
-      text: 'text-indigo-800 dark:text-indigo-200',
+      bg: "bg-indigo-700 dark:bg-indigo-900/20",
+      text: "text-indigo-800 dark:text-indigo-200",
     },
   },
   teal: {
-    bg: 'bg-teal-700 hover:bg-teal-800',
-    border: 'border-teal-800 hover:border-teal-700',
-    text: 'text-teal-800 hover:text-teal-700',
+    bg: "bg-teal-700 hover:bg-teal-800",
+    border: "border-teal-800 hover:border-teal-700",
+    text: "text-teal-800 hover:text-teal-700",
     badge: {
-      bg: 'bg-teal-700 dark:bg-teal-900/20',
-      text: 'text-teal-800 dark:text-teal-200',
+      bg: "bg-teal-700 dark:bg-teal-900/20",
+      text: "text-teal-800 dark:text-teal-200",
     },
   },
 } satisfies Record<

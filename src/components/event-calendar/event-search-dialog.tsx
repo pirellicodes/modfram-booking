@@ -1,12 +1,14 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Loader2, Search } from "lucide-react";
-import { Input } from "../ui/input";
-import { EventCard } from "./ui/events";
-import { Events, TimeFormatType } from "@/types/event";
-import { ScrollArea } from "../ui/scroll-area";
-import { SearchEventFilter } from "@/lib/validations";
+import { useCallback, useEffect, useRef,useState } from "react";
+
 import { searchEvents } from "@/app/actions";
+import { SearchEventFilter } from "@/lib/validations";
+import { Events, TimeFormatType } from "@/types/event";
+
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Input } from "../ui/input";
+import { ScrollArea } from "../ui/scroll-area";
+import { EventCard } from "./ui/events";
 interface EventSearchDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;

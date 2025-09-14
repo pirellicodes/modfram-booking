@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { exchangeCodeForTokens } from "@/lib/google";
 import { supabaseServer } from "@/lib/supabase-server";
 
@@ -27,7 +28,7 @@ export async function GET(request: NextRequest) {
     let userId = null;
     if (state) {
       try {
-        const stateData = JSON.parse(Buffer.from(state, 'base64').toString());
+        const stateData = JSON.parse(Buffer.from(state, "base64").toString());
         userId = stateData.userId;
       } catch (err) {
         console.error("Invalid state parameter:", err);
@@ -42,8 +43,11 @@ export async function GET(request: NextRequest) {
     }
 
     // Get user from Supabase
-    const supabase = supabaseServer();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const supabase = await supabaseServer();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
     if (authError || !user) {
       return NextResponse.redirect(
@@ -54,7 +58,7 @@ export async function GET(request: NextRequest) {
     // Store tokens in user_integrations table
     const integrationData = {
       user_id: user.id,
-      integration_type: 'google_calendar',
+      integration_type: "google_calendar",
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token,
       token_expires_at: tokens.expiry_date
@@ -84,7 +88,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(
       `${process.env.NEXT_PUBLIC_URL}/admin/settings/integrations?success=google_connected`
     );
-
   } catch (error) {
     console.error("Google OAuth callback error:", error);
     return NextResponse.redirect(

@@ -1,20 +1,21 @@
 'use client';
 
-import React, { useEffect, useMemo } from 'react';
-
-import { EventsList } from './event-list';
-import { EventCalendarDay } from './event-calendar-day';
-import { EventCalendarWeek } from './event-calendar-week';
-import EventDialog from './event-dialog';
-import { useEventCalendarStore } from '@/hooks/use-event';
-import { EventCalendarMonth } from './event-calendar-month';
-import { MonthDayEventsDialog } from './day-events-dialog';
-import EventCreateDialog from './event-create-dialog';
+import React, { useMemo } from 'react';
 import { useShallow } from 'zustand/shallow';
-import { EventCalendarYear } from './event-calendar-year';
-import { EventCalendarDays } from './event-calendar-days';
-import CalendarToolbar from './event-calendar-toolbar';
+
+import { useEventCalendarStore } from '@/hooks/use-event';
 import { Events } from '@/types/event';
+
+import { MonthDayEventsDialog } from './day-events-dialog';
+import { EventCalendarDay } from './event-calendar-day';
+import { EventCalendarDays } from './event-calendar-days';
+import { EventCalendarMonth } from './event-calendar-month';
+import CalendarToolbar from './event-calendar-toolbar';
+import { EventCalendarWeek } from './event-calendar-week';
+import { EventCalendarYear } from './event-calendar-year';
+import EventCreateDialog from './event-create-dialog';
+import EventDialog from './event-dialog';
+import { EventsList } from './event-list';
 
 interface EventCalendarProps {
   events: Events[];

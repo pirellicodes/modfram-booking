@@ -8,6 +8,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+
 import { useBookingsOverTime } from "@/hooks/use-dashboard-data";
 
 export function Overview() {

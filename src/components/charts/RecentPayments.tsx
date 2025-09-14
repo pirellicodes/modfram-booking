@@ -1,6 +1,10 @@
 "use client";
 
-import { useRecentPayments } from "@/hooks/use-dashboard-data";
+import { formatDistanceToNow } from "date-fns";
+import { ArrowUpRight,CreditCard } from "lucide-react";
+
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -16,11 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { CreditCard, ArrowUpRight } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
-import type { Payment } from "@/types";
+import { useRecentPayments } from "@/hooks/use-dashboard-data";
 
 interface RecentPaymentsProps {
   className?: string;
@@ -148,27 +148,33 @@ export function RecentPayments({
                     <div className="flex items-center gap-3">
                       <Avatar className="h-8 w-8">
                         <AvatarFallback>
-                          {client.name
+                          {(client as any)?.name
                             .split(" ")
-                            .map((n) => n[0])
+                            .map((n: any) => n[0])
                             .join("")
                             .toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <div className="font-semibold">{client.name}</div>
+                        <div className="font-semibold">
+                          {(client as any)?.name}
+                        </div>
                         <div className="text-sm text-muted-foreground">
-                          {client.email}
+                          {(client as any)?.email}
                         </div>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div>
-                      <div className="font-medium">{booking.session_type}</div>
-                      {booking.category && (
+                      <div className="font-medium">
+                        {String(booking.session_type || "")}
+                      </div>
+                      {Boolean(
+                        booking.category && String(booking.category)
+                      ) && (
                         <div className="text-sm text-muted-foreground">
-                          {booking.category}
+                          {String(booking.category || "")}
                         </div>
                       )}
                     </div>
@@ -186,9 +192,12 @@ export function RecentPayments({
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="text-sm">
-                      {formatDistanceToNow(new Date(payment.created_at), {
-                        addSuffix: true,
-                      })}
+                      {formatDistanceToNow(
+                        new Date(payment.created_at as string),
+                        {
+                          addSuffix: true,
+                        }
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

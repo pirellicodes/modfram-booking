@@ -1,11 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { format, formatDistance } from "date-fns";
+import {
+  Calendar,
+  Clock,
+  Edit2,
+  Filter,
+  MapPin,
+  Plus,
+  Search,
+  Trash2,
+  User} from "lucide-react";
+import { useEffect,useState } from "react";
+
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -19,21 +31,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import {
-  Plus,
-  Calendar,
-  Clock,
-  MapPin,
-  User,
-  Edit2,
-  Trash2,
-  Search,
-  Filter
-} from "lucide-react";
-import { format, formatDistance } from "date-fns";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Event {
   id: string;

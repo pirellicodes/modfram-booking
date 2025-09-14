@@ -1,17 +1,83 @@
 // API request and response types
 
-import type {
-  Client,
-  Event,
-  Booking,
-  Payment,
-  Availability,
-  EventType,
-  PaginationMeta,
-  BookingFilters,
-  ClientFilters,
-  PaginationParams,
-} from "@/types";
+import type { EventType } from "@/types";
+
+// Define missing types locally
+export interface Client {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  notes?: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface Event {
+  id: string;
+  title: string;
+  start: Date;
+  end: Date;
+  notes?: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface Booking {
+  id: string;
+  client_id?: string;
+  start: Date;
+  end: Date;
+  status: "pending" | "confirmed" | "cancelled";
+  notes?: string;
+  event_type_id?: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface Payment {
+  id: string;
+  booking_id: string;
+  amount_cents: number;
+  currency: string;
+  status: "pending" | "completed" | "failed";
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface Availability {
+  id: string;
+  weekday: number;
+  slots: Array<{
+    start: string;
+    end: string;
+  }>;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  total_pages: number;
+}
+
+export interface BookingFilters {
+  status?: Booking["status"];
+  client_id?: string;
+  date_from?: string;
+  date_to?: string;
+}
+
+export interface ClientFilters {
+  search?: string;
+}
+
+export interface PaginationParams {
+  page?: number;
+  limit?: number;
+}
 
 // Base API response structure
 export interface ApiResponse<TData = unknown> {

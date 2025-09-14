@@ -1,7 +1,8 @@
-import { cn } from '@/lib/utils';
 import { FormatOptions, isSameDay, Locale } from 'date-fns';
-import { useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { useMemo } from 'react';
+
+import { cn } from '@/lib/utils';
 
 interface WeekDayHeadersProps {
   weekNumber?: number;

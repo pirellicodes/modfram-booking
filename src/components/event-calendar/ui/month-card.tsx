@@ -1,25 +1,25 @@
-import { Button } from '@/components/ui/button';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { isSameDay } from '@/lib/date';
-import { getColorClasses } from '@/lib/event';
-import { cn } from '@/lib/utils';
 import {
   eachDayOfInterval,
   endOfMonth,
   format,
   getDate,
-  getMonth,
   isSameMonth,
   isSameYear,
   startOfMonth,
-} from 'date-fns';
-import { ChevronRight, Plus } from 'lucide-react';
-import { memo, useMemo } from 'react';
-import { Events, YearViewConfig } from '@/types/event';
+} from "date-fns";
+import { ChevronRight, Plus } from "lucide-react";
+import { memo, useMemo } from "react";
+
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { isSameDay } from "@/lib/date";
+import { getColorClasses } from "@/lib/event";
+import { cn } from "@/lib/utils";
+import { Events, YearViewConfig } from "@/types/event";
 
 interface MonthCardProps {
   month: Date;
@@ -45,9 +45,9 @@ const DayCell = memo(({ day, events, isToday, onClick }: DayCellProps) => {
   const tooltipContent = useMemo(
     () =>
       hasDayEvents
-        ? `${events.length} Event on ${format(day, 'd MMMM yyyy')}`
-        : format(day, 'd MMMM yyyy'),
-    [hasDayEvents, events.length, day],
+        ? `${events.length} Event on ${format(day, "d MMMM yyyy")}`
+        : format(day, "d MMMM yyyy"),
+    [hasDayEvents, events.length, day]
   );
 
   return (
@@ -55,9 +55,9 @@ const DayCell = memo(({ day, events, isToday, onClick }: DayCellProps) => {
       <TooltipTrigger asChild>
         <button
           className={cn(
-            'relative flex h-10 w-full items-center justify-center rounded-full p-0 text-[11px] transition-colors',
-            isToday ? 'bg-blue-500 font-bold text-white' : '',
-            hasDayEvents && !isToday ? 'bg-primary/10 font-medium' : '',
+            "relative flex h-10 w-full items-center justify-center rounded-full p-0 text-[11px] transition-colors",
+            isToday ? "bg-blue-500 font-bold text-white" : "",
+            hasDayEvents && !isToday ? "bg-primary/10 font-medium" : ""
           )}
           onClick={onClick}
         >
@@ -74,7 +74,7 @@ const DayCell = memo(({ day, events, isToday, onClick }: DayCellProps) => {
   );
 });
 
-DayCell.displayName = 'DayCell';
+DayCell.displayName = "DayCell";
 
 const MonthDaysGrid = memo(
   ({
@@ -93,7 +93,7 @@ const MonthDaysGrid = memo(
 
     return (
       <div className="grid grid-cols-7 gap-1 text-center text-xs">
-        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
+        {["S", "M", "T", "W", "T", "F", "S"].map((day, i) => (
           <div
             key={i}
             className="text-muted-foreground mb-1 text-[10px] font-medium"
@@ -102,7 +102,7 @@ const MonthDaysGrid = memo(
           </div>
         ))}
         {daysInMonth.map((day) => {
-          const dateKey = format(day, 'yyyy-MM-dd');
+          const dateKey = format(day, "yyyy-MM-dd");
           return (
             <DayCell
               key={dateKey}
@@ -115,10 +115,10 @@ const MonthDaysGrid = memo(
         })}
       </div>
     );
-  },
+  }
 );
 
-MonthDaysGrid.displayName = 'MonthDaysGrid';
+MonthDaysGrid.displayName = "MonthDaysGrid";
 
 const MonthCard = memo(
   ({
@@ -139,11 +139,11 @@ const MonthCard = memo(
     return (
       <div
         className={cn(
-          'group flex flex-col rounded-lg border p-3 shadow-sm transition-all',
-          'hover:border-primary hover:shadow-md',
+          "group flex flex-col rounded-lg border p-3 shadow-sm transition-all",
+          "hover:border-primary hover:shadow-md",
           isCurrentMonth &&
             yearViewConfig.highlightCurrentMonth &&
-            'border-blue-500 bg-blue-50/50 dark:bg-blue-950/10',
+            "border-blue-500 bg-blue-50/50 dark:bg-blue-950/10"
         )}
       >
         <div className="mb-3 flex items-center justify-between">
@@ -152,21 +152,21 @@ const MonthCard = memo(
               <Button
                 variant="ghost"
                 className={cn(
-                  'text-md flex h-auto items-center gap-1 p-0 font-medium hover:cursor-pointer',
-                  isCurrentMonth && 'text-blue-600 dark:text-blue-400',
-                  'transition-all hover:translate-x-0.5',
+                  "text-md flex h-auto items-center gap-1 p-0 font-medium hover:cursor-pointer",
+                  isCurrentMonth && "text-blue-600 dark:text-blue-400",
+                  "transition-all hover:translate-x-0.5"
                 )}
                 onClick={() => {
                   onMonthClick(month);
                 }}
               >
                 {yearViewConfig.showMonthLabels && (
-                  <span>{format(month, 'MMMM')}</span>
+                  <span>{format(month, "MMMM")}</span>
                 )}
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top">
-              View {format(month, 'MMMM yyyy')}
+              View {format(month, "MMMM yyyy")}
             </TooltipContent>
           </Tooltip>
           <Tooltip>
@@ -181,7 +181,7 @@ const MonthCard = memo(
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top">
-              Add event in {format(month, 'MMMM')}
+              Add event in {format(month, "MMMM")}
             </TooltipContent>
           </Tooltip>
         </div>
@@ -195,29 +195,29 @@ const MonthCard = memo(
         {hasEvents && yearViewConfig.enableEventPreview ? (
           <div className="space-y-1 pt-1">
             {Object.entries(eventsByDate)
-              .filter(([key]) => key.startsWith(format(month, 'yyyy-MM')))
+              .filter(([key]) => key.startsWith(format(month, "yyyy-MM")))
               .slice(0, yearViewConfig.previewEventsPerMonth)
               .flatMap(([dateKey, events]) =>
                 events.slice(0, 1).map((event) => {
-                  const colorClasses = getColorClasses(event.color);
+                  const colorClasses = getColorClasses(event.color || "gray");
                   return (
                     <button
                       key={event.id}
                       className={cn(
-                        'w-full truncate rounded-md px-2 py-1.5 text-left text-xs',
-                        colorClasses?.bg,
+                        "w-full truncate rounded-md px-2 py-1.5 text-left text-xs",
+                        colorClasses?.bg
                       )}
                       onClick={() => onEventClick(event)}
                     >
                       <span className="flex items-center text-white">
                         <span className="mr-1 font-medium">
-                          {format(new Date(dateKey), 'd')}
+                          {format(new Date(dateKey), "d")}
                         </span>
                         {event.title}
                       </span>
                     </button>
                   );
-                }),
+                })
               )}
             {eventCount > 3 && yearViewConfig.showMoreEventsIndicator && (
               <Button
@@ -226,7 +226,7 @@ const MonthCard = memo(
                 className="hover:bg-accent/40 mt-1 h-7 w-full justify-between px-2 py-1 text-xs"
                 onClick={() =>
                   onMonthClick(
-                    new Date(month.getFullYear(), month.getMonth(), 30),
+                    new Date(month.getFullYear(), month.getMonth(), 30)
                   )
                 }
               >
@@ -238,9 +238,9 @@ const MonthCard = memo(
         ) : null}
       </div>
     );
-  },
+  }
 );
 
-MonthCard.displayName = 'MonthCard';
+MonthCard.displayName = "MonthCard";
 
 export { MonthCard };

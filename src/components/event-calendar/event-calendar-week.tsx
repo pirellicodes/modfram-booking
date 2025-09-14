@@ -1,29 +1,31 @@
-'use client';
+"use client";
 
-import { useState, useMemo, useRef, useCallback } from 'react';
-import { formatDate, generateTimeSlots, isSameDay } from '@/lib/date';
-import { ScrollArea } from '../ui/scroll-area';
-import { Events, HoverPositionType } from '@/types/event';
-import { WeekDayHeaders } from './ui/week-days-header';
-import { TimeColumn } from './ui/time-column';
-import { CurrentTimeIndicator } from './ui/current-time-indicator';
-import { HoverTimeIndicator } from './ui/hover-time-indicator';
-import { TimeGrid } from './ui/time-grid';
-import { EventDialogTrigger } from './event-dialog-trigger';
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { useCallback,useMemo, useRef, useState } from "react";
+import { useShallow } from "zustand/shallow";
+
+import { useEventCalendarStore } from "@/hooks/use-event";
+import { formatDate, generateTimeSlots, isSameDay } from "@/lib/date";
 import {
   getLocaleFromCode,
   useEventPositions,
   useFilteredEvents,
   useMultiDayEventRows,
   useWeekDays,
-} from '@/lib/event';
-import { useEventCalendarStore } from '@/hooks/use-event';
-import { useShallow } from 'zustand/shallow';
-import { Button } from '../ui/button';
-import { ChevronDown, ChevronUp } from 'lucide-react';
-import { MultiDayEventSection } from './ui/multi-day-event';
-import { cn } from '@/lib/utils';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+} from "@/lib/event";
+import { cn } from "@/lib/utils";
+import { Events, HoverPositionType } from "@/types/event";
+
+import { Button } from "../ui/button";
+import { ScrollArea } from "../ui/scroll-area";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { EventDialogTrigger } from "./event-dialog-trigger";
+import { CurrentTimeIndicator } from "./ui/current-time-indicator";
+import { HoverTimeIndicator } from "./ui/hover-time-indicator";
+import { MultiDayEventSection } from "./ui/multi-day-event";
+import { TimeColumn } from "./ui/time-column";
+import { TimeGrid } from "./ui/time-grid";
+import { WeekDayHeaders } from "./ui/week-days-header";
 
 const HOUR_HEIGHT = 64; // Height in pixels for 1 hour
 const START_HOUR = 0; // 00:00
@@ -54,7 +56,7 @@ export function EventCalendarWeek({ events, currentDate }: CalendarWeekProps) {
       openDayEventsDialog: state.openDayEventsDialog,
       openQuickAddDialog: state.openQuickAddDialog,
       openEventDialog: state.openEventDialog,
-    })),
+    }))
   );
   const [hoverPosition, setHoverPosition] = useState<
     HoverPositionType | undefined
@@ -70,16 +72,16 @@ export function EventCalendarWeek({ events, currentDate }: CalendarWeekProps) {
   const { weekNumber, weekDays, todayIndex } = useWeekDays(
     currentDate,
     DAYS_IN_WEEK,
-    localeObj,
+    localeObj
   );
   const { singleDayEvents, multiDayEvents } = useFilteredEvents(
     events,
-    weekDays,
+    weekDays
   );
   const eventsPositions = useEventPositions(
     singleDayEvents,
     weekDays,
-    HOUR_HEIGHT,
+    HOUR_HEIGHT
   );
 
   const multiDayEventRows = useMultiDayEventRows(multiDayEvents, weekDays);
@@ -108,7 +110,7 @@ export function EventCalendarWeek({ events, currentDate }: CalendarWeekProps) {
         dayIndex: -1,
       });
     },
-    [],
+    []
   );
 
   const handleTimeLeave = useCallback(() => {
@@ -133,7 +135,7 @@ export function EventCalendarWeek({ events, currentDate }: CalendarWeekProps) {
     (_event: Events) => {
       openEventDialog(_event);
     },
-    [openEventDialog],
+    [openEventDialog]
   );
 
   const handleTimeBlockClick = useCallback(
@@ -146,7 +148,7 @@ export function EventCalendarWeek({ events, currentDate }: CalendarWeekProps) {
         position: hoverPosition,
       });
     },
-    [hoverPosition, openQuickAddDialog, viewSettings.week.enableTimeBlockClick],
+    [hoverPosition, openQuickAddDialog, viewSettings.week.enableTimeBlockClick]
   );
 
   const toggleMultiDayExpand = useCallback(() => {
@@ -180,13 +182,13 @@ export function EventCalendarWeek({ events, currentDate }: CalendarWeekProps) {
                     onClick={toggleMultiDayExpand}
                   >
                     <span className="sr-only">
-                      {isMultiDayExpanded ? 'Collapse' : 'Expand'} multi-day
+                      {isMultiDayExpanded ? "Collapse" : "Expand"} multi-day
                     </span>
                     {isMultiDayExpanded ? <ChevronUp /> : <ChevronDown />}
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  {isMultiDayExpanded ? 'Collapse' : 'Expand'} multi-day
+                  {isMultiDayExpanded ? "Collapse" : "Expand"} multi-day
                 </TooltipContent>
               </Tooltip>
             </div>
@@ -196,7 +198,7 @@ export function EventCalendarWeek({ events, currentDate }: CalendarWeekProps) {
                 height: isMultiDayExpanded
                   ? `${totalMultiDayRows * MULTI_DAY_ROW_HEIGHT}px`
                   : `${MULTI_DAY_ROW_HEIGHT}px`,
-                transition: 'height 0.3s ease',
+                transition: "height 0.3s ease",
               }}
             >
               <div className="absolute inset-0">
@@ -213,9 +215,9 @@ export function EventCalendarWeek({ events, currentDate }: CalendarWeekProps) {
                           key={`multi-day-cell-${rowIndex}-${dayIndex}`}
                           data-testid={`multi-day-cell-${rowIndex}-${dayIndex}`}
                           className={cn(
-                            'relative flex items-center justify-center border-r last:border-r-0',
-                            todayIndex === dayIndex && 'bg-primary/10',
-                            'flex-1',
+                            "relative flex items-center justify-center border-r last:border-r-0",
+                            todayIndex === dayIndex && "bg-primary/10",
+                            "flex-1"
                           )}
                         ></div>
                       ))}
@@ -273,9 +275,9 @@ export function EventCalendarWeek({ events, currentDate }: CalendarWeekProps) {
               />
               <div className="pointer-events-none absolute inset-0">
                 {singleDayEvents.map((event) => {
-                  const eventDate = new Date(event.startDate);
+                  const eventDate = event.start;
                   const dayIndex = weekDays.findIndex((day) =>
-                    isSameDay(day, eventDate),
+                    isSameDay(day, eventDate)
                   );
 
                   if (dayIndex === -1) return null;

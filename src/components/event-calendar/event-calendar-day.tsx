@@ -1,18 +1,20 @@
-'use client';
+"use client";
 
-import { useState, useMemo, useRef, useCallback } from 'react';
-import { ScrollArea } from '../ui/scroll-area';
-import { isSameDay } from 'date-fns';
-import { generateTimeSlots } from '@/lib/date';
-import { cn } from '@/lib/utils';
-import { Events, HoverPositionType } from '@/types/event';
-import { EventDialogTrigger } from './event-dialog-trigger';
-import { CurrentTimeIndicator } from './ui/current-time-indicator';
-import { HoverTimeIndicator } from './ui/hover-time-indicator';
-import { useDayEventPositions } from '@/lib/event';
-import { TimeColumn } from './ui/time-column';
-import { useEventCalendarStore } from '@/hooks/use-event';
-import { useShallow } from 'zustand/shallow';
+import { isSameDay } from "date-fns";
+import { useCallback,useMemo, useRef, useState } from "react";
+import { useShallow } from "zustand/shallow";
+
+import { useEventCalendarStore } from "@/hooks/use-event";
+import { generateTimeSlots } from "@/lib/date";
+import { useDayEventPositions } from "@/lib/event";
+import { cn } from "@/lib/utils";
+import { Events, HoverPositionType } from "@/types/event";
+
+import { ScrollArea } from "../ui/scroll-area";
+import { EventDialogTrigger } from "./event-dialog-trigger";
+import { CurrentTimeIndicator } from "./ui/current-time-indicator";
+import { HoverTimeIndicator } from "./ui/hover-time-indicator";
+import { TimeColumn } from "./ui/time-column";
 
 const HOUR_HEIGHT = 64; // Height in pixels for 1 hour
 const START_HOUR = 0; // 00:00
@@ -31,7 +33,7 @@ export function EventCalendarDay({ events, currentDate }: CalendarDayProps) {
         viewSettings: state.viewSettings,
         openQuickAddDialog: state.openQuickAddDialog,
         openEventDialog: state.openEventDialog,
-      })),
+      }))
     );
   const [hoverPosition, setHoverPosition] = useState<
     HoverPositionType | undefined
@@ -44,8 +46,8 @@ export function EventCalendarDay({ events, currentDate }: CalendarDayProps) {
 
   const filteredEvents = useMemo(() => {
     return events.filter((event) => {
-      const eventStartDate = new Date(event.startDate);
-      const eventEndDate = new Date(event.endDate);
+      const eventStartDate = event.start;
+      const eventEndDate = event.end;
 
       return (
         isSameDay(eventStartDate, currentDate) ||
@@ -76,7 +78,7 @@ export function EventCalendarDay({ events, currentDate }: CalendarDayProps) {
         dayIndex: -1,
       });
     },
-    [],
+    []
   );
 
   const handleTimeLeave = useCallback(() => {
@@ -136,7 +138,7 @@ export function EventCalendarDay({ events, currentDate }: CalendarDayProps) {
               <div
                 key={index}
                 data-testid={`time-grid-${index}`}
-                className={cn('border-border h-16 border-t')}
+                className={cn("border-border h-16 border-t")}
               />
             ))}
             {filteredEvents.map((event) => {

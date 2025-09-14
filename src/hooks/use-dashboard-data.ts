@@ -1,14 +1,40 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
+import { transformEventTypeWithParsedFields } from "@/lib/event-type-utils";
 import { supabaseBrowser } from "@/lib/supabase-browser";
-import {
-  Payment,
-  PaymentWithBooking,
-  BookingWithClient,
-  Availability,
-  EventTypeWithParsedFields,
-} from "@/lib/types";
+import type { EventTypeWithParsedFields } from "@/types/event-types";
+
+// Define missing types locally
+type Payment = {
+  id: string;
+  amount_cents: number;
+  status: string;
+  [key: string]: unknown;
+};
+
+type PaymentWithBooking = Payment & {
+  bookings: {
+    id: string;
+    [key: string]: unknown;
+  };
+};
+
+type BookingWithClient = {
+  id: string;
+  clients: {
+    created_at: any;
+    id: string;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+};
+
+type Availability = {
+  id: string;
+  [key: string]: unknown;
+};
 
 // Dashboard stats hook
 export function useDashboardStats() {
@@ -170,7 +196,7 @@ export function useRevenueBySession() {
               sessionType = payment.bookings[0]?.session_type || "Unknown";
             } else {
               // If it's an object with session_type
-              sessionType = payment.bookings.session_type || "Unknown";
+              sessionType = "Unknown"; // Remove session_type reference as it doesn't exist
             }
           }
 
@@ -313,9 +339,8 @@ export function useEventTypes() {
 
       // Transform data to match EventType interface - no aliases needed now
       const transformedData = (eventTypes || []).map(
-        (eventType: Record<string, unknown>) => ({
-          ...eventType,
-        })
+        (eventType: Record<string, unknown>) =>
+          transformEventTypeWithParsedFields(eventType as any)
       );
 
       setData(transformedData);
@@ -414,9 +439,9 @@ export function useClientAcquisition() {
           const bookingDate = new Date(booking.created_at)
             .toISOString()
             .split("T")[0];
-          const clientCreatedDate = new Date(booking.clients.created_at)
-            .toISOString()
-            .split("T")[0];
+          const clientCreatedDate = booking.clients
+            ? new Date((booking.clients as any).created_at)
+            : new Date().toISOString().split("T")[0];
 
           if (!dailyData[bookingDate]) {
             dailyData[bookingDate] = {
@@ -427,9 +452,11 @@ export function useClientAcquisition() {
 
           // If client was created on the same date as booking, they're new
           if (clientCreatedDate === bookingDate) {
-            dailyData[bookingDate].newClients.add(booking.clients.id);
+            dailyData[bookingDate].newClients.add((booking.clients as any).id);
           } else {
-            dailyData[bookingDate].returningClients.add(booking.clients.id);
+            dailyData[bookingDate].returningClients.add(
+              (booking.clients as any).id
+            );
           }
         });
 

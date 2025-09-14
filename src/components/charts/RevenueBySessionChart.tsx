@@ -1,6 +1,8 @@
 "use client";
 
-import { useRevenueBySession } from "@/hooks/use-dashboard-data";
+import { DollarSign, TrendingUp } from "lucide-react";
+import { Bar, BarChart, XAxis, YAxis } from "recharts";
+
 import {
   Card,
   CardContent,
@@ -14,8 +16,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Bar, BarChart, XAxis, YAxis } from "recharts";
-import { DollarSign, TrendingUp } from "lucide-react";
+import { useRevenueBySession } from "@/hooks/use-dashboard-data";
 
 const chartConfig = {
   revenue: {

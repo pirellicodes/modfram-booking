@@ -1,7 +1,12 @@
-import { eventFormSchema } from '@/lib/validations';
 import { Locale } from 'date-fns';
 import { memo } from 'react';
 import { UseFormReturn } from 'react-hook-form';
+import { z } from 'zod';
+
+import { CATEGORY_OPTIONS, EVENT_COLORS } from '@/constants/calendar-constant';
+import { getColorClasses } from '@/lib/event';
+import { eventFormSchema } from '@/lib/validations';
+
 import {
   Form,
   FormControl,
@@ -11,9 +16,6 @@ import {
   FormMessage,
 } from '../ui/form';
 import { Input } from '../ui/input';
-import { Textarea } from '../ui/textarea';
-import { DateSelector } from './ui/date-selector';
-import { TimeSelector } from './ui/time-selector';
 import {
   Select,
   SelectContent,
@@ -21,10 +23,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/select';
-import { CATEGORY_OPTIONS, EVENT_COLORS } from '@/constants/calendar-constant';
+import { Textarea } from '../ui/textarea';
 import { ColorOptionItem } from './ui/color-option-item';
-import { z } from 'zod';
-import { getColorClasses } from '@/lib/event';
+import { DateSelector } from './ui/date-selector';
+import { TimeSelector } from './ui/time-selector';
 
 type EventFormValues = z.infer<typeof eventFormSchema>;
 

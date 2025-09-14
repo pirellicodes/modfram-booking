@@ -1,5 +1,22 @@
-import { useState, useEffect } from "react";
-import { BookingWithClient } from "@/lib/types";
+import { useEffect,useState } from "react";
+// Define local type instead of importing from deleted location
+interface BookingWithClient {
+  id: string;
+  client_id: string;
+  session_type: string;
+  category: string;
+  start_time: string;
+  end_time: string;
+  created_at: string;
+  status?: string;
+  notes?: string;
+  user_id: string;
+  client?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+}
 
 export function useBookings() {
   const [data, setData] = useState<BookingWithClient[]>([]);
@@ -8,7 +25,7 @@ export function useBookings() {
 
   useEffect(() => {
     fetchBookings();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   const fetchBookings = async () => {

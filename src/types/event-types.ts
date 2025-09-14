@@ -1,43 +1,17 @@
-import type { EventType } from "./index";
-
-export interface LocationObject {
-  type: string;
-  address?: string;
-  link?: string;
-  phone?: string;
-  text?: string;
-}
-
-export interface BookingField {
-  name: string;
-  type: string;
-  label: string;
-  required: boolean;
-  placeholder?: string;
-}
-
-export interface BookingLimits {
-  day?: number;
-  week?: number;
-  month?: number;
-  year?: number;
-}
-
-export interface DurationLimits {
-  min?: number;
-  max?: number;
-}
+import type { LocationObject } from "./location";
 
 export interface RecurringEvent {
-  freq?: string;
+  freq?: "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
   interval?: number;
   count?: number;
-  until?: string;
+  until?: string; // ISO
+  byweekday?: string[]; // e.g. ["MO","TU"]
+  bymonthday?: number[]; // e.g. [1,15,31]
 }
 
 export interface EventTypeWithParsedFields
   extends Omit<
-    EventType,
+    import("@/db/schema").EventType,
     | "locations"
     | "metadata"
     | "bookingFields"
@@ -47,17 +21,14 @@ export interface EventTypeWithParsedFields
   > {
   locations?: LocationObject[];
   metadata?: Record<string, unknown>;
-  bookingFields?: BookingField[];
-  bookingLimits?: BookingLimits;
-  durationLimits?: DurationLimits;
+  bookingFields?: unknown[];
+  bookingLimits?: Record<string, unknown>;
+  durationLimits?: Record<string, unknown>;
   recurringEvent?: RecurringEvent;
+
+  // Alias fields for component compatibility
+  price_cents?: number;
+  duration_minutes?: number; // alias for length field
 }
 
-export interface FormData extends Partial<EventTypeWithParsedFields> {
-  slugManuallySet?: boolean;
-  is_paid?: boolean;
-  deposit_cents?: number;
-  require_agreement?: boolean;
-  agreement_text?: string;
-  allow_cancellation?: boolean;
-}
+export type { LocationObject };

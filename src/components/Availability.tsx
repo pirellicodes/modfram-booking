@@ -1,7 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useAvailability } from "@/hooks/use-dashboard-data";
+import {
+  Calendar,
+  ChevronLeft,
+  Copy,
+  Globe,
+  Info,
+  MoreVertical,
+  Pencil,
+  Plus,
+  Trash2,
+} from "lucide-react";
+import { useEffect,useState } from "react";
+import { toast } from "sonner";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -9,15 +23,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -26,22 +31,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
-import {
-  Plus,
-  Copy,
-  Trash2,
-  Globe,
-  Calendar,
-  Info,
-  MoreVertical,
-  Pencil,
-  ChevronLeft,
-} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -50,6 +39,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { useAvailability } from "@/hooks/use-dashboard-data";
 
 const timeOptions = Array.from({ length: 48 }, (_, i) => {
   const hour = Math.floor(i / 2);
@@ -85,6 +86,12 @@ interface DaySchedule {
   slots: TimeSlot[];
 }
 
+type ApiAvailabilitySlot = {
+  day_of_week: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+  start_time: string;
+  end_time: string;
+};
+
 export function Availability() {
   const { data: availabilityData, loading, error } = useAvailability();
   const [isOverrideDialogOpen, setIsOverrideDialogOpen] = useState(false);
@@ -108,30 +115,35 @@ export function Availability() {
     { date: string; available: boolean }[]
   >([]);
 
-  // Populate the weekly schedule from API data
   useEffect(() => {
-    if (availabilityData.length > 0) {
-      const newSchedule = { ...weeklySchedule };
+    if (!availabilityData || availabilityData.length === 0) return;
 
-      availabilityData.forEach((slot) => {
-        const dayOfWeek = slot.day_of_week;
-        if (
-          !newSchedule[dayOfWeek].slots.some(
-            (s) => s.start === slot.start_time && s.end === slot.end_time
-          )
-        ) {
-          if (!newSchedule[dayOfWeek].enabled) {
-            newSchedule[dayOfWeek].enabled = true;
-          }
-          newSchedule[dayOfWeek].slots.push({
-            start: slot.start_time,
-            end: slot.end_time,
-          });
-        }
+    setWeeklySchedule((prev) => {
+      const next: Record<number, DaySchedule> = { ...prev };
+
+      (availabilityData as unknown as ApiAvailabilitySlot[]).forEach((slot) => {
+        const day = slot.day_of_week as number;
+        const cur = next[day] ?? { enabled: false, slots: [] };
+
+        const exists = cur.slots.some(
+          (s) => s.start === slot.start_time && s.end === slot.end_time
+        );
+
+        const updated: DaySchedule = {
+          enabled: true,
+          slots: exists
+            ? cur.slots
+            : [
+                ...cur.slots,
+                { start: String(slot.start_time), end: String(slot.end_time) },
+              ],
+        };
+
+        next[day] = updated;
       });
 
-      setWeeklySchedule(newSchedule);
-    }
+      return next;
+    });
   }, [availabilityData]);
 
   const toggleDay = (dayOfWeek: number) => {

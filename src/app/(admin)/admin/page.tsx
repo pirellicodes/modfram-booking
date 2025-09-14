@@ -1,6 +1,15 @@
 "use client";
 
 import {
+  CalendarIcon,
+  ClockIcon,
+  DollarSignIcon,
+  UsersIcon,
+} from "lucide-react";
+
+import { Overview } from "@/components/dashboard/overview";
+import { RecentActivities } from "@/components/dashboard/recent-activities";
+import {
   Card,
   CardContent,
   CardDescription,
@@ -8,15 +17,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Overview } from "@/components/dashboard/overview";
-import { RecentActivities } from "@/components/dashboard/recent-activities";
 import { useDashboardStats } from "@/hooks/use-dashboard-data";
-import {
-  CalendarIcon,
-  DollarSignIcon,
-  UsersIcon,
-  ClockIcon,
-} from "lucide-react";
 
 function StatsCard({
   title,

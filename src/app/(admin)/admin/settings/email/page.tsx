@@ -1,9 +1,9 @@
 "use client";
 
 import { AppSidebar } from "@/components/app-sidebar";
+import { EmailSettings } from "@/components/EmailSettings";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { EmailSettings } from "@/components/EmailSettings";
 
 export default function EmailSettingsPage() {
   return (

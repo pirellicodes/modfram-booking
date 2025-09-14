@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect,useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -9,64 +10,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { EventTypeBasicForm } from "./EventTypeBasicForm";
-import { EventTypeAvailabilityForm } from "./EventTypeAvailabilityForm";
-import { EventTypeBookingForm } from "./EventTypeBookingForm";
-import { EventTypeAdvancedForm } from "./EventTypeAdvancedForm";
-import { type EventType } from "@/db/schema";
+import type { EventTypeWithParsedFields } from "@/types/event-types";
 import type { EventTypeFormData } from "@/types/forms";
+import type { LocationObject } from "@/types/location";
 
-interface LocationObject {
-  type: string;
-  address?: string;
-  link?: string;
-  phone?: string;
-}
-
-interface BookingField {
-  name: string;
-  type: string;
-  label: string;
-  required: boolean;
-  placeholder?: string;
-}
-
-interface BookingLimits {
-  day?: number;
-  week?: number;
-  month?: number;
-  year?: number;
-}
-
-interface DurationLimits {
-  min?: number;
-  max?: number;
-}
-
-interface RecurringEvent {
-  freq?: string;
-  interval?: number;
-  count?: number;
-  until?: string;
-}
-
-interface EventTypeWithParsedFields
-  extends Omit<
-    EventType,
-    | "locations"
-    | "metadata"
-    | "bookingFields"
-    | "bookingLimits"
-    | "durationLimits"
-    | "recurringEvent"
-  > {
-  locations?: LocationObject[];
-  metadata?: Record<string, unknown>;
-  bookingFields?: BookingField[];
-  bookingLimits?: BookingLimits;
-  durationLimits?: DurationLimits;
-  recurringEvent?: RecurringEvent;
-}
+import { EventTypeAdvancedForm } from "./EventTypeAdvancedForm";
+import { EventTypeAvailabilityForm } from "./EventTypeAvailabilityForm";
+import { EventTypeBasicForm } from "./EventTypeBasicForm";
+import { EventTypeBookingForm } from "./EventTypeBookingForm";
 
 interface EventTypeFormProps {
   eventType?: EventTypeWithParsedFields;
@@ -88,120 +39,89 @@ export function EventTypeForm({
     slug: "",
     description: "",
     length: 30,
-    locations: [{ type: "zoom" }],
-    hidden: false,
+    locations: [{ type: "zoom" } as LocationObject],
     requiresConfirmation: false,
     disableGuests: false,
     hideCalendarNotes: false,
     minimumBookingNotice: 120,
     beforeEventBuffer: 0,
     afterEventBuffer: 0,
-    price: 0,
+    price_cents: 0,
     currency: "USD",
-    slotInterval: undefined,
-    onlyShowFirstAvailableSlot: false,
-    seatsPerTimeSlot: undefined,
-    seatsShowAttendees: false,
-    seatsShowAvailabilityCount: true,
-
-    periodType: "UNLIMITED",
-    periodDays: undefined,
-    periodCountCalendarDays: false,
     bookingFields: [],
     bookingLimits: {},
     durationLimits: {},
     recurringEvent: undefined,
     metadata: {},
-    allow_cancellation: true,
-    is_active: true,
   });
 
   const [formData, setFormData] = useState<EventTypeFormData>(
     getInitialFormData()
   );
+  const [isSaving, setIsSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState("basic");
 
-  // Sync form data when eventType changes
   useEffect(() => {
     if (eventType) {
       setFormData({
-        ...eventType,
-        is_active: true, // Provide default for missing property
+        title: eventType.title || "",
+        slug: eventType.slug || "",
+        description: eventType.description || "",
+        length: eventType.length || 30,
+        locations: eventType.locations || [],
+        price_cents:
+          typeof eventType.price === "string"
+            ? Math.round(parseFloat(eventType.price) * 100)
+            : typeof eventType.price === "number"
+            ? Math.round(eventType.price * 100)
+            : (eventType as any).price_cents ?? 0,
+        currency: eventType.currency || "USD",
+        requiresConfirmation: eventType.requiresConfirmation || false,
+        disableGuests: eventType.disableGuests || false,
+        hideCalendarNotes: eventType.hideCalendarNotes || false,
+        minimumBookingNotice: eventType.minimumBookingNotice || 120,
+        beforeEventBuffer: eventType.beforeEventBuffer || 0,
+        afterEventBuffer: eventType.afterEventBuffer || 0,
+        bookingFields: eventType.bookingFields || [],
+        bookingLimits: eventType.bookingLimits || {},
+        durationLimits: eventType.durationLimits || {},
+        recurringEvent: eventType.recurringEvent || undefined,
+        metadata: eventType.metadata || {},
       });
     } else {
       setFormData(getInitialFormData());
     }
   }, [eventType]);
 
-  const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState("basic");
-
   const handleSave = async () => {
     if (!formData.title?.trim()) {
       alert("Please enter a title for the event type");
       return;
     }
-
     setIsSaving(true);
-
     try {
       const url = isEditing
-        ? `/api/event-types/${eventType.id}`
+        ? `/api/event-types/${eventType!.id}`
         : "/api/event-types";
       const method = isEditing ? "PATCH" : "POST";
-
-      const response = await fetch(url, {
+      const res = await fetch(url, {
         method,
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-
-      const data = await response.json();
-
+      const data = await res.json();
       if (data.success) {
         onSave(data.data);
         onOpenChange(false);
-
-        // Reset form if creating new
         if (!isEditing) {
-          setFormData({
-            title: "",
-            slug: "",
-            description: "",
-            length: 30,
-            locations: [{ type: "zoom" }],
-            hidden: false,
-            requiresConfirmation: false,
-            disableGuests: false,
-            hideCalendarNotes: false,
-            minimumBookingNotice: 120,
-            beforeEventBuffer: 0,
-            afterEventBuffer: 0,
-            price: "0.00",
-            currency: "USD",
-            slotInterval: null,
-            onlyShowFirstAvailableSlot: false,
-            seatsPerTimeSlot: null,
-            seatsShowAttendees: false,
-            seatsShowAvailabilityCount: true,
-            assignAllTeamMembers: false,
-            periodType: "UNLIMITED",
-            periodDays: null,
-            periodCountCalendarDays: false,
-            bookingFields: [],
-            bookingLimits: {},
-            durationLimits: {},
-            recurringEvent: undefined,
-            metadata: {},
-          });
+          setFormData(getInitialFormData());
           setActiveTab("basic");
         }
       } else {
         alert(data.error || "Failed to save event type");
       }
-    } catch (error) {
-      console.error("Error saving event type:", error);
+    } catch (err) {
+      console.error("Error saving event type:", err);
       alert("Failed to save event type");
     } finally {
       setIsSaving(false);

@@ -1,21 +1,23 @@
-'use client';
+"use client";
 
-import { useMemo, useRef, useState } from 'react';
 import {
+  eachDayOfInterval,
+  endOfMonth,
+  endOfWeek,
   format,
   startOfMonth,
-  endOfMonth,
-  eachDayOfInterval,
   startOfWeek,
-  endOfWeek,
-} from 'date-fns';
-import { useEventCalendarStore } from '@/hooks/use-event';
-import { useShallow } from 'zustand/shallow';
-import { DayCell } from './ui/day-cell';
-import { WeekDayHeaders } from './ui/week-days-header';
-import { getLocaleFromCode, useWeekDays } from '@/lib/event';
-import { formatDate } from '@/lib/date';
-import { Events } from '@/types/event';
+} from "date-fns";
+import { useMemo, useRef, useState } from "react";
+import { useShallow } from "zustand/shallow";
+
+import { useEventCalendarStore } from "@/hooks/use-event";
+import { formatDate } from "@/lib/date";
+import { getLocaleFromCode, useWeekDays } from "@/lib/event";
+import { Events } from "@/types/event";
+
+import { DayCell } from "./ui/day-cell";
+import { WeekDayHeaders } from "./ui/week-days-header";
 
 const DAYS_IN_WEEK = 7;
 interface CalendarMonthProps {
@@ -43,7 +45,7 @@ export function EventCalendarMonth({ events, baseDate }: CalendarMonthProps) {
       openDayEventsDialog: state.openDayEventsDialog,
       openEventDialog: state.openEventDialog,
       openQuickAddDialog: state.openQuickAddDialog,
-    })),
+    }))
   );
   const daysContainerRef = useRef<HTMLDivElement>(null);
   const [focusedDate, setFocusedDate] = useState<Date | null>(null);
@@ -52,7 +54,7 @@ export function EventCalendarMonth({ events, baseDate }: CalendarMonthProps) {
   const { weekNumber, weekDays } = useWeekDays(
     baseDate,
     DAYS_IN_WEEK,
-    localeObj,
+    localeObj
   );
 
   // Calculate visible days in month
@@ -70,11 +72,11 @@ export function EventCalendarMonth({ events, baseDate }: CalendarMonthProps) {
     const groupedEvents: Record<string, Events[]> = {};
 
     visibleDays.forEach((day) => {
-      groupedEvents[format(day, 'yyyy-MM-dd')] = [];
+      groupedEvents[format(day, "yyyy-MM-dd")] = [];
     });
 
     events.forEach((event) => {
-      const dateKey = format(event.startDate, 'yyyy-MM-dd');
+      const dateKey = format(event.start, "yyyy-MM-dd");
       if (groupedEvents[dateKey]) {
         groupedEvents[dateKey].push(event);
       }
@@ -84,7 +86,7 @@ export function EventCalendarMonth({ events, baseDate }: CalendarMonthProps) {
   }, [events, visibleDays]);
 
   const handleShowDayEvents = (date: Date) => {
-    const dateKey = format(date, 'yyyy-MM-dd');
+    const dateKey = format(date, "yyyy-MM-dd");
     openDayEventsDialog(date, eventsGroupedByDate[dateKey] || []);
   };
 

@@ -1,10 +1,20 @@
 "use client";
 
+import {
+  Camera,
+  ChevronRightIcon,
+  ClockIcon,
+  Copy,
+  EditIcon,
+  Settings,
+  Trash2Icon,
+} from "lucide-react";
 import { useState } from "react";
-import { useEventTypes } from "@/hooks/use-dashboard-data";
-import { supabaseBrowser } from "@/lib/supabase-browser";
-import { Card, CardContent } from "@/components/ui/card";
+import { toast } from "sonner";
+
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -13,20 +23,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-
-import { toast } from "sonner";
-import {
-  ChevronRightIcon,
-  EditIcon,
-  Trash2Icon,
-  Copy,
-  Settings,
-  Camera,
-  ClockIcon,
-} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,7 +30,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useEventTypes } from "@/hooks/use-dashboard-data";
+import { supabaseBrowser } from "@/lib/supabase-browser";
 import type { EventType } from "@/types";
 
 export function EventTypes() {
@@ -59,9 +59,12 @@ export function EventTypes() {
     setSelectedEventType(eventType);
     setEditForm({
       title: eventType.title,
-      length: eventType.length,
+      length: eventType.length || 30,
       description: eventType.description || "",
-      price: eventType.price || 0,
+      price:
+        typeof eventType.price === "string"
+          ? parseFloat(eventType.price)
+          : eventType.price || 0,
     });
     setIsEditDialogOpen(true);
   };
@@ -218,7 +221,11 @@ export function EventTypes() {
                           <div className="flex items-center gap-4 text-sm text-muted-foreground">
                             <div className="flex items-center">
                               <ClockIcon className="h-4 w-4 mr-1" />
-                              {formatDuration(eventType.duration_minutes)}
+                              {formatDuration(
+                                eventType.duration_minutes ||
+                                  eventType.length ||
+                                  30
+                              )}
                             </div>
                             {eventType.price_cents &&
                               eventType.price_cents > 0 && (
@@ -235,7 +242,18 @@ export function EventTypes() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => copyEventTypeUrl(eventType)}
+                        onClick={() =>
+                          copyEventTypeUrl({
+                            ...eventType,
+                            locations: eventType.locations || [],
+                            metadata: eventType.metadata || {},
+                            bookingFields: eventType.bookingFields || [],
+                            bookingLimits: eventType.bookingLimits || {},
+                            durationLimits: eventType.durationLimits || {},
+                            recurringEvent:
+                              eventType.recurringEvent || undefined,
+                          })
+                        }
                       >
                         <Copy className="h-4 w-4 mr-2" />
                         Copy link
@@ -251,13 +269,35 @@ export function EventTypes() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
-                            onClick={() => handleEditEventType(eventType)}
+                            onClick={() =>
+                              handleEditEventType({
+                                ...eventType,
+                                locations: eventType.locations || [],
+                                metadata: eventType.metadata || {},
+                                bookingFields: eventType.bookingFields || [],
+                                bookingLimits: eventType.bookingLimits || {},
+                                durationLimits: eventType.durationLimits || {},
+                                recurringEvent:
+                                  eventType.recurringEvent || undefined,
+                              })
+                            }
                           >
                             <EditIcon className="h-4 w-4 mr-2" />
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => copyEventTypeUrl(eventType)}
+                            onClick={() =>
+                              copyEventTypeUrl({
+                                ...eventType,
+                                locations: eventType.locations || [],
+                                metadata: eventType.metadata || {},
+                                bookingFields: eventType.bookingFields || [],
+                                bookingLimits: eventType.bookingLimits || {},
+                                durationLimits: eventType.durationLimits || {},
+                                recurringEvent:
+                                  eventType.recurringEvent || undefined,
+                              })
+                            }
                           >
                             <Copy className="h-4 w-4 mr-2" />
                             Copy link
@@ -265,7 +305,18 @@ export function EventTypes() {
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
                             className="text-destructive focus:text-destructive"
-                            onClick={() => handleDeleteEventType(eventType)}
+                            onClick={() =>
+                              handleDeleteEventType({
+                                ...eventType,
+                                locations: eventType.locations || [],
+                                metadata: eventType.metadata || {},
+                                bookingFields: eventType.bookingFields || [],
+                                bookingLimits: eventType.bookingLimits || {},
+                                durationLimits: eventType.durationLimits || {},
+                                recurringEvent:
+                                  eventType.recurringEvent || undefined,
+                              })
+                            }
                           >
                             <Trash2Icon className="h-4 w-4 mr-2" />
                             Delete

@@ -1,6 +1,8 @@
 "use client";
 
-import { useDashboardStats } from "@/hooks/use-dashboard-data";
+import { Calendar, TrendingUp } from "lucide-react";
+import { RadialBar, RadialBarChart } from "recharts";
+
 import {
   Card,
   CardContent,
@@ -14,8 +16,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { RadialBar, RadialBarChart } from "recharts";
-import { Calendar, TrendingUp } from "lucide-react";
+import { useDashboardStats } from "@/hooks/use-dashboard-data";
 
 const chartConfig = {
   upcoming: {

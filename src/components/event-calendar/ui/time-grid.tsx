@@ -1,6 +1,7 @@
-import { cn } from '@/lib/utils';
-import { memo } from 'react';
 import { format } from 'date-fns';
+import { memo } from 'react';
+
+import { cn } from '@/lib/utils';
 
 interface BaseTimeGridProps {
   highlightToday: boolean;

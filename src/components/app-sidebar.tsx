@@ -1,24 +1,26 @@
 "use client";
 
 import {
+  BarChart3,
+  Calendar,
+  CalendarDays,
+  Camera,
+  Clock,
+  LayoutDashboard,
+  Settings,
+} from "lucide-react";
+
+import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
+
 import { NavGroup } from "./nav-group";
 import { NavUser } from "./nav-user";
 import { TeamSwitcher } from "./team-switcher";
-import {
-  LayoutDashboard,
-  BarChart3,
-  Calendar,
-  CalendarDays,
-  Clock,
-  Camera,
-  Settings,
-} from "lucide-react";
 import { type SidebarData } from "./types";
 
 const sidebarData: SidebarData = {

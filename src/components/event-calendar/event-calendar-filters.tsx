@@ -1,9 +1,17 @@
+import { Clock,Repeat, Search, Tag, X } from 'lucide-react';
+import { parseAsArrayOf, parseAsString,useQueryStates } from 'nuqs';
 import { useState } from 'react';
-import { useQueryStates, parseAsArrayOf, parseAsString } from 'nuqs';
-import { Search, X, Tag, Repeat, Clock } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { useShallow } from 'zustand/shallow';
+
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -11,17 +19,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 import { CATEGORY_OPTIONS, EVENT_COLORS } from '@/constants/calendar-constant';
-import { getColorClasses } from '@/lib/event';
-import { EventSearchDialog } from './event-search-dialog';
-import { useShallow } from 'zustand/shallow';
 import { useEventCalendarStore } from '@/hooks/use-event';
+import { getColorClasses } from '@/lib/event';
+
+import { EventSearchDialog } from './event-search-dialog';
 
 export const EventCalendarFilters = () => {
   const { timeFormat, openEventDialog } = useEventCalendarStore(

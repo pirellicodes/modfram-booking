@@ -1,6 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  AlertCircle,
+  Calendar,
+  CheckCircle,
+  ExternalLink,
+  Settings,
+  Trash2,
+  Zap,
+} from "lucide-react";
+import { useEffect,useState } from "react";
+import { toast } from "sonner";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,20 +22,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  Calendar,
-  ExternalLink,
-  Trash2,
-  CheckCircle,
-  AlertCircle,
-  Settings,
-  Zap,
-} from "lucide-react";
 import { supabaseBrowser } from "@/lib/supabase-browser";
-import { toast } from "sonner";
 
 interface Integration {
   id: string;

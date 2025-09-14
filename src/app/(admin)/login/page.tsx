@@ -1,5 +1,6 @@
-import EnvCheck from "./_env-check";
 import { LoginForm } from "@/components/login-form";
+
+import EnvCheck from "./_env-check";
 
 export default function LoginPage() {
   return (

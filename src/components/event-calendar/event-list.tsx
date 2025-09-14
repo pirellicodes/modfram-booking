@@ -1,6 +1,4 @@
 "use client";
-import { useCallback } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   addDays,
   endOfDay,
@@ -11,16 +9,20 @@ import {
   isWithinInterval,
   startOfDay,
 } from "date-fns";
-import { CalendarViewType, TimeFormatType } from "@/types/event";
-import { Events } from "@/types/event";
-import { EventGroup, NoEvents } from "./ui/events";
+import { useCallback } from "react";
+import { useShallow } from "zustand/shallow";
+
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useEventCalendarStore } from "@/hooks/use-event";
 import {
   getLocaleFromCode,
   useEventFilter,
   useEventGrouper,
 } from "@/lib/event";
-import { useShallow } from "zustand/shallow";
+import { CalendarViewType, TimeFormatType } from "@/types/event";
+import { Events } from "@/types/event";
+
+import { EventGroup, NoEvents } from "./ui/events";
 
 interface EventsListProps {
   events: Events[];

@@ -1,8 +1,11 @@
 "use client";
 
+import { MapPin, Plus, Users,Video, X } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -11,9 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Plus, X, MapPin, Video, Users } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import type { EventTypeFormData } from "@/types/forms";
 
 interface EventTypeBasicFormProps {
@@ -228,11 +229,11 @@ export function EventTypeBasicForm({
                   </SelectContent>
                 </Select>
 
-                {(location.type === "inPerson" ||
+                {(location.type === "in_person" ||
                   location.type === "custom") && (
                   <Input
                     value={
-                      location.type === "inPerson"
+                      location.type === "in_person"
                         ? location.address || ""
                         : location.type === "custom"
                         ? location.text || ""
@@ -240,7 +241,7 @@ export function EventTypeBasicForm({
                     }
                     onChange={(e) => {
                       const field =
-                        location.type === "inPerson" ? "address" : "text";
+                        location.type === "in_person" ? "address" : "text";
                       updateLocation(index, field, e.target.value);
                     }}
                     placeholder={getLocationPlaceholder(location.type)}
@@ -307,7 +308,7 @@ export function EventTypeBasicForm({
             </div>
           </div>
 
-          {(formData.price || 0) > 0 && (
+          {(Number(formData.price) || 0) > 0 && (
             <div className="space-y-4 p-4 border rounded-lg bg-blue-50/50">
               <div>
                 <Label htmlFor="deposit_cents">Deposit Required (cents)</Label>

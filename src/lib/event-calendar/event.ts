@@ -1,23 +1,25 @@
 import {
   addDays,
   differenceInDays,
+  format,
   getWeek,
   Locale,
   startOfWeek,
-  format,
 } from "date-fns";
+import { enUS } from "date-fns/locale";
 import { useMemo } from "react";
+
+import { EVENT_VIEW_CONFIG } from "@/components/event-calendar/event-list";
+import { CATEGORY_OPTIONS, LOCALES } from "@/constants/calendar-constant";
+import type { CalendarEvent } from "@/types/calendar";
 import {
   CalendarViewType,
   EventPosition,
   MultiDayEventRowType,
   TimeFormatType,
 } from "@/types/event";
-import { CATEGORY_OPTIONS, LOCALES } from "@/constants/calendar-constant";
-import { Event } from "@/db/schema";
-import { EVENT_VIEW_CONFIG } from "@/components/event-calendar/event-list";
+
 import { convertTimeToMinutes, formatTimeDisplay, isSameDay } from "./date";
-import { enUS } from "date-fns/locale";
 
 /**
  * @namespace CalendarHooks
@@ -89,16 +91,16 @@ export function useWeekDays(
  * @example
  * const { singleDayEvents, multiDayEvents } = useFilteredEvents(events, weekDays);
  */
-export function useFilteredEvents(events: EventTypes[], daysInWeek: Date[]) {
+export function useFilteredEvents(events: CalendarEvent[], daysInWeek: Date[]) {
   return useMemo(() => {
-    const singleDayEvents: EventTypes[] = [];
-    const multiDayEvents: EventTypes[] = [];
+    const singleDayEvents: CalendarEvent[] = [];
+    const multiDayEvents: CalendarEvent[] = [];
 
     const [firstDayOfWeek, lastDayOfWeek] = [daysInWeek[0], daysInWeek[6]];
 
     events.forEach((event) => {
-      const startDate = new Date(event.startDate);
-      const endDate = new Date(event.endDate);
+      const startDate = event.start;
+      const endDate = event.end;
       const dayDiff = differenceInDays(endDate, startDate);
 
       const isSingleDay = dayDiff <= 1;
@@ -136,7 +138,7 @@ export function useFilteredEvents(events: EventTypes[], daysInWeek: Date[]) {
  * const eventPositions = useEventPositions(singleDayEvents, weekDays, 60);
  */
 export function useEventPositions(
-  singleDayEvents: EventTypes[],
+  singleDayEvents: CalendarEvent[],
   daysInWeek: Date[],
   hourHeight: number
 ) {
@@ -144,7 +146,7 @@ export function useEventPositions(
     const positions: Record<string, EventPosition> = {};
     const dayEvents: Record<
       number,
-      Array<{ event: EventTypes; start: number; end: number }>
+      Array<{ event: CalendarEvent; start: number; end: number }>
     > = {};
 
     // Initialize day events structure
@@ -154,14 +156,14 @@ export function useEventPositions(
 
     // Group events by day and convert times to minutes
     singleDayEvents.forEach((event) => {
-      const eventDate = new Date(event.startDate);
+      const eventDate = event.start;
       const dayIndex = daysInWeek.findIndex((day) => isSameDay(day, eventDate));
 
       if (dayIndex !== -1) {
         dayEvents[dayIndex].push({
           event,
-          start: convertTimeToMinutes(event.startTime),
-          end: convertTimeToMinutes(event.endTime),
+          start: convertTimeToMinutes(format(event.start, "HH:mm")),
+          end: convertTimeToMinutes(format(event.end, "HH:mm")),
         });
       }
     });
@@ -224,16 +226,16 @@ export function useEventPositions(
  * const multiDayRows = useMultiDayEventRows(multiDayEvents, weekDays);
  */
 export function useMultiDayEventRows(
-  multiDayEvents: EventTypes[],
+  multiDayEvents: CalendarEvent[],
   daysInWeek: Date[]
 ) {
   return useMemo(() => {
-    const rows: Array<MultiDayEventRowType & { event: EventTypes }> = [];
+    const rows: Array<MultiDayEventRowType & { event: CalendarEvent }> = [];
     const [weekStart, weekEnd] = [daysInWeek[0], daysInWeek[6]];
 
     multiDayEvents.forEach((event) => {
-      const startDate = new Date(event.startDate);
-      const endDate = new Date(event.endDate);
+      const startDate = event.start;
+      const endDate = event.end;
 
       // Normalize times for comparison
       [startDate, endDate].forEach((d) => d.setHours(12, 0, 0, 0));
@@ -289,14 +291,17 @@ export function useMultiDayEventRows(
  * @example
  * const dayEventPositions = useDayEventPositions(dayEvents, 60);
  */
-export function useDayEventPositions(events: EventTypes[], hourHeight: number) {
+export function useDayEventPositions(
+  events: CalendarEvent[],
+  hourHeight: number
+) {
   return useMemo(() => {
     const positions: Record<string, EventPosition> = {};
 
     // Convert event times to minutes for easier comparison
     const timeRanges = events.map((event) => {
-      const start = convertTimeToMinutes(event.startTime);
-      const end = convertTimeToMinutes(event.endTime);
+      const start = convertTimeToMinutes(format(event.start, "HH:mm"));
+      const end = convertTimeToMinutes(format(event.end, "HH:mm"));
       return { event, start, end };
     });
 
@@ -369,7 +374,7 @@ export function useDayEventPositions(events: EventTypes[], hourHeight: number) {
  * const filteredEvents = useEventFilter(events, currentDate, CalendarViewType.WEEK);
  */
 export function useEventFilter(
-  events: EventTypes[],
+  events: CalendarEvent[],
   currentDate: Date,
   viewType: CalendarViewType
 ) {
@@ -377,7 +382,7 @@ export function useEventFilter(
     try {
       const { filterFn } = EVENT_VIEW_CONFIG[viewType];
       return events.filter((event) => {
-        const eventDate = new Date(event.startDate);
+        const eventDate = event.start;
         return filterFn(eventDate, currentDate);
       });
     } catch (error) {
@@ -400,7 +405,7 @@ export function useEventFilter(
  * const groupedEvents = useEventGrouper(events, CalendarViewType.DAY, TimeFormatType.HOUR_12);
  */
 export function useEventGrouper(
-  events: EventTypes[],
+  events: CalendarEvent[],
   viewType: CalendarViewType,
   timeFormat: TimeFormatType,
   locale?: Locale
@@ -410,9 +415,9 @@ export function useEventGrouper(
     const isDayView = viewType === CalendarViewType.DAY;
 
     const groupMap = events.reduce((acc, event) => {
-      const eventDate = new Date(event.startDate);
+      const eventDate = (event as any).startDate || event.start;
       const groupKey = isDayView
-        ? event.startTime
+        ? (event as any).startTime || format(event.start, "HH:mm")
         : format(eventDate, groupFormat, { locale });
 
       const groupTitle = isDayView
@@ -428,7 +433,7 @@ export function useEventGrouper(
       }
       acc[groupKey].events.push(event);
       return acc;
-    }, {} as Record<string, { key: string; title: string; events: EventTypes[] }>);
+    }, {} as Record<string, { key: string; title: string; events: CalendarEvent[] }>);
 
     return Object.values(groupMap).sort((a, b) => a.key.localeCompare(b.key));
   }, [events, viewType, timeFormat, locale]);

@@ -1,12 +1,13 @@
-'use client';
+"use client";
 
-import { Clock, Plus } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { formatTimeDisplay } from '@/lib/date';
-import { Button } from '@/components/ui/button';
-import { format, isSameDay, isSameMonth, Locale } from 'date-fns';
-import { Events, MonthViewConfig, TimeFormatType } from '@/types/event';
-import { getColorClasses } from '@/lib/event';
+import { format, isSameDay, isSameMonth, Locale } from "date-fns";
+import { Clock, Plus } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { formatTimeDisplay } from "@/lib/date";
+import { getColorClasses } from "@/lib/event";
+import { cn } from "@/lib/utils";
+import { Events, MonthViewConfig, TimeFormatType } from "@/types/event";
 
 interface DayCellProps {
   date: Date;
@@ -35,7 +36,7 @@ export function DayCell({
   onShowDayEvents,
   onOpenEvent,
 }: DayCellProps) {
-  const dateKey = format(date, 'yyyy-MM-dd');
+  const dateKey = format(date, "yyyy-MM-dd");
   const dayEvents = eventsByDate[dateKey] || [];
   const isToday = isSameDay(date, new Date());
   const isWithinMonth = isSameMonth(date, baseDate);
@@ -43,23 +44,25 @@ export function DayCell({
   const firstEvent = dayEvents[0];
   const _isFocused = focusedDate && isSameDay(date, focusedDate);
   const shouldRenderEvents = isWithinMonth && dayEvents.length > 0;
-  const colorClasses = firstEvent ? getColorClasses(firstEvent.color) : null;
+  const colorClasses = firstEvent
+    ? getColorClasses(firstEvent.color || "gray")
+    : null;
   return (
     <div
       data-date={dateKey}
       role="gridcell"
       tabIndex={0}
-      aria-label={`${format(date, 'EEEE, MMMM do')}. Press Enter to ${
-        dayEvents.length === 0 ? 'add new event' : 'view events'
+      aria-label={`${format(date, "EEEE, MMMM do")}. Press Enter to ${
+        dayEvents.length === 0 ? "add new event" : "view events"
       }`}
       className={cn(
-        'group relative z-20 flex h-[80px] cursor-pointer flex-col rounded border transition-all sm:h-[140px] sm:p-2',
-        'hover:border-primary focus:ring-primary hover:shadow-sm focus:ring-2 focus:outline-none',
+        "group relative z-20 flex h-[80px] cursor-pointer flex-col rounded border transition-all sm:h-[140px] sm:p-2",
+        "hover:border-primary focus:ring-primary hover:shadow-sm focus:ring-2 focus:outline-none",
         !isWithinMonth && monthViewConfig.hideOutsideDays
-          ? 'hidden'
+          ? "hidden"
           : !isWithinMonth
-            ? 'bg-muted/20 opacity-50'
-            : '',
+          ? "bg-muted/20 opacity-50"
+          : ""
         // _isFocused && 'ring-2 ring-blue-500',
       )}
       onClick={() => {
@@ -67,7 +70,7 @@ export function DayCell({
         onFocusDate(date);
       }}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
+        if (e.key === "Enter" || e.key === " ") {
           onQuickAdd(date);
           onFocusDate(date);
           e.preventDefault();
@@ -78,16 +81,16 @@ export function DayCell({
       <div className="mb-0 flex items-center justify-between sm:mb-1">
         <span
           className={cn(
-            'flex h-5 w-5 items-center justify-center rounded-full border text-xs font-medium sm:h-6 sm:w-6',
-            isToday && 'bg-blue-500 text-white',
-            !isWithinMonth && 'text-muted-foreground',
+            "flex h-5 w-5 items-center justify-center rounded-full border text-xs font-medium sm:h-6 sm:w-6",
+            isToday && "bg-blue-500 text-white",
+            !isWithinMonth && "text-muted-foreground"
           )}
         >
-          {format(date, 'd', { locale })}
+          {format(date, "d", { locale })}
         </span>
         {!monthViewConfig.hideOutsideDays && (
           <span className="text-muted-foreground hidden text-xs md:block">
-            {format(date, 'E', { locale })}
+            {format(date, "E", { locale })}
           </span>
         )}
       </div>
@@ -96,10 +99,10 @@ export function DayCell({
           {shouldRenderEvents && firstEvent && (
             <button
               className={cn(
-                'relative z-0 flex cursor-pointer flex-col justify-start text-left',
-                'rounded p-1 text-xs',
-                'transition-colors hover:opacity-90',
-                colorClasses?.bg ?? 'bg-primary',
+                "relative z-0 flex cursor-pointer flex-col justify-start text-left",
+                "rounded p-1 text-xs",
+                "transition-colors hover:opacity-90",
+                colorClasses?.bg ?? "bg-primary"
               )}
               onClick={(e) => {
                 e.stopPropagation();
@@ -112,8 +115,15 @@ export function DayCell({
               <div className="hidden items-center truncate text-white sm:flex">
                 <Clock className="mr-1 h-3 w-3" />
                 <span className="truncate">
-                  {formatTimeDisplay(firstEvent.startTime, timeFormat)} -{' '}
-                  {formatTimeDisplay(firstEvent.endTime, timeFormat)}
+                  {formatTimeDisplay(
+                    firstEvent.startTime || format(firstEvent.start, "HH:mm"),
+                    timeFormat
+                  )}{" "}
+                  -{" "}
+                  {formatTimeDisplay(
+                    firstEvent.endTime || format(firstEvent.end, "HH:mm"),
+                    timeFormat
+                  )}
                 </span>
               </div>
             </button>
@@ -135,10 +145,10 @@ export function DayCell({
               variant="ghost"
               size="sm"
               className={cn(
-                'w-full cursor-pointer gap-1 truncate p-5 px-1 text-xs opacity-0 group-hover:opacity-100',
+                "w-full cursor-pointer gap-1 truncate p-5 px-1 text-xs opacity-0 group-hover:opacity-100",
                 isEmpty
-                  ? 'mb-2 bg-transparent !ring-0 hover:!bg-transparent'
-                  : 'h-5',
+                  ? "mb-2 bg-transparent !ring-0 hover:!bg-transparent"
+                  : "h-5"
               )}
               onClick={(e) => {
                 e.stopPropagation();

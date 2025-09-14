@@ -1,3 +1,7 @@
+import { format, Locale } from 'date-fns';
+import { CalendarIcon, Clock, MapPin, Tag } from 'lucide-react';
+import { z } from 'zod';
+
 import {
   Card,
   CardContent,
@@ -6,15 +10,13 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { calculateDuration, formatTimeDisplay } from '@/lib/date';
+import { getCategoryLabel, getContrastColor } from '@/lib/event';
 import { cn } from '@/lib/utils';
 import { eventFormSchema } from '@/lib/validations';
 import { TimeFormatType } from '@/types/event';
-import { format, Locale } from 'date-fns';
-import { CalendarIcon, Clock, MapPin, Tag } from 'lucide-react';
-import { z } from 'zod';
-import { Separator } from '../ui/separator';
+
 import { Badge } from '../ui/badge';
-import { getCategoryLabel, getContrastColor } from '@/lib/event';
+import { Separator } from '../ui/separator';
 
 type EventFormValues = z.infer<typeof eventFormSchema>;
 

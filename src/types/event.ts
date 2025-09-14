@@ -1,4 +1,4 @@
-import { Locale } from 'date-fns';
+import { Locale } from "date-fns";
 
 export interface HoverPositionType {
   hour: number;
@@ -6,21 +6,25 @@ export interface HoverPositionType {
   dayIndex?: number;
 }
 
-export interface Events {
-  id: string;
-  title: string;
-  description: string;
-  startDate: Date;
-  endDate: Date;
-  startTime: string;
-  endTime: string;
-  isRepeating: boolean;
-  repeatingType: 'daily' | 'weekly' | 'monthly' | null;
-  location: string;
-  category: string;
-  color: string;
-  createdAt: Date;
-  updatedAt: Date;
+// Use the canonical CalendarEvent as Events for backward compatibility
+import type { CalendarEvent } from "./calendar";
+
+export interface Events extends CalendarEvent {
+  // Legacy compatibility fields that may still be expected
+  startDate?: Date; // alias to start
+  endDate?: Date; // alias to end
+  startTime?: string;
+  endTime?: string;
+  isRepeating?: boolean;
+  repeatingType?: "daily" | "weekly" | "monthly" | null;
+
+  // Additional fields from EventType schema
+  length?: number;
+  slug?: string;
+  hidden?: boolean;
+  position?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface MultiDayEventRowType {
@@ -46,21 +50,21 @@ export interface QuickAddDialogData {
 }
 
 export enum CalendarViewType {
-  DAY = 'day',
-  DAYS = 'days',
-  WEEK = 'week',
-  MONTH = 'month',
-  YEAR = 'year',
+  DAY = "day",
+  DAYS = "days",
+  WEEK = "week",
+  MONTH = "month",
+  YEAR = "year",
 }
 
 export enum TimeFormatType {
-  HOUR_12 = '12',
-  HOUR_24 = '24',
+  HOUR_12 = "12",
+  HOUR_24 = "24",
 }
 
 export enum ViewModeType {
-  CALENDAR = 'calendar',
-  LIST = 'list',
+  CALENDAR = "calendar",
+  LIST = "list",
 }
 
 export interface DayViewConfig {

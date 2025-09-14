@@ -1,4 +1,7 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
+
+import type { Events } from "@/types/event";
 import {
   CalendarViewConfigs,
   CalendarViewType,
@@ -12,8 +15,6 @@ import {
   WeekViewConfig,
   YearViewConfig,
 } from "@/types/event";
-import { Event } from "@/db/schema";
-import { persist } from "zustand/middleware";
 
 const DEFAULT_VIEW_CONFIGS: CalendarViewConfigs = {
   day: {
@@ -53,7 +54,7 @@ const DEFAULT_VIEW_CONFIGS: CalendarViewConfigs = {
 };
 
 interface EventCalendarState {
-  selectedEvent: EventTypes | null;
+  selectedEvent: Events | null;
   selectedDate: Date;
   currentView: CalendarViewType;
   viewMode: ViewModeType;
@@ -70,7 +71,7 @@ interface EventCalendarState {
   dayEventsDialog: {
     open: boolean;
     date: Date | null;
-    events: EventTypes[];
+    events: Events[];
   };
   quickAddData: QuickAddDialogData;
   isQuickAddDialogOpen: boolean;
@@ -93,13 +94,13 @@ interface EventCalendarState {
     | MonthViewConfig
     | YearViewConfig;
   openEventDialog: (
-    event: EventTypes,
+    event: Events,
     position?: EventPosition,
     leftOffset?: number,
     rightOffset?: number
   ) => void;
   closeEventDialog: () => void;
-  openDayEventsDialog: (date: Date, events: EventTypes[]) => void;
+  openDayEventsDialog: (date: Date, events: Events[]) => void;
   closeDayEventsDialog: () => void;
   openQuickAddDialog: (data: QuickAddDialogData) => void;
   closeQuickAddDialog: () => void;

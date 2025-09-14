@@ -1,6 +1,15 @@
 "use client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+import { useShallow } from "zustand/shallow";
+
+import { deleteEvent, updateEvent } from "@/app/actions";
+import { DeleteAlert } from "@/components/event-calendar/ui/delete-alert";
+import { FormFooter } from "@/components/event-calendar/ui/form-footer";
 import {
   Dialog,
   DialogContent,
@@ -9,19 +18,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ScrollArea } from "../ui/scroll-area";
-import { DeleteAlert } from "@/components/event-calendar/ui/delete-alert";
-import { FormFooter } from "@/components/event-calendar/ui/form-footer";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { ensureDate } from "@/lib/date";
 import { useEventCalendarStore } from "@/hooks/use-event";
-import { eventFormSchema } from "@/lib/validations";
-import { EventDetailsForm } from "./event-detail-form";
-import { toast } from "sonner";
-import { deleteEvent, updateEvent } from "@/app/actions";
-import { useShallow } from "zustand/shallow";
+import { ensureDate } from "@/lib/date";
 import { getLocaleFromCode } from "@/lib/event";
+import { eventFormSchema } from "@/lib/validations";
+
+import { ScrollArea } from "../ui/scroll-area";
+import { EventDetailsForm } from "./event-detail-form";
 
 const DEFAULT_START_TIME = "09:00";
 const DEFAULT_END_TIME = "10:00";
@@ -83,8 +86,10 @@ export default function EventDialog() {
   useEffect(() => {
     if (selectedEvent) {
       try {
-        const startDate = ensureDate(selectedEvent.startDate);
-        const endDate = ensureDate(selectedEvent.endDate);
+        const startDate = ensureDate(
+          selectedEvent.startDate || selectedEvent.start
+        );
+        const endDate = ensureDate(selectedEvent.endDate || selectedEvent.end);
 
         form.reset({
           title: selectedEvent.title || "",
@@ -92,10 +97,19 @@ export default function EventDialog() {
           startDate,
           endDate,
           category: selectedEvent.category || DEFAULT_CATEGORY,
-          startTime: selectedEvent.startTime || DEFAULT_START_TIME,
-          endTime: selectedEvent.endTime || DEFAULT_END_TIME,
-          location: selectedEvent.location || "",
-          color: selectedEvent.color,
+          startTime:
+            selectedEvent.startTime ||
+            format(selectedEvent.start, "HH:mm") ||
+            DEFAULT_START_TIME,
+          endTime:
+            selectedEvent.endTime ||
+            format(selectedEvent.end, "HH:mm") ||
+            DEFAULT_END_TIME,
+          location:
+            typeof selectedEvent.location === "object"
+              ? selectedEvent.location?.address || ""
+              : selectedEvent.location || "",
+          color: selectedEvent.color || "gray",
         });
       } catch (error) {
         console.error("Error resetting form with event data:", error);
@@ -106,7 +120,15 @@ export default function EventDialog() {
   const handleUpdate = async (values: EventFormValues) => {
     if (!selectedEvent?.id) return;
 
-    toast.promise(updateEvent(selectedEvent.id, values), {
+    // Transform values to match expected API format
+    const eventData = {
+      ...values,
+      location:
+        typeof values.location === "string"
+          ? { type: "custom" as const, address: values.location }
+          : values.location,
+    };
+    toast.promise(updateEvent(selectedEvent.id, eventData), {
       loading: "Updating event...",
       success: (result) => {
         closeEventDialog();

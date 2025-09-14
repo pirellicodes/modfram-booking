@@ -1,3 +1,7 @@
+import { endOfWeek, format, Locale, startOfWeek } from "date-fns";
+import { Calendar, Clock, MapPin } from "lucide-react";
+import { memo } from "react";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatTimeDisplay } from "@/lib/date";
@@ -5,9 +9,6 @@ import { getColorClasses } from "@/lib/event";
 import { cn } from "@/lib/utils";
 import { CalendarViewType, TimeFormatType } from "@/types/event";
 import { Events } from "@/types/event";
-import { endOfWeek, format, Locale, startOfWeek } from "date-fns";
-import { Calendar, Clock, MapPin } from "lucide-react";
-import { memo } from "react";
 
 export const NoEvents = memo(
   ({
@@ -75,7 +76,7 @@ export const EventCard = ({
   timeFormat: TimeFormatType;
   onClick: (event: Events) => void;
 }) => {
-  const { bg, badge } = getColorClasses(event.color);
+  const { bg, badge } = getColorClasses(event.color || "gray");
   return (
     <Button
       key={event.id}
@@ -100,15 +101,26 @@ export const EventCard = ({
         <div className="flex items-center gap-1.5">
           <Clock className="h-3 w-3" />
           <span>
-            {formatTimeDisplay(event.startTime, timeFormat)} -{" "}
-            {formatTimeDisplay(event.endTime, timeFormat)}
+            {formatTimeDisplay(
+              event.startTime || format(event.start, "HH:mm"),
+              timeFormat
+            )}{" "}
+            -{" "}
+            {formatTimeDisplay(
+              event.endTime || format(event.end, "HH:mm"),
+              timeFormat
+            )}
           </span>
         </div>
 
         {event.location && (
           <div className="flex items-center gap-1.5">
             <MapPin className="h-3 w-3" />
-            <span className="line-clamp-1">{event.location}</span>
+            <span className="line-clamp-1">
+              {typeof event.location === "object"
+                ? event.location?.address || ""
+                : event.location || ""}
+            </span>
           </div>
         )}
       </div>

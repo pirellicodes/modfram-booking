@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { supabaseServer } from "@/lib/supabase-server";
 
 function slugify(text: string): string {
@@ -16,7 +17,7 @@ export async function GET(
 ) {
   try {
     const params = await context.params;
-    const supabase = supabaseServer();
+    const supabase = await supabaseServer();
 
     // Check authentication
     const {
@@ -85,7 +86,7 @@ export async function PATCH(
 ) {
   try {
     const params = await context.params;
-    const supabase = supabaseServer();
+    const supabase = await supabaseServer();
 
     // Check authentication
     const {
@@ -202,7 +203,7 @@ export async function DELETE(
 ) {
   try {
     const params = await context.params;
-    const supabase = supabaseServer();
+    const supabase = await supabaseServer();
 
     // Check authentication
     const {

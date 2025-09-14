@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+
 import { Events } from '@/types/event'
 
 // Event Actions
