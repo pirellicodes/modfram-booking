@@ -12,7 +12,7 @@ import {
   startOfDay,
 } from "date-fns";
 import { CalendarViewType, TimeFormatType } from "@/types/event";
-import { Event } from "@/types";
+import { Events } from "@/types/event";
 import { EventGroup, NoEvents } from "./ui/events";
 import { useEventCalendarStore } from "@/hooks/use-event";
 import {
@@ -23,7 +23,7 @@ import {
 import { useShallow } from "zustand/shallow";
 
 interface EventsListProps {
-  events: Event[];
+  events: Events[];
   currentDate: Date;
 }
 
@@ -72,9 +72,9 @@ const EventSection = ({
 }: {
   title: string;
   timeKey: string;
-  events: EventTypes[];
+  events: Events[];
   timeFormat: TimeFormatType;
-  onEventClick: (event: EventTypes) => void;
+  onEventClick: (event: Events) => void;
 }) => (
   <div className="space-y-2">
     <h3 className="text-muted-foreground text-sm font-medium">{title}</h3>
@@ -109,7 +109,7 @@ export function EventsList({ events, currentDate }: EventsListProps) {
   );
 
   const handleEventClick = useCallback(
-    (event: EventTypes) => {
+    (event: Events) => {
       openEventDialog(event);
     },
     [openEventDialog]
@@ -123,7 +123,13 @@ export function EventsList({ events, currentDate }: EventsListProps) {
     <div className="h-full w-full space-y-4" data-testid="events-list">
       <ScrollArea className="h-[calc(100vh-12rem)] pr-3">
         <div className="space-y-3 px-5 py-4">
-          {groupedEvents.map(({ key, title, events }) => (
+          {(
+            groupedEvents as Array<{
+              key: string;
+              title: string;
+              events: Events[];
+            }>
+          ).map(({ key, title, events }) => (
             <EventSection
               key={key}
               title={title}

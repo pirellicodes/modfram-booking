@@ -2,22 +2,22 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { memo } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Event } from "@/db/schema";
+import { Events } from "@/types/event";
 import { getColorClasses } from "@/lib/event";
 import { formatTimeDisplay, calculateDuration } from "@/lib/date";
 
 interface MultiDayEventProps {
-  event: EventTypes;
+  event: Events;
   startIndex: number;
   endIndex: number;
   row: number;
-  onClick: (event: EventTypes) => void;
+  onClick: (event: Events) => void;
   daysCount: number;
   multiDayRowHeight: number;
 }
 
 interface MultiDayEventRowType {
-  event: EventTypes;
+  event: Events;
   startIndex: number;
   endIndex: number;
   row: number;
@@ -26,7 +26,7 @@ interface MultiDayEventRowType {
 interface MultiDayEventSectionProps {
   rows: MultiDayEventRowType[];
   daysInWeek: Date[];
-  showEventDetail: (event: EventTypes) => void;
+  showEventDetail: (event: Events) => void;
   multiDayRowHeight: number;
   isExpanded?: boolean;
 }
@@ -61,27 +61,27 @@ export const MultiDayEvent = ({
     >
       <Button
         className={cn(
-          'group absolute flex h-full w-full cursor-pointer flex-col items-start justify-start gap-0 overflow-hidden rounded bg-transparent p-2 text-white hover:bg-transparent',
-          'border-none shadow-none ring-0 focus:ring-0 focus:outline-none',
-          'transition-colors',
-          bg,
+          "group absolute flex h-full w-full cursor-pointer flex-col items-start justify-start gap-0 overflow-hidden rounded bg-transparent p-2 text-white hover:bg-transparent",
+          "border-none shadow-none ring-0 focus:ring-0 focus:outline-none",
+          "transition-colors",
+          bg
         )}
         onClick={() => onClick(event)}
       >
         <div className="text-xs font-medium sm:truncate">{event.title}</div>
         <div className="text-xs sm:truncate">
-          {formatTimeDisplay(event.startTime, '12')} -{' '}
-          {formatTimeDisplay(event.endTime, '12')}
+          {formatTimeDisplay(event.startTime, "12")} -{" "}
+          {formatTimeDisplay(event.endTime, "12")}
         </div>
         <div className="mt-1 text-xs sm:truncate">
-          {calculateDuration(event.startTime, event.endTime, 'auto')}
+          {calculateDuration(event.startTime, event.endTime, "auto")}
         </div>
       </Button>
     </motion.div>
   );
 };
 
-MultiDayEvent.displayName = 'MultiDayEvent';
+MultiDayEvent.displayName = "MultiDayEvent";
 
 export const MultiDayEventSection = memo(
   ({
@@ -113,7 +113,7 @@ export const MultiDayEventSection = memo(
         </AnimatePresence>
       </div>
     );
-  },
+  }
 );
 
-MultiDayEventSection.displayName = 'MultiDayEventSection';
+MultiDayEventSection.displayName = "MultiDayEventSection";

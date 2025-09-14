@@ -35,7 +35,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import type { EventTypeWithParsedFields } from "@/lib/types";
+import type { EventType, EventTypeWithParsedFields } from "@/types";
 
 export function EventTypes() {
   const { data: eventTypes, loading, error, refetch } = useEventTypes();

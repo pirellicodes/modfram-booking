@@ -4,7 +4,7 @@ import { formatTimeDisplay } from "@/lib/date";
 import { getColorClasses } from "@/lib/event";
 import { cn } from "@/lib/utils";
 import { CalendarViewType, TimeFormatType } from "@/types/event";
-import { Event } from "@/db/schema";
+import { Events } from "@/types/event";
 import { endOfWeek, format, Locale, startOfWeek } from "date-fns";
 import { Calendar, Clock, MapPin } from "lucide-react";
 import { memo } from "react";
@@ -71,9 +71,9 @@ export const EventCard = ({
   timeFormat,
   onClick,
 }: {
-  event: EventTypes;
+  event: Events;
   timeFormat: TimeFormatType;
-  onClick: (event: EventTypes) => void;
+  onClick: (event: Events) => void;
 }) => {
   const { bg, badge } = getColorClasses(event.color);
   return (
@@ -124,9 +124,9 @@ export const EventGroup = memo(
     onClick,
   }: {
     timeKey: string;
-    events: EventTypes[];
+    events: Events[];
     timeFormat: TimeFormatType;
-    onClick: (event: EventTypes) => void;
+    onClick: (event: Events) => void;
   }) => (
     <div
       key={timeKey}
