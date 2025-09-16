@@ -1,10 +1,13 @@
-import { type CookieOptions,createServerClient } from "@supabase/ssr";
+import {
+  type CookieOptions,
+  createServerClient as supabaseCreateServerClient,
+} from "@supabase/ssr";
 import { cookies } from "next/headers";
 
 export async function supabaseServer() {
   const store = await cookies(); // readonly type
 
-  return createServerClient(
+  return supabaseCreateServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -25,4 +28,8 @@ export async function supabaseServer() {
       },
     }
   );
+}
+
+export async function createServerClient() {
+  return await supabaseServer();
 }

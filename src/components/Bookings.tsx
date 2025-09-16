@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo,useState } from "react";
+import { useMemo, useState } from "react";
 
 import { useBookings } from "@/hooks/use-bookings";
+import { NewBookingDialog } from "@/components/bookings/NewBookingDialog";
 // Use the same interface as defined in use-bookings.ts
 interface BookingWithClient {
   id: string;
@@ -45,10 +46,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -289,10 +287,7 @@ export function Bookings() {
             <RefreshCwIcon className="h-4 w-4 mr-2" />
             Refresh
           </Button>
-          <Button size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            New Booking
-          </Button>
+          <NewBookingDialog onCreated={refetch} />
         </div>
       </div>
 

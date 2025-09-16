@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -53,6 +53,7 @@ export function EventTypeForm({
     durationLimits: {},
     recurringEvent: undefined,
     metadata: {},
+    slugManuallySet: false,
   });
 
   const [formData, setFormData] = useState<EventTypeFormData>(
@@ -87,6 +88,7 @@ export function EventTypeForm({
         durationLimits: eventType.durationLimits || {},
         recurringEvent: eventType.recurringEvent || undefined,
         metadata: eventType.metadata || {},
+        slugManuallySet: true, // When editing existing event, consider slug as manually set
       });
     } else {
       setFormData(getInitialFormData());
@@ -95,34 +97,36 @@ export function EventTypeForm({
 
   const handleSave = async () => {
     if (!formData.title?.trim()) {
-      alert("Please enter a title for the event type");
+      alert("Please enter a title for the session type");
       return;
     }
     setIsSaving(true);
     try {
       const url = isEditing
-        ? `/api/event-types/${eventType!.id}`
-        : "/api/event-types";
-      const method = isEditing ? "PATCH" : "POST";
+        ? `/api/session-types?id=${eventType!.id}`
+        : "/api/session-types";
+      const method = isEditing ? "PUT" : "POST";
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to save session type");
+      }
+
       const data = await res.json();
-      if (data.success) {
-        onSave(data.data);
-        onOpenChange(false);
-        if (!isEditing) {
-          setFormData(getInitialFormData());
-          setActiveTab("basic");
-        }
-      } else {
-        alert(data.error || "Failed to save event type");
+      onSave(data);
+      onOpenChange(false);
+      if (!isEditing) {
+        setFormData(getInitialFormData());
+        setActiveTab("basic");
       }
     } catch (err) {
-      console.error("Error saving event type:", err);
-      alert("Failed to save event type");
+      console.error("Error saving session type:", err);
+      alert("Failed to save session type");
     } finally {
       setIsSaving(false);
     }
@@ -133,7 +137,7 @@ export function EventTypeForm({
       <DialogContent className="sm:max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? "Edit Event Type" : "Create Event Type"}
+            {isEditing ? "Edit Session Type" : "Create Session Type"}
           </DialogTitle>
         </DialogHeader>
 
@@ -192,7 +196,7 @@ export function EventTypeForm({
             onClick={handleSave}
             disabled={isSaving || !formData.title?.trim()}
           >
-            {isSaving ? "Saving..." : isEditing ? "Update" : "Create"} Event
+            {isSaving ? "Saving..." : isEditing ? "Update" : "Create"} Session
             Type
           </Button>
         </div>

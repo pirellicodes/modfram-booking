@@ -11,7 +11,7 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -583,20 +583,6 @@ export function Availability() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <div className="flex rounded-md border border-input p-1">
-            <Button
-              variant="ghost"
-              className="rounded-sm px-3 text-sm font-medium bg-background text-foreground"
-            >
-              My Availability
-            </Button>
-            <Button
-              variant="ghost"
-              className="rounded-sm px-3 text-sm font-medium"
-            >
-              Team Availability
-            </Button>
-          </div>
           <Button>
             <Plus className="h-4 w-4 mr-2" />
             New

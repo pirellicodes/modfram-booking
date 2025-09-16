@@ -30,8 +30,8 @@ export async function GET() {
     const { data: eventTypes, error } = await supabase
       .from("event_types")
       .select("*")
-      .order("position", { ascending: false })
-      .order("created_at", { ascending: false });
+      .eq("user_id", user.id)
+      .order("title", { ascending: true });
 
     if (error) {
       console.error("Error fetching event types:", error);
@@ -43,7 +43,7 @@ export async function GET() {
 
     // Parse JSON fields for response
     const parsedEventTypes =
-      eventTypes?.map((eventType) => ({
+      eventTypes?.map((eventType: any) => ({
         ...eventType,
         locations: eventType.locations
           ? JSON.parse(eventType.locations as string)

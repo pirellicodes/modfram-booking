@@ -86,13 +86,13 @@ export function EventTypes() {
 
       if (error) throw error;
 
-      toast.success("Event type updated successfully");
+      toast.success("Session type updated successfully");
       setIsEditDialogOpen(false);
       setSelectedEventType(null);
       refetch();
     } catch (error) {
-      console.error("Error updating event type:", error);
-      toast.error("Failed to update event type");
+      console.error("Error updating session type:", error);
+      toast.error("Failed to update session type");
     } finally {
       setIsSubmitting(false);
     }
@@ -115,11 +115,11 @@ export function EventTypes() {
 
       if (error) throw error;
 
-      toast.success("Event type deleted successfully");
+      toast.success("Session type deleted successfully");
       refetch();
     } catch (error) {
-      console.error("Error deleting event type:", error);
-      toast.error("Failed to delete event type");
+      console.error("Error deleting session type:", error);
+      toast.error("Failed to delete session type");
     }
   };
 
@@ -163,7 +163,7 @@ export function EventTypes() {
     return (
       <div className="text-center py-12">
         <p className="text-muted-foreground">
-          Error loading event types: {error}
+          Error loading session types: {error}
         </p>
       </div>
     );
@@ -174,10 +174,10 @@ export function EventTypes() {
       <div className="mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-foreground mb-1">
-            Event Types
+            Session Types
           </h1>
           <p className="text-muted-foreground">
-            Create events to share for people to book on your calendar.
+            Create session types to share for people to book on your calendar.
           </p>
         </div>
       </div>
@@ -193,10 +193,10 @@ export function EventTypes() {
               <div className="rounded-full bg-primary/10 p-3 mb-4">
                 <ClockIcon className="h-10 w-10 text-primary" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">No event types</h3>
+              <h3 className="text-xl font-semibold mb-2">No session types</h3>
               <p className="text-muted-foreground text-center max-w-md">
-                You don&apos;t have any event types yet. Contact your
-                administrator to create event types.
+                You don&apos;t have any session types yet. Contact your
+                administrator to create session types.
               </p>
             </CardContent>
           </Card>
@@ -332,13 +332,13 @@ export function EventTypes() {
         )}
       </div>
 
-      {/* Edit Event Type Dialog */}
+      {/* Edit Session Type Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-[550px]">
           <DialogHeader>
-            <DialogTitle>Edit Event Type</DialogTitle>
+            <DialogTitle>Edit Session Type</DialogTitle>
             <DialogDescription>
-              Update the details of your event type
+              Update the details of your session type
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -388,7 +388,7 @@ export function EventTypes() {
                 onChange={(e) =>
                   setEditForm({ ...editForm, description: e.target.value })
                 }
-                placeholder="A brief description of your event type"
+                placeholder="A brief description of your session type"
               />
             </div>
 

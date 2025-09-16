@@ -7,7 +7,6 @@
 - [ ] Supabase connection and RLS
 - [ ] Stripe webhook endpoints
 - [ ] Google Calendar OAuth flow
-- [ ] Tally form webhook handling
 - [ ] Zoom API integration (if enabled)
 
 ## Validation Steps

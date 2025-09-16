@@ -76,7 +76,7 @@ const sidebarData: SidebarData = {
       title: "Management",
       items: [
         {
-          title: "Event Types",
+          title: "Session Types",
           url: "/admin/event-types",
           icon: Camera,
         },

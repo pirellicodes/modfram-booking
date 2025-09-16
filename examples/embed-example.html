@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ModFram Booking Widget Examples</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9fafb;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .example {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 32px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .example h2 {
+            margin-top: 0;
+            color: #1f2937;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 8px;
+        }
+        .code-block {
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 16px;
+            margin: 16px 0;
+            overflow-x: auto;
+        }
+        .code-block code {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            color: #374151;
+        }
+        .widget-container {
+            margin: 24px 0;
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 16px;
+            background: #f9fafb;
+        }
+        .note {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 16px 0;
+            color: #1e40af;
+        }
+        .warning {
+            background: #fef3c7;
+            border: 1px solid #fbbf24;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 16px 0;
+            color: #92400e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ModFram Booking Widget - Embed Examples</h1>
+        <p>This page demonstrates different ways to embed the ModFram booking widget on your website.</p>
+
+        <!-- Example 1: Basic Iframe Embed -->
+        <div class="example">
+            <h2>1. Basic Iframe Embed</h2>
+            <p>The simplest way to embed the booking widget using a standard iframe.</p>
+
+            <div class="code-block">
+                <code>&lt;iframe
+    src="https://YOUR_DOMAIN/schedule/demo-session/embed"
+    style="width:100%;min-height:780px;border:0;border-radius:8px;"
+    loading="lazy"
+    allow="clipboard-write *"
+    title="Book a Session"
+&gt;&lt;/iframe&gt;</code>
+            </div>
+
+            <div class="note">
+                <strong>Note:</strong> Replace <code>YOUR_DOMAIN</code> with your actual domain and <code>demo-session</code> with your event type slug.
+            </div>
+
+            <div class="widget-container">
+                <p><strong>Widget Preview:</strong></p>
+                <iframe
+                    src="https://localhost:3000/schedule/demo-session/embed"
+                    style="width:100%;min-height:600px;border:0;border-radius:8px;"
+                    loading="lazy"
+                    allow="clipboard-write *"
+                    title="Book a Session"
+                ></iframe>
+            </div>
+        </div>
+
+        <!-- Example 2: JavaScript Widget (Auto-resize) -->
+        <div class="example">
+            <h2>2. JavaScript Widget (Recommended)</h2>
+            <p>Uses the ModFram widget script for automatic resizing and better user experience.</p>
+
+            <div class="code-block">
+                <code>&lt;script async
+    src="https://YOUR_DOMAIN/widget.js"
+    data-schedule-url="https://YOUR_DOMAIN/schedule/demo-session/embed"
+    data-width="100%"
+    data-height="auto"
+    data-theme="auto"
+&gt;&lt;/script&gt;</code>
+            </div>
+
+            <div class="note">
+                <strong>Features:</strong>
+                <ul>
+                    <li>Automatic height adjustment based on content</li>
+                    <li>Responsive design</li>
+                    <li>Theme detection (light/dark)</li>
+                    <li>Loading states and error handling</li>
+                    <li>Retry mechanism for network issues</li>
+                </ul>
+            </div>
+
+            <div class="widget-container">
+                <p><strong>Widget Preview:</strong></p>
+                <script async
+                    src="/widget.js"
+                    data-schedule-url="https://localhost:3000/schedule/demo-session/embed"
+                    data-width="100%"
+                    data-height="auto"
+                    data-theme="light"
+                ></script>
+            </div>
+        </div>
+
+        <!-- Example 3: Custom Styling -->
+        <div class="example">
+            <h2>3. Custom Styling Options</h2>
+            <p>Customize the appearance of the widget to match your brand.</p>
+
+            <div class="code-block">
+                <code>&lt;script async
+    src="https://YOUR_DOMAIN/widget.js"
+    data-schedule-url="https://YOUR_DOMAIN/schedule/demo-session/embed"
+    data-width="800px"
+    data-height="700px"
+    data-theme="dark"
+&gt;&lt;/script&gt;
+
+&lt;style&gt;
+.modfram-booking-widget {
+    border: 2px solid #3b82f6;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+}
+&lt;/style&gt;</code>
+            </div>
+
+            <div class="widget-container">
+                <p><strong>Styled Widget Preview:</strong></p>
+                <div style="border: 2px solid #3b82f6; border-radius: 12px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); margin: 20px auto; max-width: 800px;">
+                    <iframe
+                        src="https://localhost:3000/schedule/demo-session/embed"
+                        style="width:100%;height:600px;border:0;border-radius:10px;"
+                        loading="lazy"
+                        allow="clipboard-write *"
+                        title="Book a Session"
+                    ></iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- Example 4: Popup/Modal Integration -->
+        <div class="example">
+            <h2>4. Popup/Modal Integration</h2>
+            <p>Open the booking widget in a popup or modal for better integration.</p>
+
+            <div class="code-block">
+                <code>&lt;button onclick="openBookingModal()"&gt;Book a Session&lt;/button&gt;
+
+&lt;div id="booking-modal" style="display:none;"&gt;
+    &lt;div class="modal-backdrop"&gt;
+        &lt;div class="modal-content"&gt;
+            &lt;span class="close" onclick="closeBookingModal()"&gt;&times;&lt;/span&gt;
+            &lt;iframe
+                src="https://YOUR_DOMAIN/schedule/demo-session/embed"
+                style="width:100%;height:600px;border:0;"
+                title="Book a Session"
+            &gt;&lt;/iframe&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+function openBookingModal() {
+    document.getElementById('booking-modal').style.display = 'block';
+}
+
+function closeBookingModal() {
+    document.getElementById('booking-modal').style.display = 'none';
+}
+&lt;/script&gt;</code>
+            </div>
+
+            <div class="widget-container">
+                <p><strong>Try it:</strong></p>
+                <button onclick="openBookingModal()" style="background: #3b82f6; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-size: 16px; cursor: pointer;">
+                    Book a Session
+                </button>
+            </div>
+        </div>
+
+        <!-- Configuration Reference -->
+        <div class="example">
+            <h2>5. Configuration Reference</h2>
+            <p>Available configuration options for the JavaScript widget.</p>
+
+            <div class="code-block">
+                <code>// Available data attributes:
+data-schedule-url    // Required: URL to your booking page embed
+data-width          // Optional: Widget width (default: "100%")
+data-height         // Optional: Widget height (default: "auto")
+data-theme          // Optional: "light", "dark", or "auto" (default: "auto")
+
+// Programmatic API:
+ModFramWidget.create(element, scheduleUrl, options)
+ModFramWidget.destroy(widgetId)</code>
+            </div>
+
+            <div class="warning">
+                <strong>Security Note:</strong> The widget runs in a sandboxed iframe with restricted permissions for security. Only clipboard-write permission is allowed for copying confirmation details.
+            </div>
+        </div>
+
+        <!-- Setup Instructions -->
+        <div class="example">
+            <h2>6. Setup Instructions</h2>
+            <ol>
+                <li><strong>Create Event Type:</strong> Set up your session types in the admin panel with unique slugs</li>
+                <li><strong>Configure Availability:</strong> Set your available time slots in the availability settings</li>
+                <li><strong>Get Embed URL:</strong> Use the format <code>/schedule/{slug}/embed</code> where <code>{slug}</code> is your event type slug</li>
+                <li><strong>Add to Website:</strong> Use either iframe or JavaScript widget methods shown above</li>
+                <li><strong>Test:</strong> Verify the booking flow works end-to-end</li>
+            </ol>
+
+            <div class="note">
+                <strong>Live Example URLs:</strong>
+                <ul>
+                    <li>Full page: <code>https://YOUR_DOMAIN/schedule/demo-session</code></li>
+                    <li>Embed page: <code>https://YOUR_DOMAIN/schedule/demo-session/embed</code></li>
+                    <li>Widget script: <code>https://YOUR_DOMAIN/widget.js</code></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for popup example -->
+    <div id="booking-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000;">
+        <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:white; border-radius:8px; width:90%; max-width:900px; height:80%; max-height:700px;">
+            <div style="display:flex; justify-content:flex-end; padding:16px;">
+                <span onclick="closeBookingModal()" style="cursor:pointer; font-size:24px; font-weight:bold; color:#666;">&times;</span>
+            </div>
+            <iframe
+                src="https://localhost:3000/schedule/demo-session/embed"
+                style="width:100%; height:calc(100% - 60px); border:0;"
+                title="Book a Session"
+            ></iframe>
+        </div>
+    </div>
+
+    <script>
+        function openBookingModal() {
+            document.getElementById('booking-modal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeBookingModal() {
+            document.getElementById('booking-modal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal when clicking backdrop
+        document.getElementById('booking-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeBookingModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeBookingModal();
+            }
+        });
+    </script>
+</body>
+</html>
