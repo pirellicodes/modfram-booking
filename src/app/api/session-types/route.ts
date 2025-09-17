@@ -1,45 +1,18 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-type CookieStore = Awaited<ReturnType<typeof cookies>>;
-
-async function createSupabaseClient() {
-  const store: CookieStore = await cookies();
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => store.getAll(),
-        setAll: (cookies) => {
-          cookies.forEach(({ name, value, options }) => {
-            store.set(name, value, options);
-          });
-        },
-      },
-    }
-  );
-}
-
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9-]/g, "")
-    .slice(0, 60);
-}
+import { logErr } from "@/lib/log";
+import { slugify } from "@/lib/slug";
+import { supabaseServer } from "@/lib/supabase-server-client";
 
 function handleError(e: unknown, status = 400) {
-  console.error("API/session-types error", e);
+  logErr("api/session-types", e);
   const message = (e as any)?.message ?? "unknown";
   return NextResponse.json({ error: message }, { status });
 }
 
 export async function GET() {
   try {
-    const supabase = await createSupabaseClient();
+    const supabase = await supabaseServer();
     const {
       data: { user },
       error: authError,
@@ -89,7 +62,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createSupabaseClient();
+    const supabase = await supabaseServer();
     const {
       data: { user },
       error: authError,
@@ -117,7 +90,7 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
 
     if (clash) {
-      return handleError("Slug already in use", 400);
+      return NextResponse.json({ error: "slug_taken" }, { status: 409 });
     }
 
     const newSessionType = {
@@ -145,9 +118,19 @@ export async function POST(request: NextRequest) {
       hideCalendarNotes: body.hideCalendarNotes || false,
       minimumBookingNotice: body.minimumBookingNotice || 120,
 
-      // Buffer times
+      // Buffer times (map camelCase to snake_case for new schema)
       beforeEventBuffer: body.beforeEventBuffer || 0,
       afterEventBuffer: body.afterEventBuffer || 0,
+      before_event_buffer:
+        body.before_event_buffer || body.beforeEventBuffer || 0,
+      after_event_buffer: body.after_event_buffer || body.afterEventBuffer || 0,
+
+      // New schema fields
+      length_in_minutes: body.length_in_minutes || body.length || 30,
+      price_cents:
+        body.price_cents ||
+        (body.price ? Math.round(parseFloat(body.price as string) * 100) : 0),
+      color: body.color || "indigo",
 
       // Pricing
       price: body.price || "0.00",
@@ -173,7 +156,9 @@ export async function POST(request: NextRequest) {
       durationLimits: JSON.stringify(body.durationLimits || {}),
 
       // Recurring events
-      recurringEvent: body.recurringEvent ? JSON.stringify(body.recurringEvent) : null,
+      recurringEvent: body.recurringEvent
+        ? JSON.stringify(body.recurringEvent)
+        : null,
 
       // Seats
       seatsPerTimeSlot: body.seatsPerTimeSlot,
@@ -211,7 +196,7 @@ export async function PUT(request: NextRequest) {
       return handleError("Session Type ID required", 400);
     }
 
-    const supabase = await createSupabaseClient();
+    const supabase = await supabaseServer();
     const {
       data: { user },
       error: authError,
@@ -235,7 +220,7 @@ export async function PUT(request: NextRequest) {
         .maybeSingle();
 
       if (clash) {
-        return handleError("Slug already in use", 400);
+        return NextResponse.json({ error: "slug_taken" }, { status: 409 });
       }
       body.slug = slug;
     }
@@ -243,10 +228,14 @@ export async function PUT(request: NextRequest) {
     // Convert JSON fields to strings if present
     if (body.locations) body.locations = JSON.stringify(body.locations);
     if (body.metadata) body.metadata = JSON.stringify(body.metadata);
-    if (body.bookingFields) body.bookingFields = JSON.stringify(body.bookingFields);
-    if (body.bookingLimits) body.bookingLimits = JSON.stringify(body.bookingLimits);
-    if (body.durationLimits) body.durationLimits = JSON.stringify(body.durationLimits);
-    if (body.recurringEvent) body.recurringEvent = JSON.stringify(body.recurringEvent);
+    if (body.bookingFields)
+      body.bookingFields = JSON.stringify(body.bookingFields);
+    if (body.bookingLimits)
+      body.bookingLimits = JSON.stringify(body.bookingLimits);
+    if (body.durationLimits)
+      body.durationLimits = JSON.stringify(body.durationLimits);
+    if (body.recurringEvent)
+      body.recurringEvent = JSON.stringify(body.recurringEvent);
 
     const { data: updatedSessionType, error } = await supabase
       .from("event_types")
@@ -272,7 +261,7 @@ export async function DELETE(request: NextRequest) {
       return handleError("Session Type ID required", 400);
     }
 
-    const supabase = await createSupabaseClient();
+    const supabase = await supabaseServer();
     const {
       data: { user },
       error: authError,

@@ -15,20 +15,12 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { slugify } from "@/lib/slug";
 import type { EventTypeFormData } from "@/types/forms";
 
 interface EventTypeBasicFormProps {
   formData: EventTypeFormData;
   setFormData: (data: EventTypeFormData) => void;
-}
-
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9-]/g, "")
-    .slice(0, 60);
 }
 
 export function EventTypeBasicForm({

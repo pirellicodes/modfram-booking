@@ -54,6 +54,8 @@ export function EventTypeForm({
     recurringEvent: undefined,
     metadata: {},
     slugManuallySet: false,
+    price: "0.00",
+    is_paid: false,
   });
 
   const [formData, setFormData] = useState<EventTypeFormData>(
