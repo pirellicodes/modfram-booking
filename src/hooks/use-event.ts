@@ -259,6 +259,14 @@ export const useEventCalendarStore = create<EventCalendarState>()(
         daysCount: state.daysCount,
         viewSettings: state.viewSettings,
       }),
+      merge: (persistedState, currentState) => {
+        const s = (persistedState as any) ?? {};
+        const sdRaw = s.selectedDate ?? null;
+        const sd =
+          sdRaw instanceof Date ? sdRaw : sdRaw ? new Date(sdRaw) : null;
+        const safe = sd && !Number.isNaN(sd.getTime()) ? sd : null;
+        return { ...currentState, ...s, selectedDate: safe };
+      },
     }
   )
 );

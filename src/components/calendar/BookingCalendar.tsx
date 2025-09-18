@@ -76,18 +76,21 @@ export function BookingCalendar({
     return Array.from(colors);
   }, [eventsWithColors]);
 
-  const handleDateChange = (date: Date) => {
-    setCurrentDate(date);
+  const handleDateChange = (dateLike: Date | string) => {
+    const d = dateLike instanceof Date ? dateLike : new Date(dateLike as any);
+    if (!Number.isNaN(d.getTime())) {
+      setCurrentDate((prev) => (prev.getTime() === d.getTime() ? prev : d));
 
-    // Calculate range for the current view (month)
-    const start = new Date(date.getFullYear(), date.getMonth(), 1);
-    const end = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+      // Calculate range for the current view (month)
+      const start = new Date(d.getFullYear(), d.getMonth(), 1);
+      const end = new Date(d.getFullYear(), d.getMonth() + 1, 0);
 
-    if (onRangeChange) {
-      onRangeChange({
-        start: start.toISOString(),
-        end: end.toISOString(),
-      });
+      if (onRangeChange) {
+        onRangeChange({
+          start: start.toISOString(),
+          end: end.toISOString(),
+        });
+      }
     }
   };
 

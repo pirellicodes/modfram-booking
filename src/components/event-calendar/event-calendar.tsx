@@ -39,18 +39,28 @@ export function EventCalendar({
       }))
     );
 
+  const toMillis = (v: unknown): number => {
+    if (!v) return 0;
+    if (v instanceof Date) return v.getTime();
+    const d = new Date(v as any);
+    const t = d.getTime();
+    return Number.isNaN(t) ? 0 : t;
+  };
+
   // Sync date with parent component
   React.useEffect(() => {
-    // Prevent infinite loops by checking if date actually changed
-    const currentTime = initialDate.getTime();
-    const storeTime = selectedDate?.getTime() ?? 0;
+    // Prevent loops; accept Date or string
+    const currentTime = toMillis(initialDate);
+    const storeTime = toMillis(selectedDate);
     if (currentTime === storeTime) return;
 
-    setSelectedDate(initialDate);
-    if (onDateChange && currentTime !== storeTime) {
-      onDateChange(initialDate);
+    const next =
+      initialDate instanceof Date ? initialDate : new Date(initialDate as any);
+    if (!Number.isNaN(next.getTime())) {
+      setSelectedDate(next);
+      onDateChange?.(next);
     }
-  }, [initialDate.getTime(), setSelectedDate, onDateChange]);
+  }, [initialDate, selectedDate, setSelectedDate, onDateChange]);
 
   const renderCalendarView = useMemo(() => {
     if (viewMode === "list") {
