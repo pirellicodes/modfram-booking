@@ -54,7 +54,7 @@ export function DatePicker({
           }}
           initialFocus
           locale={locale}
-          weekStartsOn={1} // Minggu dimulai pada hari Senin
+          weekStartsOn={1} // Week starts on Monday
           disabled={(date) => false} // Semua tanggal aktif
           className="rounded-md border"
           classNames={{

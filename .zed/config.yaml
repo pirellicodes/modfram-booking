@@ -1,0 +1,13 @@
+tools:
+  deepwiki:
+    cmd: ["curl"]
+    args:
+      - -s
+      - -H
+      - Content-Type: application/json
+      - -d
+      - '{"query":"$input"}'
+      - http://localhost:8001/ask
+    input: stdin
+    output: stdout
+    format: json

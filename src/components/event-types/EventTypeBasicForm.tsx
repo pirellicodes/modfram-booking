@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPin, Plus, Users,Video, X } from "lucide-react";
+import { MapPin, Plus, Users, Video, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,20 +15,12 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { slugify } from "@/lib/slug";
 import type { EventTypeFormData } from "@/types/forms";
 
 interface EventTypeBasicFormProps {
   formData: EventTypeFormData;
   setFormData: (data: EventTypeFormData) => void;
-}
-
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/[\s_-]+/g, "-")
-    .replace(/^-+|-+$/g, "");
 }
 
 export function EventTypeBasicForm({
@@ -50,6 +42,13 @@ export function EventTypeBasicForm({
   const handleSlugChange = (slug: string) => {
     updateField("slug", slugify(slug));
     updateField("slugManuallySet", true);
+  };
+
+  const handleSlugBlur = () => {
+    // If slug is empty, regenerate from title
+    if (!formData.slug) {
+      updateField("slug", slugify(formData.title || ""));
+    }
   };
 
   const addLocation = () => {
@@ -105,7 +104,7 @@ export function EventTypeBasicForm({
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="title">Event Title *</Label>
+            <Label htmlFor="title">Session Title *</Label>
             <Input
               id="title"
               value={formData.title || ""}
@@ -124,6 +123,7 @@ export function EventTypeBasicForm({
                 id="slug"
                 value={formData.slug || ""}
                 onChange={(e) => handleSlugChange(e.target.value)}
+                onBlur={handleSlugBlur}
                 placeholder="30min"
               />
             </div>
@@ -143,40 +143,38 @@ export function EventTypeBasicForm({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="length">Duration (minutes) *</Label>
-              <Input
-                id="length"
-                type="number"
-                value={formData.length || 30}
-                onChange={(e) =>
-                  updateField("length", parseInt(e.target.value) || 30)
-                }
-                min="5"
-                max="1440"
-              />
-            </div>
+          <div>
+            <Label htmlFor="length">Duration (minutes) *</Label>
+            <Input
+              id="length"
+              type="number"
+              value={formData.length || 30}
+              onChange={(e) =>
+                updateField("length", parseInt(e.target.value) || 30)
+              }
+              min="5"
+              max="1440"
+            />
+          </div>
 
-            <div>
-              <Label htmlFor="eventName">Event Name Template</Label>
-              <Input
-                id="eventName"
-                value={formData.eventName || ""}
-                onChange={(e) => updateField("eventName", e.target.value)}
-                placeholder="{TITLE} between {ORGANIZER} and {ATTENDEE}"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Optional custom name for calendar events
-              </p>
-            </div>
+          <div>
+            <Label htmlFor="eventName">Event Name Template</Label>
+            <Input
+              id="eventName"
+              value={formData.eventName || ""}
+              onChange={(e) => updateField("eventName", e.target.value)}
+              placeholder="{TITLE} between {ORGANIZER} and {ATTENDEE}"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Optional custom name for calendar events
+            </p>
           </div>
 
           <div className="flex items-center justify-between">
             <div>
-              <Label>Hidden Event Type</Label>
+              <Label>Hidden Session Type</Label>
               <p className="text-sm text-muted-foreground">
-                Hide this event type from your public page
+                Hide this session type from your public page
               </p>
             </div>
             <Switch

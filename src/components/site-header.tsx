@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar,Plus, Search } from "lucide-react";
+import { Calendar, Plus, Search } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -52,7 +52,7 @@ export function SiteHeader({ className, fixed = true, ...props }: HeaderProps) {
   const getPageTitle = () => {
     if (pathname === "/admin") return "Dashboard";
     if (pathname.startsWith("/admin/analytics")) return "Analytics";
-    if (pathname.startsWith("/admin/event-types")) return "Event Types";
+    if (pathname.startsWith("/admin/event-types")) return "Session Types";
     if (pathname.startsWith("/admin/bookings")) return "Bookings";
     if (pathname.startsWith("/admin/availability")) return "Availability";
     if (pathname.startsWith("/admin/calendar")) return "Calendar";

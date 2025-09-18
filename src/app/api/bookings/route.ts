@@ -1,181 +1,270 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
-type CookieStore = {
-  get(name: string): { value: string } | undefined;
-  set(name: string, value: string, options?: Record<string, unknown>): void;
-  delete(name: string): void;
-};
+import { logErr } from "@/lib/log";
+import { supabaseServer } from "@/lib/supabase-server-client";
 
-function sb() {
-  const store = cookies() as unknown as CookieStore;
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return store.get(name)?.value;
-        },
-        set(name: string, value: string, options?: Record<string, unknown>) {
-          store.set(name, value, options);
-        },
-        remove(name: string) {
-          store.delete(name);
-        },
-      },
-    }
-  );
+function err(e: unknown, status = 400) {
+  logErr("api/bookings", e);
+  const msg = (e as any)?.message ?? "bad request";
+  return NextResponse.json({ error: msg }, { status });
 }
 
-export async function GET() {
+function combineDateTime(
+  dateStr?: string | null,
+  timeStr?: string | null
+): string | null {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  if (timeStr) {
+    const [hh, mm, ss] = timeStr.split(":").map(Number);
+    d.setUTCHours(hh ?? 0, mm ?? 0, ss ?? 0, 0);
+  }
+  return d.toISOString();
+}
+
+export async function GET(req: Request) {
   try {
-    const supabase = sb();
+    const { searchParams } = new URL(req.url);
+    const start = searchParams.get("start");
+    const end = searchParams.get("end");
+
+    const supabase = await supabaseServer();
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    if (!user)
-      return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
+    if (!user) return err("unauthenticated", 401);
 
-    const { data, error } = await supabase
+    let query = supabase
       .from("bookings")
       .select(
         `
-        *,
-        clients!inner(id, name, email, phone)
+        id, user_id, client_id, client_name, client_email, client_phone,
+        status, notes, created_at, booking_date, booking_time, updated_at,
+        event_type_id, service_type_id, total_price, start_time, end_time
       `
       )
-      .eq("user_id", user.id)
-      .order("start_time", { ascending: false });
+      .eq("user_id", user.id);
 
-    if (error)
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    return NextResponse.json(data);
-  } catch (e: unknown) {
-    return NextResponse.json(
-      { error: e instanceof Error ? e.message : "bad request" },
-      { status: 400 }
-    );
+    // Add date range filters if provided
+    if (start) {
+      query = query.gte("start_time", start);
+    }
+    if (end) {
+      query = query.lte("start_time", end);
+    }
+
+    query = query
+      .order("booking_date", { ascending: true })
+      .order("booking_time", { ascending: true });
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    // Return bookings with computed times if start_time/end_time are null
+    const enriched = (data ?? []).map((b) => {
+      let start_time = b.start_time;
+      let end_time = b.end_time;
+
+      // Fallback computation if times are missing
+      if (!start_time && b.booking_date && b.booking_time) {
+        start_time = combineDateTime(b.booking_date, b.booking_time);
+      }
+      if (!end_time && start_time) {
+        end_time = new Date(
+          new Date(start_time).getTime() + 30 * 60 * 1000
+        ).toISOString();
+      }
+
+      return { ...b, start_time, end_time };
+    });
+
+    return NextResponse.json(enriched);
+  } catch (e) {
+    return err(e);
   }
 }
 
 export async function POST(req: Request) {
   try {
-    const {
-      client_id,
-      session_type,
-      category,
-      start_time,
-      end_time,
-      status,
-      notes,
-    } = (await req.json()) as {
-      client_id?: string;
-      session_type: string;
-      category?: string;
-      start_time: string;
-      end_time: string;
-      status?: string;
-      notes?: string;
+    const body = (await req.json()) as {
+      client_name: string;
+      client_email?: string | null;
+      client_phone?: string | null;
+      booking_date: string; // YYYY-MM-DD
+      booking_time: string; // HH:MM:SS
+      notes?: string | null;
+      status?: string | null;
+      client_id?: string | null;
+      event_type_id?: string | null;
+      service_type_id?: string | null;
     };
 
-    const supabase = sb();
+    const supabase = await supabaseServer();
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    if (!user)
-      return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
+    if (!user) return err("unauthenticated", 401);
+    if (!body.client_name) return err("client_name is required", 400);
+    if (!body.booking_date) return err("booking_date is required", 400);
+    if (!body.booking_time) return err("booking_time is required", 400);
+
+    // Fetch session type details if provided to compute total_price and duration
+    let total_price = 0;
+    let duration = 30; // default 30 minutes
+
+    if (body.event_type_id) {
+      const { data: sessionType } = await supabase
+        .from("event_types")
+        .select("price_cents, length_in_minutes, length")
+        .eq("id", body.event_type_id)
+        .single();
+
+      if (sessionType) {
+        if (sessionType.price_cents != null) {
+          total_price = sessionType.price_cents;
+        }
+        if (sessionType.length_in_minutes) {
+          duration = sessionType.length_in_minutes;
+        } else if (sessionType.length) {
+          duration = sessionType.length;
+        }
+      }
+    }
+
+    // Compute start_time and end_time
+    const start_time = combineDateTime(body.booking_date, body.booking_time);
+    const end_time = start_time
+      ? new Date(
+          new Date(start_time).getTime() + duration * 60 * 1000
+        ).toISOString()
+      : null;
+
+    // Validate end_time is not before start_time
+    if (start_time && end_time && new Date(end_time) < new Date(start_time)) {
+      return NextResponse.json(
+        {
+          error: "end_before_start",
+          hint: "End time cannot be before start time",
+        },
+        { status: 400 }
+      );
+    }
 
     const { data, error } = await supabase
       .from("bookings")
       .insert({
         user_id: user.id,
-        client_id: client_id || null,
-        session_type: session_type || "General Meeting",
-        category: category || null,
+        client_id: body.client_id ?? null,
+        client_name: body.client_name,
+        client_email: body.client_email ?? null,
+        client_phone: body.client_phone ?? null,
+        booking_date: body.booking_date,
+        booking_time: body.booking_time,
+        status: body.status ?? "pending",
+        notes: body.notes ?? null,
+        event_type_id: body.event_type_id ?? null,
+        service_type_id: body.service_type_id ?? null,
+        total_price, // Ensure total_price is always provided
         start_time,
         end_time,
-        status: status || "pending",
-        notes: notes || null,
       })
       .select(
-        `
-        *,
-        clients!inner(id, name, email, phone)
-      `
+        `id, user_id, client_id, client_name, client_email, client_phone,
+         status, notes, booking_date, booking_time, created_at, updated_at,
+         event_type_id, service_type_id, total_price, start_time, end_time`
       )
       .single();
 
-    if (error)
-      return NextResponse.json({ error: error.message }, { status: 400 });
+    if (error) throw error;
+
     return NextResponse.json(data, { status: 201 });
-  } catch (e: unknown) {
-    return NextResponse.json(
-      { error: e instanceof Error ? e.message : "bad request" },
-      { status: 400 }
-    );
+  } catch (e) {
+    return err(e);
   }
 }
 
 export async function PUT(req: Request) {
   try {
-    const {
-      id,
-      client_id,
-      session_type,
-      category,
-      start_time,
-      end_time,
-      status,
-      notes,
-    } = (await req.json()) as {
-      id: string;
-      client_id?: string;
-      session_type?: string;
-      category?: string;
-      start_time: string;
-      end_time: string;
-      status: string;
-      notes?: string;
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+    if (!id) return err("Booking ID required", 400);
+
+    const body = (await req.json()) as {
+      client_name?: string;
+      client_email?: string | null;
+      client_phone?: string | null;
+      booking_date?: string;
+      booking_time?: string;
+      notes?: string | null;
+      status?: string | null;
+      event_type_id?: string | null;
     };
 
-    const supabase = sb();
+    const supabase = await supabaseServer();
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    if (!user)
-      return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
+    if (!user) return err("unauthenticated", 401);
+
+    // Fetch session type details if provided to get duration
+    let duration = 30; // default 30 minutes
+    if (body.event_type_id) {
+      const { data: sessionType } = await supabase
+        .from("event_types")
+        .select("length_in_minutes, length")
+        .eq("id", body.event_type_id)
+        .single();
+
+      if (sessionType) {
+        if (sessionType.length_in_minutes) {
+          duration = sessionType.length_in_minutes;
+        } else if (sessionType.length) {
+          duration = sessionType.length;
+        }
+      }
+    }
+
+    // Compute start_time and end_time if date/time is being updated
+    const updateData: any = {
+      client_name: body.client_name,
+      client_email: body.client_email,
+      client_phone: body.client_phone,
+      booking_date: body.booking_date,
+      booking_time: body.booking_time,
+      status: body.status,
+      notes: body.notes,
+    };
+
+    if (body.booking_date && body.booking_time) {
+      const start_time = combineDateTime(body.booking_date, body.booking_time);
+      const end_time = start_time
+        ? new Date(
+            new Date(start_time).getTime() + duration * 60 * 1000
+          ).toISOString()
+        : null;
+
+      updateData.start_time = start_time;
+      updateData.end_time = end_time;
+    }
 
     const { data, error } = await supabase
       .from("bookings")
-      .update({
-        client_id: client_id || null,
-        session_type: session_type || "General Meeting",
-        category: category || null,
-        start_time,
-        end_time,
-        status,
-        notes: notes || null,
-      })
+      .update(updateData)
       .eq("id", id)
       .eq("user_id", user.id)
       .select(
-        `
-        *,
-        clients!inner(id, name, email, phone)
-      `
+        `id, user_id, client_id, client_name, client_email, client_phone,
+         status, notes, booking_date, booking_time, created_at, updated_at,
+         event_type_id, service_type_id, total_price, start_time, end_time`
       )
       .single();
 
-    if (error)
-      return NextResponse.json({ error: error.message }, { status: 400 });
+    if (error) throw error;
+
     return NextResponse.json(data);
-  } catch (e: unknown) {
-    return NextResponse.json(
-      { error: e instanceof Error ? e.message : "bad request" },
-      { status: 400 }
-    );
+  } catch (e) {
+    return err(e);
   }
 }
 
@@ -183,20 +272,13 @@ export async function DELETE(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
+    if (!id) return err("Booking ID required", 400);
 
-    if (!id) {
-      return NextResponse.json(
-        { error: "Booking ID required" },
-        { status: 400 }
-      );
-    }
-
-    const supabase = sb();
+    const supabase = await supabaseServer();
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    if (!user)
-      return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
+    if (!user) return err("unauthenticated", 401);
 
     const { error } = await supabase
       .from("bookings")
@@ -204,13 +286,9 @@ export async function DELETE(req: Request) {
       .eq("id", id)
       .eq("user_id", user.id);
 
-    if (error)
-      return NextResponse.json({ error: error.message }, { status: 400 });
+    if (error) throw error;
     return NextResponse.json({ success: true });
-  } catch (e: unknown) {
-    return NextResponse.json(
-      { error: e instanceof Error ? e.message : "bad request" },
-      { status: 400 }
-    );
+  } catch (e) {
+    return err(e);
   }
 }

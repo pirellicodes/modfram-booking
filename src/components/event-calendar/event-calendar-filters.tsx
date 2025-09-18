@@ -1,36 +1,36 @@
-import { Clock,Repeat, Search, Tag, X } from 'lucide-react';
-import { parseAsArrayOf, parseAsString,useQueryStates } from 'nuqs';
-import { useState } from 'react';
-import { useShallow } from 'zustand/shallow';
+import { Clock, Repeat, Search, Tag, X } from "lucide-react";
+import { parseAsArrayOf, parseAsString, useQueryStates } from "nuqs";
+import { useCallback, useMemo, useState } from "react";
+import { useShallow } from "zustand/shallow";
 
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { CATEGORY_OPTIONS, EVENT_COLORS } from '@/constants/calendar-constant';
-import { useEventCalendarStore } from '@/hooks/use-event';
-import { getColorClasses } from '@/lib/event';
+} from "@/components/ui/select";
+import { CATEGORY_OPTIONS, EVENT_COLORS } from "@/constants/calendar-constant";
+import { useEventCalendarStore } from "@/hooks/use-event";
+import { getColorClasses } from "@/lib/event";
 
-import { EventSearchDialog } from './event-search-dialog';
+import { EventSearchDialog } from "./event-search-dialog";
 
 export const EventCalendarFilters = () => {
   const { timeFormat, openEventDialog } = useEventCalendarStore(
     useShallow((state) => ({
       timeFormat: state.timeFormat,
       openEventDialog: state.openEventDialog,
-    })),
+    }))
   );
   const [searchDialogOpen, setSearchDialogOpen] = useState(false);
   const [filters, setFilters] = useQueryStates({
@@ -39,14 +39,16 @@ export const EventCalendarFilters = () => {
     colors: parseAsArrayOf(parseAsString)
       .withDefault([])
       .withOptions({ shallow: false }),
-    isRepeating: parseAsString.withDefault(''),
+    isRepeating: parseAsString.withDefault("all"),
     repeatingTypes: parseAsArrayOf(parseAsString).withDefault([]),
-    dateStart: parseAsString.withDefault(''),
-    dateEnd: parseAsString.withDefault(''),
-    search: parseAsString.withDefault(''),
+    dateStart: parseAsString.withDefault(""),
+    dateEnd: parseAsString.withDefault(""),
+    search: parseAsString.withDefault(""),
   });
 
-  const getActiveFiltersCount = () => {
+  // Removed: isUpdatingRef + setTimeout guards (no longer needed)
+
+  const getActiveFiltersCount = useMemo(() => {
     let count = 0;
     count += filters.categories.length;
     count += filters.locations.length;
@@ -56,63 +58,79 @@ export const EventCalendarFilters = () => {
     if (filters.dateStart || filters.dateEnd) count += 1;
     if (filters.search) count += 1;
     return count;
-  };
+  }, [filters]);
 
-  const toggleArrayFilter = (key: keyof typeof filters, value: string) => {
-    if (
-      key === 'dateStart' ||
-      key === 'dateEnd' ||
-      key === 'search' ||
-      key === 'isRepeating'
-    )
-      return;
+  const toggleArrayFilter = useCallback(
+    (key: string, value: string) => {
+      if (
+        key === "dateStart" ||
+        key === "dateEnd" ||
+        key === "search" ||
+        key === "isRepeating"
+      )
+        return;
 
-    const currentArray = filters[key] as string[];
-    const newArray = currentArray.includes(value)
-      ? currentArray.filter((item) => item !== value)
-      : [...currentArray, value];
+      setFilters((currentFilters: any) => {
+        const currentArray: string[] = (currentFilters[key] as string[]) ?? [];
+        const newArray = currentArray.includes(value)
+          ? currentArray.filter((item) => item !== value)
+          : [...currentArray, value];
+        return { ...currentFilters, [key]: newArray };
+      });
+    },
+    [setFilters]
+  );
 
-    setFilters({ [key]: newArray });
-  };
+  const updateSingleFilter = useCallback(
+    (key: string, value: string) => {
+      setFilters((currentFilters: any) => ({
+        ...currentFilters,
+        [key]: value,
+      }));
+    },
+    [setFilters]
+  );
 
-  const updateSingleFilter = (key: keyof typeof filters, value: string) => {
-    setFilters({ [key]: value });
-  };
-
-  const clearAllFilters = () => {
-    setFilters({
+  const clearAllFilters = useCallback(() => {
+    setFilters((currentFilters: any) => ({
+      ...currentFilters,
       categories: [],
       locations: [],
       colors: [],
-      isRepeating: '',
+      isRepeating: "all",
       repeatingTypes: [],
-      dateStart: '',
-      dateEnd: '',
-      search: '',
-    });
-  };
+      dateStart: "",
+      dateEnd: "",
+      search: "",
+    }));
+  }, [setFilters]);
 
-  const clearSingleArrayFilter = (key: keyof typeof filters, value: string) => {
-    if (
-      key === 'dateStart' ||
-      key === 'dateEnd' ||
-      key === 'search' ||
-      key === 'isRepeating'
-    )
-      return;
+  const clearSingleArrayFilter = useCallback(
+    (key: string, value: string) => {
+      if (
+        key === "dateStart" ||
+        key === "dateEnd" ||
+        key === "search" ||
+        key === "isRepeating"
+      )
+        return;
 
-    const currentArray = filters[key] as string[];
-    const newArray = currentArray.filter((item) => item !== value);
-    setFilters({ [key]: newArray });
-  };
+      setFilters((currentFilters: any) => {
+        const currentArray: string[] = (currentFilters[key] as string[]) ?? [];
+        const newArray = currentArray.filter((item) => item !== value);
+        return { ...currentFilters, [key]: newArray };
+      });
+    },
+    [setFilters]
+  );
 
-  const activeFiltersCount = getActiveFiltersCount();
+  const activeFiltersCount = getActiveFiltersCount;
 
   return (
     <div className="flex flex-col space-y-2 border-b px-4 pt-2 pb-2">
       <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-start">
         <Button
-          variant={filters.search ? 'default' : 'outline'}
+          variant={filters.search ? "default" : "outline"}
           onClick={() => setSearchDialogOpen(true)}
           className="h-9 gap-2 px-4 text-sm font-medium transition-all"
         >
@@ -127,7 +145,7 @@ export const EventCalendarFilters = () => {
         <Popover>
           <PopoverTrigger asChild>
             <Button
-              variant={filters.categories.length > 0 ? 'default' : 'outline'}
+              variant={filters.categories.length > 0 ? "default" : "outline"}
               className="h-9 gap-2 px-4 text-sm font-medium transition-all"
             >
               <Tag className="h-4 w-4" />
@@ -151,7 +169,7 @@ export const EventCalendarFilters = () => {
                       id={`category-${category.value}`}
                       checked={filters.categories.includes(category.value)}
                       onCheckedChange={() =>
-                        toggleArrayFilter('categories', category.value)
+                        toggleArrayFilter("categories", category.value)
                       }
                     />
                     <Label
@@ -169,7 +187,7 @@ export const EventCalendarFilters = () => {
         <Popover>
           <PopoverTrigger asChild>
             <Button
-              variant={filters.colors.length > 0 ? 'default' : 'outline'}
+              variant={filters.colors.length > 0 ? "default" : "outline"}
               className="h-9 gap-2 px-4 text-sm font-medium transition-all"
             >
               <div className="h-4 w-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 ring-2 ring-white" />
@@ -198,7 +216,7 @@ export const EventCalendarFilters = () => {
                         id={`color-${color.value}`}
                         checked={filters.colors.includes(color.value)}
                         onCheckedChange={() =>
-                          toggleArrayFilter('colors', color.value)
+                          toggleArrayFilter("colors", color.value)
                         }
                       />
                       <div className="flex items-center gap-2">
@@ -221,7 +239,7 @@ export const EventCalendarFilters = () => {
         </Popover>
         <Select
           value={filters.isRepeating}
-          onValueChange={(value) => updateSingleFilter('isRepeating', value)}
+          onValueChange={(value) => updateSingleFilter("isRepeating", value)}
         >
           <SelectTrigger className="h-9 w-[160px] gap-2 text-sm font-medium">
             <Repeat className="h-4 w-4" />
@@ -239,12 +257,12 @@ export const EventCalendarFilters = () => {
             </SelectItem>
           </SelectContent>
         </Select>
-        {filters.isRepeating === 'repeating' && (
+        {filters.isRepeating === "repeating" && (
           <Popover>
             <PopoverTrigger asChild>
               <Button
                 variant={
-                  filters.repeatingTypes.length > 0 ? 'default' : 'outline'
+                  filters.repeatingTypes.length > 0 ? "default" : "outline"
                 }
                 size="sm"
                 className="h-9 gap-2 px-4 text-sm font-medium transition-all"
@@ -264,13 +282,13 @@ export const EventCalendarFilters = () => {
                   Repeat Frequency
                 </h4>
                 <div className="space-y-3">
-                  {['daily', 'weekly', 'monthly'].map((type) => (
+                  {["daily", "weekly", "monthly"].map((type) => (
                     <div key={type} className="flex items-center space-x-3">
                       <Checkbox
                         id={`repeat-${type}`}
                         checked={filters.repeatingTypes.includes(type)}
                         onCheckedChange={() =>
-                          toggleArrayFilter('repeatingTypes', type)
+                          toggleArrayFilter("repeatingTypes", type)
                         }
                       />
                       <Label
@@ -293,7 +311,7 @@ export const EventCalendarFilters = () => {
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-muted-foreground text-sm font-medium">
                 {activeFiltersCount} active filter
-                {activeFiltersCount > 1 ? 's' : ''}:
+                {activeFiltersCount > 1 ? "s" : ""}:
               </span>
               {filters.search && (
                 <Badge
@@ -305,7 +323,7 @@ export const EventCalendarFilters = () => {
                     &quot;{filters.search}&quot;
                   </span>
                   <button
-                    onClick={() => updateSingleFilter('search', '')}
+                    onClick={() => updateSingleFilter("search", "")}
                     className="ml-1 rounded-full p-0.5 transition-colors hover:bg-blue-200"
                   >
                     <X className="h-2.5 w-2.5" />
@@ -325,7 +343,7 @@ export const EventCalendarFilters = () => {
                   </span>
                   <button
                     onClick={() =>
-                      clearSingleArrayFilter('categories', category)
+                      clearSingleArrayFilter("categories", category)
                     }
                     className="ml-1 rounded-full p-0.5 transition-colors hover:bg-green-200"
                   >
@@ -342,14 +360,16 @@ export const EventCalendarFilters = () => {
                     className="h-7 gap-1.5 border-purple-200 bg-purple-50 px-2 py-1 text-purple-700 transition-colors hover:bg-purple-100"
                   >
                     <div
-                      className={`h-3 w-3 rounded-full border ${getColorClasses(colorValue).bg}`}
+                      className={`h-3 w-3 rounded-full border ${
+                        getColorClasses(colorValue).bg
+                      }`}
                     />
                     <span className="text-xs font-medium">
                       {color?.label || colorValue}
                     </span>
                     <button
                       onClick={() =>
-                        clearSingleArrayFilter('colors', colorValue)
+                        clearSingleArrayFilter("colors", colorValue)
                       }
                       className="ml-1 rounded-full p-0.5 transition-colors hover:bg-purple-200"
                     >
@@ -365,12 +385,12 @@ export const EventCalendarFilters = () => {
                 >
                   <Repeat className="h-3 w-3" />
                   <span className="text-xs font-medium">
-                    {filters.isRepeating === 'repeating'
-                      ? 'Repeating'
-                      : 'Single'}
+                    {filters.isRepeating === "repeating"
+                      ? "Repeating"
+                      : "Single"}
                   </span>
                   <button
-                    onClick={() => updateSingleFilter('isRepeating', '')}
+                    onClick={() => updateSingleFilter("isRepeating", "")}
                     className="ml-1 rounded-full p-0.5 transition-colors hover:bg-orange-200"
                   >
                     <X className="h-2.5 w-2.5" />
@@ -387,7 +407,7 @@ export const EventCalendarFilters = () => {
                   <span className="text-xs font-medium">{type}</span>
                   <button
                     onClick={() =>
-                      clearSingleArrayFilter('repeatingTypes', type)
+                      clearSingleArrayFilter("repeatingTypes", type)
                     }
                     className="ml-1 rounded-full p-0.5 transition-colors hover:bg-indigo-200"
                   >
@@ -412,7 +432,7 @@ export const EventCalendarFilters = () => {
         open={searchDialogOpen}
         onOpenChange={setSearchDialogOpen}
         searchQuery={filters.search}
-        onSearchQueryChange={(query) => updateSingleFilter('search', query)}
+        onSearchQueryChange={(query) => updateSingleFilter("search", query)}
         onEventSelect={openEventDialog}
         timeFormat={timeFormat}
       />

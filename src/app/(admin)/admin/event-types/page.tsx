@@ -10,7 +10,7 @@ import {
   Trash2,
   Users,
 } from "lucide-react";
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 
 import { EventTypeForm } from "@/components/event-types/EventTypeForm";
 import { Badge } from "@/components/ui/badge";
@@ -71,16 +71,16 @@ export default function EventTypesPage() {
   };
 
   const handleDeleteEventType = async (id: string) => {
-    if (!confirm("Delete this event type?")) return;
+    if (!confirm("Delete this session type?")) return;
     try {
       const res = await fetch(`/api/event-types/${id}`, { method: "DELETE" });
       const data = await res.json();
       if (data.success)
         setEventTypes((prev) => prev.filter((et) => et.id !== id));
-      else alert(data.error || "Failed to delete event type");
+      else alert(data.error || "Failed to delete session type");
     } catch (error) {
-      console.error("Error deleting event type:", error);
-      alert("Failed to delete event type");
+      console.error("Error deleting session type:", error);
+      alert("Failed to delete session type");
     }
   };
 
@@ -164,21 +164,21 @@ export default function EventTypesPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Event Types</h1>
+          <h1 className="text-3xl font-bold">Session Types</h1>
           <p className="text-muted-foreground mt-1">
-            Create and manage your event types
+            Create and manage your session types
           </p>
         </div>
 
         <Button onClick={() => setIsCreateFormOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
-          New Event Type
+          New Session Type
         </Button>
       </div>
 
       <div className="max-w-sm">
         <Input
-          placeholder="Search event types..."
+          placeholder="Search session types..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -189,17 +189,17 @@ export default function EventTypesPage() {
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Users className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">
-              {searchTerm ? "No event types found" : "No event types yet"}
+              {searchTerm ? "No session types found" : "No session types yet"}
             </h3>
             <p className="text-muted-foreground text-center mb-4">
               {searchTerm
                 ? "Try adjusting your search terms"
-                : "Create your first event type to start accepting bookings"}
+                : "Create your first session type to start accepting bookings"}
             </p>
             {!searchTerm && (
               <Button onClick={() => setIsCreateFormOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
-                Create Event Type
+                Create Session Type
               </Button>
             )}
           </CardContent>

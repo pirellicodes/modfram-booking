@@ -1,4 +1,4 @@
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 // Define local type instead of importing from deleted location
 interface BookingWithClient {
   id: string;
@@ -25,7 +25,6 @@ export function useBookings() {
 
   useEffect(() => {
     fetchBookings();
-     
   }, []);
 
   const fetchBookings = async () => {
@@ -37,6 +36,10 @@ export function useBookings() {
 
       if (!response.ok) {
         const errorData = await response.json();
+        console.error(
+          "use-bookings GET error:",
+          errorData.error || `HTTP ${response.status}`
+        );
         throw new Error(errorData.error || `HTTP ${response.status}`);
       }
 
@@ -75,6 +78,10 @@ export function useBookings() {
 
       if (!response.ok) {
         const errorData = await response.json();
+        console.error(
+          "use-bookings POST error:",
+          errorData.error || `HTTP ${response.status}`
+        );
         throw new Error(errorData.error || `HTTP ${response.status}`);
       }
 

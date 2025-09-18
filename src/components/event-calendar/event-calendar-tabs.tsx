@@ -1,9 +1,9 @@
 "use client";
 
-import { AnimatePresence,motion } from "framer-motion";
-import { ChevronDown,MoreHorizontal } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ChevronDown, MoreHorizontal } from "lucide-react";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
-import React, { useMemo,useRef, useState, useTransition } from "react";
+import React, { useMemo, useRef, useState, useTransition } from "react";
 
 import {
   DropdownMenu,
@@ -223,7 +223,7 @@ export function EventCalendarTabs({
                         storeDaysCount === option && "bg-muted font-medium"
                       )}
                     >
-                      {option} hari
+                      {option} days
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
@@ -339,7 +339,7 @@ export function EventCalendarTabs({
                         storeDaysCount === option && "bg-muted font-medium"
                       )}
                     >
-                      {option} hari
+                      {option} days
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>

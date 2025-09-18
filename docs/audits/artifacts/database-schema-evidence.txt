@@ -1,0 +1,44 @@
+# Database Schema Evidence
+
+## Current Schema (ai-docs/supabase-schema.md)
+Tables present:
+- ✅ public.clients
+- ✅ public.events
+- ✅ public.availability
+- ✅ public.bookings
+- ✅ public.payments
+- ✅ public.user_integrations
+
+## Missing Table: event_types
+❌ Table `public.event_types` is NOT in the schema but heavily referenced in API routes
+
+## API Routes Expecting event_types (16+ references):
+- /api/session-types/route.ts (7 queries)
+- /api/event-types/[id]/route.ts (8 queries)
+- /api/event-types/route.ts (3 queries)
+- /api/bookings/route.ts (2 queries)
+- /api/public/availability/route.ts (1 query)
+- /api/public/bookings/route.ts (1 query)
+
+## Expected event_types Columns (from API code analysis):
+Based on field-mapping.ts and API route references:
+- id, user_id, title, slug, description
+- length_in_minutes, price_cents, currency
+- before_event_buffer, after_event_buffer
+- minimum_booking_notice, requires_confirmation
+- disable_guests, is_active, hidden, position, color
+- locations (JSONB), metadata (JSONB)
+- booking_fields (JSONB)
+- ❌ booking_limits (JSONB) - MISSING, causing PostgREST error
+- ❌ duration_limits (JSONB) - MISSING, causing PostgREST error
+- created_at, updated_at
+
+## PostgREST Schema Cache Issue
+Error: "Could not find the 'bookingLimits' column of 'event_types'"
+- Root cause: event_types table doesn't exist
+- Secondary cause: Even if table existed, 'bookingLimits' camelCase sent instead of 'booking_limits'
+
+## Required pg_notify for Schema Refresh
+```sql
+SELECT pg_notify('pgrst', 'reload schema');
+```

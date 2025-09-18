@@ -7,14 +7,14 @@ import {
   getMonth,
   getYear,
   Locale,
-} from 'date-fns';
-import { enUS } from 'date-fns/locale';
-import { AnimatePresence,motion } from 'framer-motion';
-import { Check, ChevronsUpDown } from 'lucide-react';
-import { parseAsIsoDate,useQueryState } from 'nuqs';
-import { useEffect, useMemo, useState, useTransition } from 'react';
+} from "date-fns";
+import { enUS } from "date-fns/locale";
+import { AnimatePresence, motion } from "framer-motion";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { parseAsIsoDate, useQueryState } from "nuqs";
+import { useEffect, useMemo, useState, useTransition } from "react";
 
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -22,16 +22,16 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from '@/components/ui/command';
+} from "@/components/ui/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
-import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/popover";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
-import { ScrollArea, ScrollBar } from '../../ui/scroll-area';
+import { ScrollArea, ScrollBar } from "../../ui/scroll-area";
 
 interface SearchDayPickerProps {
   locale?: Locale;
@@ -42,21 +42,21 @@ interface SearchDayPickerProps {
 
 export function SearchDayPicker({
   locale = enUS,
-  className = '',
-  placeholder = 'Choose Day',
+  className = "",
+  placeholder = "Choose Day",
   weekStartsOn = 1, // Monday as default first day of week
 }: SearchDayPickerProps) {
   const [open, setOpen] = useState(false);
-  const [searchValue, setSearchValue] = useState('');
-  const [inputValue, setInputValue] = useState('');
+  const [searchValue, setSearchValue] = useState("");
+  const [inputValue, setInputValue] = useState("");
   const [selectedDayChanged, setSelectedDayChanged] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [date, setDate] = useQueryState(
-    'date',
+    "date",
     parseAsIsoDate.withDefault(new Date()).withOptions({
       shallow: false,
       startTransition,
-    }),
+    })
   );
 
   const day = getDate(date);
@@ -66,16 +66,16 @@ export function SearchDayPicker({
    */
   const getDaySuffix = useMemo(() => {
     return (day: number): string => {
-      if (day >= 11 && day <= 13) return 'th';
+      if (day >= 11 && day <= 13) return "th";
       switch (day % 10) {
         case 1:
-          return 'st';
+          return "st";
         case 2:
-          return 'nd';
+          return "nd";
         case 3:
-          return 'rd';
+          return "rd";
         default:
-          return 'th';
+          return "th";
       }
     };
   }, []);
@@ -88,8 +88,8 @@ export function SearchDayPicker({
     return Array.from({ length: daysCount }, (_, i) => {
       const dayNum = i + 1;
       const dayDate = new Date(year, month, dayNum);
-      const dayName = format(dayDate, 'EEE', { locale, weekStartsOn });
-      const fullDayName = format(dayDate, 'EEEE', { locale, weekStartsOn });
+      const dayName = format(dayDate, "EEE", { locale, weekStartsOn });
+      const fullDayName = format(dayDate, "EEEE", { locale, weekStartsOn });
       const daySuffix = getDaySuffix(dayNum);
 
       return {
@@ -98,10 +98,11 @@ export function SearchDayPicker({
         dayName,
         fullDayName,
         daySuffix,
-        formattedDate: format(dayDate, 'd MMMM', { locale }),
+        formattedDate: format(dayDate, "d MMMM", { locale }),
         label: `${dayName} ${dayNum}${daySuffix}`,
-        searchableText:
-          `${fullDayName} ${dayNum} ${format(dayDate, 'd MMMM', { locale })}`.toLowerCase(),
+        searchableText: `${fullDayName} ${dayNum} ${format(dayDate, "d MMMM", {
+          locale,
+        })}`.toLowerCase(),
       };
     });
   }, [date, locale, weekStartsOn, getDaySuffix]);
@@ -112,7 +113,7 @@ export function SearchDayPicker({
     return daysInMonth.filter(
       (day) =>
         day.searchableText.includes(searchTerm) ||
-        day.day.toString().includes(searchTerm),
+        day.day.toString().includes(searchTerm)
     );
   }, [daysInMonth, searchValue]);
 
@@ -125,7 +126,7 @@ export function SearchDayPicker({
 
     setDate(newDate);
     setOpen(false);
-    setSearchValue('');
+    setSearchValue("");
     setSelectedDayChanged(true);
 
     setTimeout(() => {
@@ -135,8 +136,8 @@ export function SearchDayPicker({
 
   useEffect(() => {
     if (!open) {
-      setSearchValue('');
-      setInputValue('');
+      setSearchValue("");
+      setInputValue("");
     }
   }, [open]);
 
@@ -158,9 +159,9 @@ export function SearchDayPicker({
             role="combobox"
             aria-expanded={open}
             className={cn(
-              'w-[130px] justify-between text-sm font-normal',
-              !selectedDay && 'text-muted-foreground',
-              className,
+              "w-[130px] justify-between text-sm font-normal",
+              !selectedDay && "text-muted-foreground",
+              className
             )}
             title="Choose a day"
           >
@@ -197,7 +198,7 @@ export function SearchDayPicker({
       <PopoverContent className="w-[130px] p-0" align="start">
         <Command shouldFilter={false}>
           <CommandInput
-            placeholder="Cari hari..."
+            placeholder="Search day..."
             value={inputValue}
             onValueChange={(value) => {
               setInputValue(value);
@@ -205,7 +206,7 @@ export function SearchDayPicker({
             }}
           />
           <CommandList>
-            <CommandEmpty>Hari tidak ditemukan</CommandEmpty>
+            <CommandEmpty>No day found</CommandEmpty>
             <CommandGroup>
               <ScrollArea className="h-[200px]">
                 {filteredDays.map((day) => (
@@ -226,10 +227,10 @@ export function SearchDayPicker({
                     </div>
                     <Check
                       className={cn(
-                        'h-4 w-4',
+                        "h-4 w-4",
                         selectedDay.day === day.day
-                          ? 'opacity-100'
-                          : 'opacity-0',
+                          ? "opacity-100"
+                          : "opacity-0"
                       )}
                     />
                   </CommandItem>

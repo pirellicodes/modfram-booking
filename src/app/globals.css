@@ -138,4 +138,54 @@ body,
   .sidebar-collapsed .sidebar-content {
     border-radius: 0 8px 8px 0;
   }
+
+  /* Fix calendar dark mode gray overlay */
+  .dark .calendar-container {
+    background-color: hsl(var(--background)) !important;
+  }
+
+  .dark .calendar-overlay,
+  .dark .calendar-popover,
+  .dark [data-calendar],
+  .dark [role="dialog"][data-state="open"] {
+    background-color: hsl(var(--background)) !important;
+    border-color: hsl(var(--border)) !important;
+  }
+
+  .dark .calendar-day-cell,
+  .dark .calendar-event-item {
+    background-color: hsl(var(--card)) !important;
+    color: hsl(var(--card-foreground)) !important;
+  }
+
+  /* Fix React Big Calendar dark mode styles */
+  .dark .rbc-calendar {
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
+  }
+
+  .dark .rbc-month-view,
+  .dark .rbc-agenda-view,
+  .dark .rbc-time-view {
+    background-color: hsl(var(--background)) !important;
+  }
+
+  .dark .rbc-header {
+    background-color: hsl(var(--muted)) !important;
+    color: hsl(var(--foreground)) !important;
+    border-color: hsl(var(--border)) !important;
+  }
+
+  .dark .rbc-off-range-bg {
+    background-color: hsl(var(--muted) / 0.3) !important;
+  }
+
+  .dark .rbc-today {
+    background-color: hsl(var(--accent)) !important;
+  }
+
+  .dark .rbc-event {
+    background-color: hsl(var(--primary)) !important;
+    color: hsl(var(--primary-foreground)) !important;
+  }
 }
