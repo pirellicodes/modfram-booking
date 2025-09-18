@@ -58,7 +58,7 @@ export function EventTypeForm({
     is_paid: false,
   });
 
-  const [formData, setFormData] = useState<EventTypeFormData>(
+  const [formData, setFormData] = useState<EventTypeFormData>(() =>
     getInitialFormData()
   );
   const [isSaving, setIsSaving] = useState(false);

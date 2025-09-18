@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { toSnakeEventType, fromSnakeEventType } from "@/lib/field-mapping";
 import { logErr } from "@/lib/log";
 import { slugify } from "@/lib/slug";
 import { supabaseServer } from "@/lib/supabase-server-client";
@@ -30,29 +31,11 @@ export async function GET() {
 
     if (error) throw error;
 
-    // Parse JSON fields for response
+    // Parse JSON fields and convert to camelCase for response
     const parsedSessionTypes =
-      sessionTypes?.map((sessionType: any) => ({
-        ...sessionType,
-        locations: sessionType.locations
-          ? JSON.parse(sessionType.locations as string)
-          : [],
-        metadata: sessionType.metadata
-          ? JSON.parse(sessionType.metadata as string)
-          : {},
-        bookingFields: sessionType.bookingFields
-          ? JSON.parse(sessionType.bookingFields as string)
-          : [],
-        bookingLimits: sessionType.bookingLimits
-          ? JSON.parse(sessionType.bookingLimits as string)
-          : {},
-        durationLimits: sessionType.durationLimits
-          ? JSON.parse(sessionType.durationLimits as string)
-          : {},
-        recurringEvent: sessionType.recurringEvent
-          ? JSON.parse(sessionType.recurringEvent as string)
-          : null,
-      })) || [];
+      sessionTypes?.map((sessionType: any) =>
+        fromSnakeEventType(sessionType)
+      ) || [];
 
     return NextResponse.json(parsedSessionTypes);
   } catch (e) {
@@ -93,86 +76,35 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "slug_taken" }, { status: 409 });
     }
 
-    const newSessionType = {
-      title: body.title,
+    // Prepare the new session type with snake_case field mapping
+    const newSessionType = toSnakeEventType({
+      ...body,
       slug,
+      user_id: user.id,
+      // Set defaults for required fields
       description: body.description || "",
-      length: body.length || 30,
+      length_in_minutes: body.length_in_minutes || body.length || 30,
       hidden: body.hidden || false,
       position: body.position || 0,
-      eventName: body.eventName,
-      timeZone: body.timeZone,
-      schedulingType: body.schedulingType,
-      user_id: user.id,
-
-      // Booking limits
-      periodType: body.periodType || "UNLIMITED",
-      periodStartDate: body.periodStartDate || null,
-      periodEndDate: body.periodEndDate || null,
-      periodDays: body.periodDays,
-      periodCountCalendarDays: body.periodCountCalendarDays || false,
-
-      // Confirmation and guest settings
-      requiresConfirmation: body.requiresConfirmation || false,
-      disableGuests: body.disableGuests || false,
-      hideCalendarNotes: body.hideCalendarNotes || false,
-      minimumBookingNotice: body.minimumBookingNotice || 120,
-
-      // Buffer times (map camelCase to snake_case for new schema)
-      beforeEventBuffer: body.beforeEventBuffer || 0,
-      afterEventBuffer: body.afterEventBuffer || 0,
-      before_event_buffer:
-        body.before_event_buffer || body.beforeEventBuffer || 0,
-      after_event_buffer: body.after_event_buffer || body.afterEventBuffer || 0,
-
-      // New schema fields
-      length_in_minutes: body.length_in_minutes || body.length || 30,
+      color: body.color || "indigo",
+      currency: body.currency || "USD",
       price_cents:
         body.price_cents ||
         (body.price ? Math.round(parseFloat(body.price as string) * 100) : 0),
-      color: body.color || "indigo",
-
-      // Pricing
-      price: body.price || "0.00",
-      currency: body.currency || "USD",
-      is_paid: body.is_paid || false,
-      deposit_cents: body.deposit_cents || null,
-      require_agreement: body.require_agreement || false,
-      agreement_text: body.agreement_text || null,
-
-      // Cancellation
-      allow_cancellation: body.allow_cancellation !== false,
-
-      // Slot settings
-      slotInterval: body.slotInterval,
-      successRedirectUrl: body.successRedirectUrl,
-      onlyShowFirstAvailableSlot: body.onlyShowFirstAvailableSlot || false,
-
-      // Advanced settings (JSON fields)
-      locations: JSON.stringify(body.locations || []),
-      metadata: JSON.stringify(body.metadata || {}),
-      bookingFields: JSON.stringify(body.bookingFields || []),
-      bookingLimits: JSON.stringify(body.bookingLimits || {}),
-      durationLimits: JSON.stringify(body.durationLimits || {}),
-
-      // Recurring events
-      recurringEvent: body.recurringEvent
-        ? JSON.stringify(body.recurringEvent)
-        : null,
-
-      // Seats
-      seatsPerTimeSlot: body.seatsPerTimeSlot,
-      seatsShowAttendees: body.seatsShowAttendees || false,
-      seatsShowAvailabilityCount: body.seatsShowAvailabilityCount !== false,
-
-      // Relations
-      teamId: body.teamId,
-      parentId: body.parentId,
-      scheduleId: body.scheduleId,
-
-      // Hosting
-      assignAllTeamMembers: body.assignAllTeamMembers || false,
-    };
+      minimum_booking_notice:
+        body.minimum_booking_notice || body.minimumBookingNotice || 120,
+      before_event_buffer:
+        body.before_event_buffer || body.beforeEventBuffer || 0,
+      after_event_buffer: body.after_event_buffer || body.afterEventBuffer || 0,
+      requires_confirmation:
+        body.requires_confirmation ?? body.requiresConfirmation ?? false,
+      disable_guests: body.disable_guests ?? body.disableGuests ?? false,
+      is_active: body.is_active ?? body.isActive ?? true,
+      // Ensure JSON fields have defaults
+      locations: body.locations || [],
+      metadata: body.metadata || {},
+      booking_fields: body.booking_fields || body.bookingFields || [],
+    });
 
     const { data: createdSessionType, error } = await supabase
       .from("event_types")
@@ -225,21 +157,12 @@ export async function PUT(request: NextRequest) {
       body.slug = slug;
     }
 
-    // Convert JSON fields to strings if present
-    if (body.locations) body.locations = JSON.stringify(body.locations);
-    if (body.metadata) body.metadata = JSON.stringify(body.metadata);
-    if (body.bookingFields)
-      body.bookingFields = JSON.stringify(body.bookingFields);
-    if (body.bookingLimits)
-      body.bookingLimits = JSON.stringify(body.bookingLimits);
-    if (body.durationLimits)
-      body.durationLimits = JSON.stringify(body.durationLimits);
-    if (body.recurringEvent)
-      body.recurringEvent = JSON.stringify(body.recurringEvent);
+    // Convert camelCase to snake_case and handle JSON fields
+    const updateData = toSnakeEventType(body);
 
     const { data: updatedSessionType, error } = await supabase
       .from("event_types")
-      .update(body)
+      .update(updateData)
       .eq("id", id)
       .eq("user_id", user.id)
       .select()

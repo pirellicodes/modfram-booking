@@ -198,6 +198,7 @@ export async function PUT(req: Request) {
       booking_time?: string;
       notes?: string | null;
       status?: string | null;
+      event_type_id?: string | null;
     };
 
     const supabase = await supabaseServer();
@@ -206,34 +207,62 @@ export async function PUT(req: Request) {
     } = await supabase.auth.getUser();
     if (!user) return err("unauthenticated", 401);
 
+    // Fetch session type details if provided to get duration
+    let duration = 30; // default 30 minutes
+    if (body.event_type_id) {
+      const { data: sessionType } = await supabase
+        .from("event_types")
+        .select("length_in_minutes, length")
+        .eq("id", body.event_type_id)
+        .single();
+
+      if (sessionType) {
+        if (sessionType.length_in_minutes) {
+          duration = sessionType.length_in_minutes;
+        } else if (sessionType.length) {
+          duration = sessionType.length;
+        }
+      }
+    }
+
+    // Compute start_time and end_time if date/time is being updated
+    const updateData: any = {
+      client_name: body.client_name,
+      client_email: body.client_email,
+      client_phone: body.client_phone,
+      booking_date: body.booking_date,
+      booking_time: body.booking_time,
+      status: body.status,
+      notes: body.notes,
+    };
+
+    if (body.booking_date && body.booking_time) {
+      const start_time = combineDateTime(body.booking_date, body.booking_time);
+      const end_time = start_time
+        ? new Date(
+            new Date(start_time).getTime() + duration * 60 * 1000
+          ).toISOString()
+        : null;
+
+      updateData.start_time = start_time;
+      updateData.end_time = end_time;
+    }
+
     const { data, error } = await supabase
       .from("bookings")
-      .update({
-        client_name: body.client_name,
-        client_email: body.client_email,
-        client_phone: body.client_phone,
-        booking_date: body.booking_date,
-        booking_time: body.booking_time,
-        status: body.status,
-        notes: body.notes,
-      })
+      .update(updateData)
       .eq("id", id)
       .eq("user_id", user.id)
       .select(
         `id, user_id, client_id, client_name, client_email, client_phone,
          status, notes, booking_date, booking_time, created_at, updated_at,
-         event_type_id, service_type_id`
+         event_type_id, service_type_id, total_price, start_time, end_time`
       )
       .single();
 
     if (error) throw error;
 
-    const start_time = combineDateTime(data.booking_date, data.booking_time);
-    const end_time = start_time
-      ? new Date(new Date(start_time).getTime() + 30 * 60 * 1000).toISOString()
-      : null;
-
-    return NextResponse.json({ ...data, start_time, end_time });
+    return NextResponse.json(data);
   } catch (e) {
     return err(e);
   }
