@@ -27,6 +27,8 @@ export function toSnakeEventType(data: any) {
 
     // JSON fields (keep as-is but stringify if needed)
     bookingFields: "booking_fields",
+    bookingLimits: "booking_limits",
+    durationLimits: "duration_limits",
 
     // Schedule
     scheduleId: "schedule_id",
@@ -66,8 +68,8 @@ export function toSnakeEventType(data: any) {
     "locations",
     "metadata",
     "booking_fields",
-    "bookingLimits",
-    "durationLimits",
+    "booking_limits",
+    "duration_limits",
     "recurringEvent",
   ];
   for (const field of jsonFields) {
@@ -100,6 +102,8 @@ export function fromSnakeEventType(data: any) {
     is_active: "isActive",
     slot_interval: "slotInterval",
     booking_fields: "bookingFields",
+    booking_limits: "bookingLimits",
+    duration_limits: "durationLimits",
     schedule_id: "scheduleId",
   };
 

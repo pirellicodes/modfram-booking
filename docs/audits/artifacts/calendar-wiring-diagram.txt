@@ -1,0 +1,65 @@
+# Calendar Date Sync Wiring Diagram
+
+## Component Chain & Data Flow
+
+```
+Calendar.tsx (line 29)
+├── props: none (top-level page component)
+├── state: none
+└── renders: <BookingCalendar mode="view" />
+
+BookingCalendar.tsx (line 236)
+├── props: mode, initialRange?, events?, onCreateBooking?, onRangeChange?, loading?, error?
+├── state: currentDate = useState(new Date())
+├── renders: <EventCalendar events={filteredEvents} initialDate={currentDate} onDateChange={handleDateChange} />
+└── handleDateChange: (date: Date) => {
+    setCurrentDate(date);  // Local state update
+    // Calculate range for current view (month)
+    const start = new Date(date.getFullYear(), date.getMonth(), 1);
+    const end = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    if (onRangeChange) {
+      onRangeChange({ start: start.toISOString(), end: end.toISOString() });
+    }
+}
+
+EventCalendar.tsx (line 77)
+├── props: events: Events[], initialDate: Date, onDateChange?: (date: Date) => void
+├── zustand: selectedDate, setSelectedDate from useEventCalendarStore
+├── effect: React.useEffect(() => {
+│   setSelectedDate(initialDate);                 // Store update
+│   if (onDateChange) {
+│     onDateChange(initialDate);                  // ⚠️ CALLS PARENT CALLBACK
+│   }
+│ }, [initialDate, setSelectedDate, onDateChange]);
+└── renders: <CalendarToolbar /> + calendar views
+
+EventCalendarToolbar.tsx (line 207)
+├── zustand: selectedDate, setSelectedDate from useEventCalendarStore
+├── derived: date = useMemo(() => selectedDate ?? new Date(), [selectedDate])
+├── handlers: handleNavigateNext/Previous call setSelectedDate(newDate)
+└── renders: navigation buttons + <EventCalendarFilters />
+
+EventCalendarFilters.tsx (line 244)
+├── nuqs: filters state including isRepeating
+├── effect: none that directly affects date
+└── renders: <Select value={filters.isRepeating || "all"} /> ⚠️ LOOP SOURCE
+```
+
+## Potential Cycle Analysis
+
+❌ **IDENTIFIED CYCLE:**
+1. EventCalendar effect calls `onDateChange(initialDate)` (line 35)
+2. onDateChange is `handleDateChange` from BookingCalendar
+3. handleDateChange calls `setCurrentDate(date)`
+4. BookingCalendar re-renders with new currentDate
+5. New currentDate passed as initialDate to EventCalendar
+6. EventCalendar effect fires again due to initialDate dependency
+7. **INFINITE LOOP**
+
+✅ **NON-CYCLE (Select issue is separate):**
+The Select component loop is independent - it's a controlled value issue, not a date sync issue.
+
+## Fix Requirements
+- EventCalendar effect must not call onDateChange when date hasn't actually changed
+- Add time-based comparison: `initialDate.getTime() !== selectedDate?.getTime()`
+- Remove onDateChange from dependencies or memoize it properly

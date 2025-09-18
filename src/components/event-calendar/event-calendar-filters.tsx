@@ -238,7 +238,7 @@ export const EventCalendarFilters = () => {
           </PopoverContent>
         </Popover>
         <Select
-          value={filters.isRepeating || "all"}
+          value={filters.isRepeating}
           onValueChange={(value) => updateSingleFilter("isRepeating", value)}
         >
           <SelectTrigger className="h-9 w-[160px] gap-2 text-sm font-medium">

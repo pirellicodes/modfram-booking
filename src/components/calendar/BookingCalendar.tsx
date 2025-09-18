@@ -202,42 +202,39 @@ export function BookingCalendar({
       </Card>
 
       {/* Calendar component - always render */}
-      <div className="w-full">
-        {filteredEvents.length === 0 && !loading ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center h-96 bg-background">
-              <div className="text-center">
-                <p className="text-muted-foreground">
-                  {selectedColorFilter
-                    ? `No ${selectedColorFilter} events found`
-                    : mode === "availability"
-                    ? "No events scheduled"
-                    : "No bookings found"}
-                </p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  {mode === "availability"
-                    ? "Create your first event using the Add Event button"
-                    : "Your calendar is currently empty"}
-                </p>
-                {mode === "availability" && onCreateBooking && (
-                  <Button
-                    className="mt-4"
-                    onClick={() => {
-                      // Trigger event creation
-                    }}
-                  >
-                    Add Event
-                  </Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ) : (
-          <EventCalendar
-            events={filteredEvents}
-            initialDate={currentDate}
-            onDateChange={handleDateChange}
-          />
+      <div className="w-full relative">
+        <EventCalendar
+          events={filteredEvents}
+          initialDate={currentDate}
+          onDateChange={handleDateChange}
+        />
+        {filteredEvents.length === 0 && !loading && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80">
+            <div className="text-center">
+              <p className="text-muted-foreground">
+                {selectedColorFilter
+                  ? `No ${selectedColorFilter} events found`
+                  : mode === "availability"
+                  ? "No events scheduled"
+                  : "No bookings found"}
+              </p>
+              <p className="text-sm text-muted-foreground mt-2">
+                {mode === "availability"
+                  ? "Create your first event using the Add Event button"
+                  : "Your calendar is currently empty"}
+              </p>
+              {mode === "availability" && onCreateBooking && (
+                <Button
+                  className="mt-4"
+                  onClick={() => {
+                    // Trigger event creation
+                  }}
+                >
+                  Add Event
+                </Button>
+              )}
+            </div>
+          </div>
         )}
       </div>
     </div>

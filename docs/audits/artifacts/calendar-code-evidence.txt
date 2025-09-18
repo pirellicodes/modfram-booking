@@ -1,0 +1,61 @@
+# Calendar Code Evidence
+
+## isRepeating Initialization (Line 42)
+```typescript
+isRepeating: parseAsString.withDefault("all"),
+```
+
+## Problematic Select Component (Lines 240-243)
+```typescript
+<Select
+  value={filters.isRepeating || "all"}  // ⚠️ DYNAMIC FALLBACK
+  onValueChange={(value) => updateSingleFilter("isRepeating", value)}
+>
+```
+
+## All setFilters Calls - Functional Updaters ✅
+1. toggleArrayFilter (Line 73):
+```typescript
+setFilters((currentFilters: any) => {
+  const currentArray: string[] = (currentFilters[key] as string[]) ?? [];
+  const newArray = currentArray.includes(value)
+    ? currentArray.filter((item) => item !== value)
+    : [...currentArray, value];
+  return { ...currentFilters, [key]: newArray };
+});
+```
+
+2. updateSingleFilter (Line 86):
+```typescript
+setFilters((currentFilters: any) => ({
+  ...currentFilters,
+  [key]: value,
+}));
+```
+
+3. clearAllFilters (Line 95):
+```typescript
+setFilters((currentFilters: any) => ({
+  ...currentFilters,
+  categories: [],
+  locations: [],
+  colors: [],
+  isRepeating: "all",
+  // ...
+}));
+```
+
+4. clearSingleArrayFilter (Line 118):
+```typescript
+setFilters((currentFilters: any) => {
+  const currentArray: string[] = (currentFilters[key] as string[]) ?? [];
+  const newArray = currentArray.filter((item) => item !== value);
+  return { ...currentFilters, [key]: newArray };
+});
+```
+
+## ANALYSIS:
+- ✅ ALL setFilters calls use functional updaters correctly
+- ✅ Dependencies are [setFilters] only, no dependency on filters state
+- ❌ ISSUE: Dynamic fallback `filters.isRepeating || "all"` creates render loop
+- Root cause: parseAsString.withDefault("all") should match Select fallback expectation

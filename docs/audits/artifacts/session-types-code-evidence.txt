@@ -1,0 +1,64 @@
+# Session Types Code Evidence
+
+## FormData Structure (EventTypeForm.tsx)
+Lines 52-53: Includes bookingLimits and durationLimits in camelCase
+```typescript
+bookingLimits: {},
+durationLimits: {},
+```
+
+Lines 89-90: Sets from eventType data in camelCase
+```typescript
+bookingLimits: eventType.bookingLimits || {},
+durationLimits: eventType.durationLimits || {},
+```
+
+## Request Body Creation (Line 114)
+```typescript
+body: JSON.stringify(formData),  // Sends camelCase directly
+```
+
+## Field Mapping Analysis (field-mapping.ts)
+
+### fieldMappings Object (Lines 7-29) - MISSING MAPPINGS
+```typescript
+const fieldMappings = {
+  // Buffer times
+  beforeEventBuffer: "before_event_buffer",    // ✅ HAS
+  afterEventBuffer: "after_event_buffer",      // ✅ HAS
+
+  // Duration and pricing
+  length: "length_in_minutes",                 // ✅ HAS
+  lengthInMinutes: "length_in_minutes",        // ✅ HAS
+  priceCents: "price_cents",                   // ✅ HAS
+
+  // Booking settings
+  minimumBookingNotice: "minimum_booking_notice", // ✅ HAS
+  requiresConfirmation: "requires_confirmation",  // ✅ HAS
+  disableGuests: "disable_guests",                // ✅ HAS
+
+  // JSON fields
+  bookingFields: "booking_fields",                // ✅ HAS
+
+  // ❌ MISSING: bookingLimits → booking_limits
+  // ❌ MISSING: durationLimits → duration_limits
+};
+```
+
+### JSON Fields Processing (Lines 69-70, 119-120)
+```typescript
+// In toSnakeEventType jsonFields array:
+"bookingLimits",    // ❌ Should be "booking_limits"
+"durationLimits",   // ❌ Should be "duration_limits"
+
+// In fromSnakeEventType jsonFields array:
+"bookingLimits",    // ❌ Should be "booking_limits"
+"durationLimits",   // ❌ Should be "duration_limits"
+```
+
+## ANALYSIS:
+- ✅ Form sends camelCase bookingLimits, durationLimits in request body
+- ❌ field-mapping.ts has NO mappings for bookingLimits → booking_limits
+- ❌ field-mapping.ts has NO mappings for durationLimits → duration_limits
+- ❌ JSON field processing uses camelCase names, not snake_case
+- Result: camelCase fields forwarded to PostgREST, which expects snake_case columns
