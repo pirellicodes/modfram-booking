@@ -96,10 +96,12 @@ export function Availability() {
   const { data: availabilityData, loading, error } = useAvailability();
   const [isOverrideDialogOpen, setIsOverrideDialogOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [isNewScheduleDialogOpen, setIsNewScheduleDialogOpen] = useState(false);
   const [timezone, setTimezone] = useState("America/New_York");
   const [selectedDate, setSelectedDate] = useState("");
   const [scheduleType, setScheduleType] = useState("default");
   const [scheduleLabel, setScheduleLabel] = useState("Working Hours");
+  const [newScheduleName, setNewScheduleName] = useState("");
   const [weeklySchedule, setWeeklySchedule] = useState<
     Record<number, DaySchedule>
   >({
@@ -322,6 +324,29 @@ export function Availability() {
     // In a real implementation, this would save the schedule to Supabase
     toast.success("Schedule saved successfully");
     setIsEditMode(false);
+  };
+
+  const createNewSchedule = () => {
+    if (!newScheduleName.trim()) return;
+
+    // Create a new schedule with default Mon-Fri 9-5 hours
+    const newSchedule = {
+      0: { enabled: false, slots: [] }, // Sunday
+      1: { enabled: true, slots: [{ start: "09:00", end: "17:00" }] }, // Monday
+      2: { enabled: true, slots: [{ start: "09:00", end: "17:00" }] }, // Tuesday
+      3: { enabled: true, slots: [{ start: "09:00", end: "17:00" }] }, // Wednesday
+      4: { enabled: true, slots: [{ start: "09:00", end: "17:00" }] }, // Thursday
+      5: { enabled: true, slots: [{ start: "09:00", end: "17:00" }] }, // Friday
+      6: { enabled: false, slots: [] }, // Saturday
+    };
+
+    setWeeklySchedule(newSchedule);
+    setScheduleLabel(newScheduleName);
+    setIsNewScheduleDialogOpen(false);
+    setNewScheduleName("");
+    setIsEditMode(true); // Enter edit mode to show the new schedule
+
+    toast.success(`New schedule "${newScheduleName}" created successfully`);
   };
 
   if (loading) {
@@ -583,7 +608,7 @@ export function Availability() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button>
+          <Button onClick={() => setIsNewScheduleDialogOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
             New
           </Button>
@@ -688,6 +713,54 @@ export function Availability() {
               Cancel
             </Button>
             <Button onClick={addOverride}>Add Override</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Schedule Dialog */}
+      <Dialog
+        open={isNewScheduleDialogOpen}
+        onOpenChange={setIsNewScheduleDialogOpen}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create New Schedule</DialogTitle>
+            <DialogDescription>
+              Create a new availability schedule with a custom name.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="schedule-name">Schedule Name</Label>
+              <Input
+                id="schedule-name"
+                placeholder="e.g., Weekend Hours, Holiday Schedule"
+                value={newScheduleName}
+                onChange={(e) => setNewScheduleName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && newScheduleName.trim()) {
+                    createNewSchedule();
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsNewScheduleDialogOpen(false);
+                setNewScheduleName("");
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={createNewSchedule}
+              disabled={!newScheduleName.trim()}
+            >
+              Create Schedule
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
