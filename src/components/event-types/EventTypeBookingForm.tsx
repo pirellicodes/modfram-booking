@@ -1,6 +1,6 @@
 "use client";
 
-import { DollarSign,Plus, X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -84,121 +84,6 @@ export function EventTypeBookingForm({
 
   return (
     <div className="space-y-6">
-      {/* Pricing */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <DollarSign className="h-5 w-5" />
-            Pricing
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="price">Price</Label>
-              <Input
-                id="price"
-                type="number"
-                step="0.01"
-                min="0"
-                value={formData.price || "0.00"}
-                onChange={(e) => updateField("price", e.target.value)}
-                placeholder="0.00"
-              />
-            </div>
-
-            <div>
-              <Label>Currency</Label>
-              <Select
-                value={formData.currency || "USD"}
-                onValueChange={(value) => updateField("currency", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {currencies.map((currency) => (
-                    <SelectItem key={currency.value} value={currency.value}>
-                      {currency.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <p className="text-sm text-muted-foreground">
-            Set to 0 for free events. Payment processing fees may apply.
-          </p>
-        </CardContent>
-      </Card>
-
-      {/* Booking Limits */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Booking Limits</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Limit how many times this event can be booked per time period
-          </p>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Per Day</Label>
-              <Input
-                type="number"
-                min="0"
-                value={(formData.bookingLimits?.day as number) || ""}
-                onChange={(e) =>
-                  updateBookingLimit("day", parseInt(e.target.value) || 0)
-                }
-                placeholder="Unlimited"
-              />
-            </div>
-
-            <div>
-              <Label>Per Week</Label>
-              <Input
-                type="number"
-                min="0"
-                value={(formData.bookingLimits?.week as number) || ""}
-                onChange={(e) =>
-                  updateBookingLimit("week", parseInt(e.target.value) || 0)
-                }
-                placeholder="Unlimited"
-              />
-            </div>
-
-            <div>
-              <Label>Per Month</Label>
-              <Input
-                type="number"
-                min="0"
-                value={(formData.bookingLimits?.month as number) || ""}
-                onChange={(e) =>
-                  updateBookingLimit("month", parseInt(e.target.value) || 0)
-                }
-                placeholder="Unlimited"
-              />
-            </div>
-
-            <div>
-              <Label>Per Year</Label>
-              <Input
-                type="number"
-                min="0"
-                value={(formData.bookingLimits?.year as number) || ""}
-                onChange={(e) =>
-                  updateBookingLimit("year", parseInt(e.target.value) || 0)
-                }
-                placeholder="Unlimited"
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Confirmation Settings */}
       <Card>
         <CardHeader>
@@ -216,21 +101,6 @@ export function EventTypeBookingForm({
               checked={formData.requiresConfirmation || false}
               onCheckedChange={(checked) =>
                 updateField("requiresConfirmation", checked)
-              }
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <Label>Disable Guests</Label>
-              <p className="text-sm text-muted-foreground">
-                Prevent attendees from adding additional guests
-              </p>
-            </div>
-            <Switch
-              checked={formData.disableGuests || false}
-              onCheckedChange={(checked) =>
-                updateField("disableGuests", checked)
               }
             />
           </div>

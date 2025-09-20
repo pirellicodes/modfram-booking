@@ -15,7 +15,6 @@ import type { EventTypeFormData } from "@/types/forms";
 import type { LocationObject } from "@/types/location";
 import { isValidSlug } from "@/lib/slug";
 
-import { EventTypeAdvancedForm } from "./EventTypeAdvancedForm";
 import { EventTypeAvailabilityForm } from "./EventTypeAvailabilityForm";
 import { EventTypeBasicForm } from "./EventTypeBasicForm";
 import { EventTypeBookingForm } from "./EventTypeBookingForm";
@@ -162,11 +161,10 @@ export function EventTypeForm({
           onValueChange={setActiveTab}
           className="flex-1 flex flex-col overflow-hidden"
         >
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="basic">Basic</TabsTrigger>
             <TabsTrigger value="availability">Availability</TabsTrigger>
             <TabsTrigger value="booking">Booking</TabsTrigger>
-            <TabsTrigger value="advanced">Advanced</TabsTrigger>
           </TabsList>
 
           <div className="flex-1 overflow-y-auto">
@@ -186,13 +184,6 @@ export function EventTypeForm({
 
             <TabsContent value="booking" className="mt-4">
               <EventTypeBookingForm
-                formData={formData}
-                setFormData={setFormData}
-              />
-            </TabsContent>
-
-            <TabsContent value="advanced" className="mt-4">
-              <EventTypeAdvancedForm
                 formData={formData}
                 setFormData={setFormData}
               />
