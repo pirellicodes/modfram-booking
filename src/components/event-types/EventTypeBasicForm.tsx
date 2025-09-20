@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { ColorOptionItem } from "@/components/event-calendar/ui/color-option-item";
 import { slugify } from "@/lib/slug";
 import type { EventTypeFormData } from "@/types/forms";
 
@@ -167,6 +168,86 @@ export function EventTypeBasicForm({
             />
             <p className="text-xs text-muted-foreground mt-1">
               Optional custom name for calendar events
+            </p>
+          </div>
+
+          <div>
+            <Label htmlFor="category">Category</Label>
+            <Select
+              value={formData.category || ""}
+              onValueChange={(value) => updateField("category", value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="workshop">Workshop</SelectItem>
+                <SelectItem value="conference">Conference</SelectItem>
+                <SelectItem value="seminar">Seminar</SelectItem>
+                <SelectItem value="social">Social</SelectItem>
+                <SelectItem value="meeting">Meeting</SelectItem>
+                <SelectItem value="training">Training</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-sm text-muted-foreground mt-1">
+              Categorize this session type for better organization
+            </p>
+          </div>
+
+          <div>
+            <Label htmlFor="color">Color Theme</Label>
+            <Select
+              value={formData.color || "indigo"}
+              onValueChange={(value) => updateField("color", value)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <ColorOptionItem
+                  value="indigo"
+                  label="Indigo"
+                  className="bg-indigo-500"
+                />
+                <ColorOptionItem
+                  value="blue"
+                  label="Blue"
+                  className="bg-blue-500"
+                />
+                <ColorOptionItem
+                  value="green"
+                  label="Green"
+                  className="bg-green-500"
+                />
+                <ColorOptionItem
+                  value="red"
+                  label="Red"
+                  className="bg-red-500"
+                />
+                <ColorOptionItem
+                  value="orange"
+                  label="Orange"
+                  className="bg-orange-500"
+                />
+                <ColorOptionItem
+                  value="purple"
+                  label="Purple"
+                  className="bg-purple-500"
+                />
+                <ColorOptionItem
+                  value="pink"
+                  label="Pink"
+                  className="bg-pink-500"
+                />
+                <ColorOptionItem
+                  value="yellow"
+                  label="Yellow"
+                  className="bg-yellow-500"
+                />
+              </SelectContent>
+            </Select>
+            <p className="text-sm text-muted-foreground mt-1">
+              Choose a color theme for this session type in the calendar
             </p>
           </div>
 

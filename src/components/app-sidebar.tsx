@@ -8,6 +8,7 @@ import {
   Clock,
   LayoutDashboard,
   Settings,
+  Tag,
 } from "lucide-react";
 
 import {
@@ -79,6 +80,11 @@ const sidebarData: SidebarData = {
           title: "Session Types",
           url: "/admin/event-types",
           icon: Camera,
+        },
+        {
+          title: "Categories",
+          url: "/admin/categories",
+          icon: Tag,
         },
       ],
     },

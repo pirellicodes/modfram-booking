@@ -29,6 +29,8 @@ export interface EventTypeFormData {
   durationLimits: Record<string, unknown>; // min/max duration limits
   recurringEvent?: RecurringEvent;
   metadata: Record<string, unknown>; // additional metadata
+  color?: string; // event type color for calendar display
+  category?: string; // event type category for organization
 
   // Additional form fields referenced in components
   slugManuallySet?: boolean;

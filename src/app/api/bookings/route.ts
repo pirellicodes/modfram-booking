@@ -294,11 +294,11 @@ export async function PUT(req: Request) {
 }
 
 export async function PATCH(req: Request) {
-  try {
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get("id");
-    if (!id) return err("Booking ID required", 400);
+  const { searchParams } = new URL(req.url);
+  const id = searchParams.get("id");
+  if (!id) return err("Booking ID required", 400);
 
+  try {
     const body = (await req.json()) as {
       status?: string;
       notes?: string | null;
@@ -361,7 +361,7 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ ...data, start_time, end_time });
   } catch (e) {
     Sentry.logger.error("Failed to update booking", {
-      bookingId: searchParams.get("id"),
+      bookingId: id,
       error: (e as any)?.message || "Unknown error",
     });
     return err(e);

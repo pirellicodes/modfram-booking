@@ -38,6 +38,13 @@ interface SessionType {
   length: number;
 }
 
+interface Category {
+  id: string;
+  name: string;
+  color: string;
+  description?: string;
+}
+
 interface NewBookingDialogProps {
   onCreated?: () => void;
 }
@@ -47,6 +54,8 @@ export function NewBookingDialog({ onCreated }: NewBookingDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [sessionTypes, setSessionTypes] = useState<SessionType[]>([]);
   const [loadingSessionTypes, setLoadingSessionTypes] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
 
   // Form state
   const [eventTypeId, setEventTypeId] = useState("");
@@ -56,11 +65,13 @@ export function NewBookingDialog({ onCreated }: NewBookingDialogProps) {
   const [date, setDate] = useState<Date>();
   const [startTime, setStartTime] = useState("");
   const [notes, setNotes] = useState("");
+  const [categoryId, setCategoryId] = useState("");
 
-  // Load session types when dialog opens
+  // Load session types and categories when dialog opens
   useEffect(() => {
     if (open) {
       loadSessionTypes();
+      loadCategories();
     }
   }, [open]);
 
@@ -82,6 +93,26 @@ export function NewBookingDialog({ onCreated }: NewBookingDialogProps) {
     }
   };
 
+  const loadCategories = async () => {
+    setLoadingCategories(true);
+    try {
+      // TODO: Get actual user ID from auth context
+      const userId = "temp-user-id"; // Replace with actual user ID
+      const response = await fetch(`/api/categories?user_id=${userId}`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error loading categories:", errorData.error);
+        return;
+      }
+      const data = await response.json();
+      setCategories(data || []);
+    } catch (error) {
+      console.error("Error loading categories:", error);
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
+
   const resetForm = () => {
     setEventTypeId("");
     setClientName("");
@@ -90,6 +121,7 @@ export function NewBookingDialog({ onCreated }: NewBookingDialogProps) {
     setDate(undefined);
     setStartTime("");
     setNotes("");
+    setCategoryId("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -127,6 +159,7 @@ export function NewBookingDialog({ onCreated }: NewBookingDialogProps) {
           booking_time: startTime + ":00", // HH:MM:SS format
           notes: notes.trim() || null,
           event_type_id: eventTypeId || null,
+          category_id: categoryId || null,
           status: "pending",
         }),
       });
@@ -204,6 +237,33 @@ export function NewBookingDialog({ onCreated }: NewBookingDialogProps) {
                 {sessionTypes.map((sessionType) => (
                   <SelectItem key={sessionType.id} value={sessionType.id}>
                     {sessionType.title} ({sessionType.length}min)
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="category">Category</Label>
+            <Select value={categoryId} onValueChange={setCategoryId}>
+              <SelectTrigger>
+                <SelectValue
+                  placeholder={
+                    loadingCategories
+                      ? "Loading..."
+                      : "Select category (optional)"
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`w-3 h-3 rounded-full bg-${category.color}-500`}
+                      />
+                      {category.name}
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -311,7 +371,9 @@ export function NewBookingDialog({ onCreated }: NewBookingDialogProps) {
             </Button>
             <Button
               type="submit"
-              disabled={isSubmitting || loadingSessionTypes}
+              disabled={
+                isSubmitting || loadingSessionTypes || loadingCategories
+              }
             >
               {isSubmitting ? "Creating..." : "Create Booking"}
             </Button>

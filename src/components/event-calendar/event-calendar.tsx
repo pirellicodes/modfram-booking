@@ -28,12 +28,13 @@ export function EventCalendar({
   events,
   onDateChange,
 }: EventCalendarProps) {
-  const { viewMode, currentView, daysCount, setSelectedDate } =
+  const { viewMode, currentView, daysCount, selectedDate, setSelectedDate } =
     useEventCalendarStore(
       useShallow((state) => ({
         viewMode: state.viewMode,
         currentView: state.currentView,
         daysCount: state.daysCount,
+        selectedDate: state.selectedDate,
         setSelectedDate: state.setSelectedDate,
       }))
     );

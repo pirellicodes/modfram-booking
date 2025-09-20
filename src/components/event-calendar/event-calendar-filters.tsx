@@ -1,6 +1,6 @@
 import { Clock, Repeat, Search, Tag, X } from "lucide-react";
 import { parseAsArrayOf, parseAsString, useQueryStates } from "nuqs";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useShallow } from "zustand/shallow";
 
 import { Badge } from "@/components/ui/badge";
@@ -19,11 +19,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CATEGORY_OPTIONS, EVENT_COLORS } from "@/constants/calendar-constant";
+import { EVENT_COLORS } from "@/constants/calendar-constant";
 import { useEventCalendarStore } from "@/hooks/use-event";
 import { getColorClasses } from "@/lib/event";
 
 import { EventSearchDialog } from "./event-search-dialog";
+
+interface Category {
+  id: string;
+  name: string;
+  color: string;
+  description?: string;
+}
 
 export const EventCalendarFilters = () => {
   const { timeFormat, openEventDialog } = useEventCalendarStore(
@@ -33,6 +40,8 @@ export const EventCalendarFilters = () => {
     }))
   );
   const [searchDialogOpen, setSearchDialogOpen] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
   const [filters, setFilters] = useQueryStates({
     categories: parseAsArrayOf(parseAsString).withDefault([]),
     locations: parseAsArrayOf(parseAsString).withDefault([]),
@@ -43,6 +52,31 @@ export const EventCalendarFilters = () => {
     dateEnd: parseAsString.withDefault(""),
     search: parseAsString.withDefault(""),
   });
+
+  // Load categories when component mounts
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const loadCategories = async () => {
+    setLoadingCategories(true);
+    try {
+      // TODO: Get actual user ID from auth context
+      const userId = "temp-user-id"; // Replace with actual user ID
+      const response = await fetch(`/api/categories?user_id=${userId}`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error loading categories:", errorData.error);
+        return;
+      }
+      const data = await response.json();
+      setCategories(data || []);
+    } catch (error) {
+      console.error("Error loading categories:", error);
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
 
   const getActiveFiltersCount = () => {
     let count = 0;
@@ -143,23 +177,39 @@ export const EventCalendarFilters = () => {
                 Select Categories
               </h4>
               <div className="max-h-48 space-y-3 overflow-y-auto">
-                {CATEGORY_OPTIONS.map((category, index) => (
-                  <div key={index} className="flex items-center space-x-3">
-                    <Checkbox
-                      id={`category-${category.value}`}
-                      checked={filters.categories.includes(category.value)}
-                      onCheckedChange={() =>
-                        toggleArrayFilter("categories", category.value)
-                      }
-                    />
-                    <Label
-                      htmlFor={`category-${category.value}`}
-                      className="cursor-pointer text-sm font-normal"
-                    >
-                      {category.label}
-                    </Label>
+                {loadingCategories ? (
+                  <div className="text-sm text-muted-foreground">
+                    Loading categories...
                   </div>
-                ))}
+                ) : categories.length === 0 ? (
+                  <div className="text-sm text-muted-foreground">
+                    No categories available
+                  </div>
+                ) : (
+                  categories.map((category) => (
+                    <div
+                      key={category.id}
+                      className="flex items-center space-x-3"
+                    >
+                      <Checkbox
+                        id={`category-${category.id}`}
+                        checked={filters.categories.includes(category.id)}
+                        onCheckedChange={() =>
+                          toggleArrayFilter("categories", category.id)
+                        }
+                      />
+                      <Label
+                        htmlFor={`category-${category.id}`}
+                        className="cursor-pointer text-sm font-normal flex items-center gap-2"
+                      >
+                        <div
+                          className={`w-3 h-3 rounded-full bg-${category.color}-500`}
+                        />
+                        {category.name}
+                      </Label>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </PopoverContent>
@@ -322,8 +372,8 @@ export const EventCalendarFilters = () => {
                 >
                   <Tag className="h-3 w-3" />
                   <span className="text-xs font-medium">
-                    {CATEGORY_OPTIONS.find((c) => c.value === category)
-                      ?.label || category}
+                    {categories.find((c) => c.id === category)?.name ||
+                      category}
                   </span>
                   <button
                     onClick={() =>

@@ -80,6 +80,7 @@ export const eventTypes = pgTable("event_types", {
   bookingFields: json("booking_fields"),
   bookingLimits: json("booking_limits"), // per day/week/month/year limits
   durationLimits: json("duration_limits"), // min/max duration limits
+  color: varchar("color", { length: 15 }).default("#3b82f6"), // event type color
 
   // Recurring events
   recurringEvent: json("recurring_event"), // frequency, interval, count, until
