@@ -38,14 +38,17 @@ export function EventTypeBasicForm({
     updateField("title", title);
     // Auto-derive slug from title in real time until user manually edits slug
     if (!manualSlug.current) {
-      updateField("slug", slugify(title));
+      const newSlug = slugify(title);
+      updateField("slug", newSlug);
     }
   };
 
   const handleSlugChange = (slug: string) => {
-    // Allow free typing, don't auto-slugify during typing
+    // Mark as manually edited on first change
+    manualSlug.current = true;
+
+    // Update the slug value
     updateField("slug", slug);
-    manualSlug.current = true; // Mark as manually edited
 
     // Show inline error if invalid, but don't block typing
     if (slug && !isValidSlug(slug)) {
@@ -79,7 +82,10 @@ export function EventTypeBasicForm({
             <Label htmlFor="slug">URL Slug *</Label>
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">
-                {window.location.origin}/
+                {typeof window !== "undefined"
+                  ? window.location.origin
+                  : "https://yoursite.com"}
+                /
               </span>
               <Input
                 id="slug"
