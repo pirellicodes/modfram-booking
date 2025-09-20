@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 
 import { logErr } from "@/lib/log";
 import { supabaseServer } from "@/lib/supabase-server-client";
@@ -17,7 +18,8 @@ function combineDateTime(
   const d = new Date(dateStr);
   if (timeStr) {
     const [hh, mm, ss] = timeStr.split(":").map(Number);
-    d.setUTCHours(hh ?? 0, mm ?? 0, ss ?? 0, 0);
+    // Use local timezone, not UTC to fix "always maps to 19th" bug
+    d.setHours(hh ?? 0, mm ?? 0, ss ?? 0, 0);
   }
   return d.toISOString();
 }
@@ -28,10 +30,27 @@ export async function GET(req: Request) {
     const start = searchParams.get("start");
     const end = searchParams.get("end");
 
+    Sentry.logger.info("Fetching bookings", {
+      hasStartParam: !!start,
+      hasEndParam: !!end,
+    });
+
     const supabase = await supabaseServer();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+
+    // Auth bypass for testing
+    let user;
+    if (
+      process.env.TEST_AUTH_BYPASS === "1" &&
+      process.env.NODE_ENV !== "production"
+    ) {
+      user = { id: "123e4567-e89b-12d3-a456-426614174000" }; // Valid UUID format
+    } else {
+      const {
+        data: { user: authUser },
+      } = await supabase.auth.getUser();
+      user = authUser;
+    }
+
     if (!user) return err("unauthenticated", 401);
 
     let query = supabase
@@ -61,6 +80,11 @@ export async function GET(req: Request) {
 
     if (error) throw error;
 
+    Sentry.logger.info("Successfully fetched bookings", {
+      count: data?.length || 0,
+      userId: user.id,
+    });
+
     // Return bookings with computed times if start_time/end_time are null
     const enriched = (data ?? []).map((b) => {
       let start_time = b.start_time;
@@ -81,12 +105,18 @@ export async function GET(req: Request) {
 
     return NextResponse.json(enriched);
   } catch (e) {
+    Sentry.logger.error("Failed to fetch bookings", {
+      error: (e as any)?.message || "Unknown error",
+      stack: (e as any)?.stack,
+    });
     return err(e);
   }
 }
 
 export async function POST(req: Request) {
   try {
+    Sentry.logger.info("Creating new booking");
+
     const body = (await req.json()) as {
       client_name: string;
       client_email?: string | null;
@@ -98,6 +128,7 @@ export async function POST(req: Request) {
       client_id?: string | null;
       event_type_id?: string | null;
       service_type_id?: string | null;
+      color?: string | null;
     };
 
     const supabase = await supabaseServer();
@@ -166,6 +197,7 @@ export async function POST(req: Request) {
         event_type_id: body.event_type_id ?? null,
         service_type_id: body.service_type_id ?? null,
         total_price, // Ensure total_price is always provided
+        color: body.color ?? "blue", // Default to blue color
         start_time,
         end_time,
       })
@@ -178,17 +210,30 @@ export async function POST(req: Request) {
 
     if (error) throw error;
 
+    Sentry.logger.info("Successfully created booking", {
+      bookingId: data.id,
+      clientName: data.client_name,
+      totalPrice: data.total_price,
+    });
+
     return NextResponse.json(data, { status: 201 });
   } catch (e) {
+    Sentry.logger.error("Failed to create booking", {
+      error: (e as any)?.message || "Unknown error",
+      stack: (e as any)?.stack,
+    });
     return err(e);
   }
 }
 
 export async function PUT(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const id = searchParams.get("id");
+
   try {
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get("id");
     if (!id) return err("Booking ID required", 400);
+
+    Sentry.logger.info("Updating booking", { bookingId: id });
 
     const body = (await req.json()) as {
       client_name?: string;
@@ -233,8 +278,92 @@ export async function PUT(req: Request) {
       ? new Date(new Date(start_time).getTime() + 30 * 60 * 1000).toISOString()
       : null;
 
+    Sentry.logger.info("Successfully updated booking", {
+      bookingId: id,
+      clientName: data.client_name,
+    });
+
     return NextResponse.json({ ...data, start_time, end_time });
   } catch (e) {
+    Sentry.logger.error("Failed to update booking", {
+      bookingId: id,
+      error: (e as any)?.message || "Unknown error",
+    });
+    return err(e);
+  }
+}
+
+export async function PATCH(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+    if (!id) return err("Booking ID required", 400);
+
+    const body = (await req.json()) as {
+      status?: string;
+      notes?: string | null;
+      client_name?: string;
+      client_email?: string | null;
+      client_phone?: string | null;
+      booking_date?: string;
+      booking_time?: string;
+      color?: string;
+    };
+
+    const supabase = await supabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return err("unauthenticated", 401);
+
+    Sentry.logger.info("Updating booking status", {
+      bookingId: id,
+      newStatus: body.status,
+    });
+
+    const { data, error } = await supabase
+      .from("bookings")
+      .update({
+        status: body.status,
+        notes: body.notes,
+        client_name: body.client_name,
+        client_email: body.client_email,
+        client_phone: body.client_phone,
+        booking_date: body.booking_date,
+        booking_time: body.booking_time,
+        color: body.color,
+      })
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .select(
+        `id, user_id, client_id, client_name, client_email, client_phone,
+         status, notes, booking_date, booking_time, created_at, updated_at,
+         event_type_id, service_type_id, total_price, color, start_time, end_time`
+      )
+      .single();
+
+    if (error) throw error;
+
+    // Recompute start_time and end_time if date/time changed
+    const start_time =
+      data.booking_date && data.booking_time
+        ? combineDateTime(data.booking_date, data.booking_time)
+        : data.start_time;
+    const end_time = start_time
+      ? new Date(new Date(start_time).getTime() + 30 * 60 * 1000).toISOString()
+      : data.end_time;
+
+    Sentry.logger.info("Successfully updated booking", {
+      bookingId: id,
+      status: data.status,
+    });
+
+    return NextResponse.json({ ...data, start_time, end_time });
+  } catch (e) {
+    Sentry.logger.error("Failed to update booking", {
+      bookingId: searchParams.get("id"),
+      error: (e as any)?.message || "Unknown error",
+    });
     return err(e);
   }
 }
@@ -244,6 +373,8 @@ export async function DELETE(req: Request) {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
     if (!id) return err("Booking ID required", 400);
+
+    Sentry.logger.info("Deleting booking", { bookingId: id });
 
     const supabase = await supabaseServer();
     const {
@@ -258,6 +389,8 @@ export async function DELETE(req: Request) {
       .eq("user_id", user.id);
 
     if (error) throw error;
+
+    Sentry.logger.info("Successfully deleted booking", { bookingId: id });
     return NextResponse.json({ success: true });
   } catch (e) {
     return err(e);
