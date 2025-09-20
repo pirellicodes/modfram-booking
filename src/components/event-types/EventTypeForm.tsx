@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { EventTypeWithParsedFields } from "@/types/event-types";
 import type { EventTypeFormData } from "@/types/forms";
 import type { LocationObject } from "@/types/location";
+import { isValidSlug } from "@/lib/slug";
 
 import { EventTypeAdvancedForm } from "./EventTypeAdvancedForm";
 import { EventTypeAvailabilityForm } from "./EventTypeAvailabilityForm";
@@ -100,6 +101,19 @@ export function EventTypeForm({
   const handleSave = async () => {
     if (!formData.title?.trim()) {
       alert("Please enter a title for the session type");
+      return;
+    }
+
+    // Hard validation for slug on submit
+    if (!formData.slug?.trim()) {
+      alert("Please enter a URL slug for the session type");
+      return;
+    }
+
+    if (!isValidSlug(formData.slug)) {
+      alert(
+        "URL slug must be 2-60 characters long and contain only lowercase letters, numbers, and hyphens"
+      );
       return;
     }
     setIsSaving(true);
